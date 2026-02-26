@@ -1,0 +1,23 @@
+<odoo>
+  <data>
+    <!-- Inherit the standard CRM lead form to restrict partner selection and hide company-related fields -->
+    <record id="view_crm_lead_form_contact_only" model="ir.ui.view">
+      <field name="name">crm.lead.form.contact.only</field>
+      <field name="model">crm.lead</field>
+      <field name="inherit_id" ref="crm.crm_lead_view_form"/>
+      <field name="arch" type="xml">
+        <!-- restrict partner selection to contacts (not companies) -->
+        <xpath expr="//field[@name='partner_id']" position="attributes">
+          <attribute name="domain">[('is_company','=',False)]</attribute>
+        </xpath>
+        <!-- hide related company fields if they appear in the form -->
+        <xpath expr="//field[@name='company_name']" position="attributes">
+          <attribute name="invisible">1</attribute>
+        </xpath>
+        <xpath expr="//field[@name='company_id']" position="attributes">
+          <attribute name="invisible">1</attribute>
+        </xpath>
+      </field>
+    </record>
+  </data>
+</odoo>
