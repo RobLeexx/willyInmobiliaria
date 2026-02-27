@@ -17,6 +17,16 @@
               </xpath>
 
           </field>
+          <field name="name">crm.lead.form.inherit.debug</field>
+          <field name="model">crm.lead</field>
+          <field name="inherit_id" ref="crm.crm_lead_view_form"/>
+          <field name="arch" type="xml">
+
+              <xpath expr="//sheet" position="inside">
+                  <field name="test_debug_field"/>
+              </xpath>
+
+          </field>
       </record>
   </data>
 </odoo>
