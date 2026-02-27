@@ -5,8 +5,81 @@
       <field name="model">crm.lead</field>
       <field name="inherit_id" ref="crm.crm_lead_view_form"/>
       <field name="arch" type="xml">
+        <xpath expr="//field[@name='contact_name']" position="attributes">
+          <attribute name="style">border: 1px solid #999; background-color: rgba(0, 0, 0, 0.08); padding: 4px;</attribute>
+        </xpath>
+        <xpath expr="//field[@name='email_cc']" position="attributes">
+          <attribute name="style">border: 1px solid #999; background-color: rgba(0, 0, 0, 0.08); padding: 4px;</attribute>
+        </xpath>
+        <xpath expr="//field[@name='phone']" position="attributes">
+          <attribute name="style">border: 1px solid #999; background-color: rgba(0, 0, 0, 0.08); padding: 4px;</attribute>
+        </xpath>
         <xpath expr="//field[@name='partner_name']" position="replace"/>
+        <xpath expr="//field[@name='function']" position="replace"/>
         <xpath expr="//field[@name='partner_id']" position="replace"/>
+        <xpath expr="//group[@name='lead_partner']" position="replace">
+          <div class="row">
+            <div class="col-lg-10">
+              <group string="Mudanza">
+                <field name="carga" style="border: 1px solid #999; background-color: rgba(0, 0, 0, 0.08); padding: 4px;"/>
+                <field name="observaciones_carga" style="border: 1px solid #999; background-color: rgba(0, 0, 0, 0.08); padding: 4px;"/>
+                <field name="descarga" style="border: 1px solid #999; background-color: rgba(0, 0, 0, 0.08); padding: 4px;"/>
+                <field name="observaciones_descarga" style="border: 1px solid #999; background-color: rgba(0, 0, 0, 0.08); padding: 4px;"/>
+                <field name="moving_date" widget="date" style="border: 1px solid #999; background-color: rgba(0, 0, 0, 0.08); padding: 4px;"/>
+              </group>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-lg-10">
+              <group string="Habitaciones">
+                <field name="recibidor" style="border: 1px solid #999; background-color: rgba(0, 0, 0, 0.08); padding: 4px;"/>
+                <field name="sala_comedor" style="border: 1px solid #999; background-color: rgba(0, 0, 0, 0.08); padding: 4px;"/>
+                <field name="habitacion_matrimonial" style="border: 1px solid #999; background-color: rgba(0, 0, 0, 0.08); padding: 4px;"/>
+                <field name="habitacion_individual" style="border: 1px solid #999; background-color: rgba(0, 0, 0, 0.08); padding: 4px;"/>
+                <field name="cocina" style="border: 1px solid #999; background-color: rgba(0, 0, 0, 0.08); padding: 4px;"/>
+                <field name="despacho" style="border: 1px solid #999; background-color: rgba(0, 0, 0, 0.08); padding: 4px;"/>
+                <field name="terraza_trastero" style="border: 1px solid #999; background-color: rgba(0, 0, 0, 0.08); padding: 4px;"/>
+                <field name="observaciones_mudanza" style="border: 1px solid #999; background-color: rgba(0, 0, 0, 0.08); padding: 4px;"/>
+              </group>
+            </div>
+          </div>
+
+          <div class="row pr-0">
+            <div class="col-10">
+              <group string="Carga" col="4">
+                <field name="streetup" placeholder="Calle..." class="o_address_street" style="border: 1px solid #999; background-color: rgba(0, 0, 0, 0.08); padding: 4px;" colspan="3"/>
+                <i class="fa fa-arrow-right" role="img" aria-label="De carga a descarga" colspan="1"/>
+                <field name="streetup2" placeholder="Calle 2..." class="o_address_street" style="border: 1px solid #999; background-color: rgba(0, 0, 0, 0.08); padding: 4px;" colspan="3"/>
+                <i class="fa fa-arrow-right" role="img" aria-label="De carga a descarga" colspan="1"/>
+                <field name="zipup" placeholder="C.P." class="o_address_zip" style="border: 1px solid #999; background-color: rgba(0, 0, 0, 0.08); padding: 4px;" colspan="3"/>
+                <i class="fa fa-arrow-right" role="img" aria-label="De carga a descarga" colspan="1"/>
+                <field name="cityup" placeholder="Ciudad" class="o_address_city" style="border: 1px solid #999; background-color: rgba(0, 0, 0, 0.08); padding: 4px;" colspan="3"/>
+                <i class="fa fa-arrow-right" role="img" aria-label="De carga a descarga" colspan="1"/>
+                <field name="state_up_id" class="o_address_state" placeholder="Provincia" style="border: 1px solid #999; background-color: rgba(0, 0, 0, 0.08); padding: 4px;" options="{'no_open': True}" colspan="3"/>
+                <i class="fa fa-arrow-right" role="img" aria-label="De carga a descarga" colspan="1"/>
+                <field name="country_up_id" class="o_address_country" placeholder="País" style="border: 1px solid #999; background-color: rgba(0, 0, 0, 0.08); padding: 4px;" options="{'no_open': True, 'no_create': True}" colspan="3"/>
+                <i class="fa fa-arrow-right" role="img" aria-label="De carga a descarga" colspan="1"/>
+              </group>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-9">
+              <group string="Descarga" col="4">
+                <field name="streetdown" placeholder="Calle..." class="o_address_street" style="border: 1px solid #999; background-color: rgba(0, 0, 0, 0.08); padding: 4px;" colspan="4"/>
+                <field name="streetdown2" placeholder="Calle 2..." class="o_address_street" style="border: 1px solid #999; background-color: rgba(0, 0, 0, 0.08); padding: 4px;" colspan="4"/>
+                <field name="zipdown" placeholder="C.P." class="o_address_zip" style="border: 1px solid #999; background-color: rgba(0, 0, 0, 0.08); padding: 4px;" colspan="4"/>
+                <field name="citydown" placeholder="Ciudad" class="o_address_city" style="border: 1px solid #999; background-color: rgba(0, 0, 0, 0.08); padding: 4px;" colspan="4"/>
+                <field name="state_down_id" class="o_address_state" placeholder="Provincia" style="border: 1px solid #999; background-color: rgba(0, 0, 0, 0.08); padding: 4px;" options="{'no_open': True}" colspan="4"/>
+                <field name="country_down_id" class="o_address_country" placeholder="País" style="border: 1px solid #999; background-color: rgba(0, 0, 0, 0.08); padding: 4px;" options="{'no_open': True, 'no_create': True}" colspan="4"/>
+              </group>
+            </div>
+          </div>
+
+          <separator style="border-top: 2px solid black;"/>
+
+        </xpath>
       </field>
     </record>
   </data>
