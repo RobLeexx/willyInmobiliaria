@@ -6,17 +6,18 @@
     'description': """
 Long description of module's purpose
     """,
-
-    'author': "My Company",
-    'website': "https://www.yourcompany.com",
-
+        'name': "mudanzas_crm",
+        'version': '0.1',
+        'license': 'LGPL-3',
+        'category': 'Sales/CRM',
+        'summary': "Hide company fields in CRM leads",
+        'description': """Hide partner_id and partner_name from CRM Lead form.""",
+        'author': "Mudanzas Willy",
+        'website': "https://mudanzaswilly.com/",
+        'depends': ['base', 'crm'],
+    'author': "Mudanzas Willy",
     # Categories can be used to filter modules in modules listing
-    # Check https://github.com/odoo/odoo/blob/15.0/odoo/addons/base/data/ir_module_category_data.xml
     # for the full list
-    'category': 'Uncategorized',
-    'version': '0.1',
-
-    # any module necessary for this one to work correctly
     'depends': ['base', 'crm'],
 
     # always loaded
