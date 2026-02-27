@@ -1,2 +1,2 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
-access_mi_primer_modulo_mi_primer_modulo,mi_primer_modulo.mi_primer_modulo,model_mi_primer_modulo_mi_primer_modulo,base.group_user,1,1,1,1
+access_mudanzas_crm_mudanzas_crm,mudanzas_crm.mudanzas_crm,model_mudanzas_crm_mudanzas_crm,base.group_user,1,1,1,1

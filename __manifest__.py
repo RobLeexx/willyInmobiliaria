@@ -1,5 +1,5 @@
 {
-    'name': "mi_primer_modulo",
+    'name': "mudanzas_crm",
 
     'summary': "Short (1 phrase/line) summary of the module's purpose",
 

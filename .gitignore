@@ -1,0 +1,43 @@
+# Python bytecode
+**/__pycache__/
+*.py[cod]
+*$py.class
+
+# Odoo session and temp files
+/filestore/
+/sessions/
+*.log
+
+# VS Code
+.vscode/
+!.vscode/settings.json
+!.vscode/launch.json
+
+# JetBrains (PyCharm)
+.idea/
+
+# OS metadata
+.DS_Store
+Thumbs.db
+
+# VS Code
+.vscode/
+!.vscode/settings.json
+!.vscode/launch.json
+
+# JetBrains (PyCharm)
+.idea/
+
+# OS metadata
+.DS_Store
+Thumbs.db
+
+*.conf
+*.cfg
+.env
+
+# Virtual environments
+venv/
+.venv/
+env/
+ENV/

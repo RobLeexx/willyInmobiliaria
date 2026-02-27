@@ -2,20 +2,20 @@
 
 
 # class MiPrimerModulo(http.Controller):
-#     @http.route('/mi_primer_modulo/mi_primer_modulo', auth='public')
+#     @http.route('/mudanzas_crm/mudanzas_crm', auth='public')
 #     def index(self, **kw):
 #         return "Hello, world"
 
-#     @http.route('/mi_primer_modulo/mi_primer_modulo/objects', auth='public')
+#     @http.route('/mudanzas_crm/mudanzas_crm/objects', auth='public')
 #     def list(self, **kw):
-#         return http.request.render('mi_primer_modulo.listing', {
-#             'root': '/mi_primer_modulo/mi_primer_modulo',
-#             'objects': http.request.env['mi_primer_modulo.mi_primer_modulo'].search([]),
+#         return http.request.render('mudanzas_crm.listing', {
+#             'root': '/mudanzas_crm/mudanzas_crm',
+#             'objects': http.request.env['mudanzas_crm.mudanzas_crm'].search([]),
 #         })
 
-#     @http.route('/mi_primer_modulo/mi_primer_modulo/objects/<model("mi_primer_modulo.mi_primer_modulo"):obj>', auth='public')
+#     @http.route('/mudanzas_crm/mudanzas_crm/objects/<model("mudanzas_crm.mudanzas_crm"):obj>', auth='public')
 #     def object(self, obj, **kw):
-#         return http.request.render('mi_primer_modulo.object', {
+#         return http.request.render('mudanzas_crm.object', {
 #             'object': obj
 #         })
 
