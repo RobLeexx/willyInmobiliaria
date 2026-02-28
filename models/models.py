@@ -1,6 +1,14 @@
 from odoo import models, fields, api, _
 from odoo.exceptions import UserError
 
+class MudanzasProvince(models.Model):
+    _name = 'mudanzas.province'
+    _description = 'Province for Mudanzas'
+
+    name = fields.Char(string='Provincia', required=True)
+    state = fields.Char(string='Estado')
+
+
 class CrmLead(models.Model):
     _inherit = "crm.lead"
 
@@ -27,31 +35,64 @@ class CrmLead(models.Model):
     terraza_trastero = fields.Char(string="Terraza/Trastero")
     observaciones_mudanza = fields.Text(string="Observaciones")
 
-    # carga (pickup) address fields
+    # carga (pickup) address fields (manual select)
     streetup = fields.Char(string="Calle")
     streetup2 = fields.Char(string="Calle 2")
     cityup = fields.Char(string="Ciudad")
     zipup = fields.Char(string="Código Postal")
-    state_up_id = fields.Many2one('res.country.state', string="Estado")
-    country_up_id = fields.Many2one('res.country', string="País")
 
-    # descarga (delivery) address fields
+    # map of Spanish comunidades to their provincias; used for both pickup and delivery
+    STATE_PROVINCE_MAP = {
+        'Andalucía': ['Almería', 'Cádiz', 'Córdoba', 'Granada', 'Huelva', 'Jaén', 'Málaga', 'Sevilla'],
+        'Aragón': ['Huesca', 'Teruel', 'Zaragoza'],
+        'Asturias': ['Principado de Asturias'],
+        'Baleares': ['Islas Baleares'],
+        'Canarias': ['Las Palmas', 'Santa Cruz de Tenerife'],
+        'Cantabria': ['Cantabria'],
+        'Castilla-La Mancha': ['Albacete', 'Ciudad Real', 'Cuenca', 'Guadalajara', 'Toledo'],
+        'Castilla y León': ['Ávila', 'Burgos', 'León', 'Palencia', 'Salamanca', 'Segovia', 'Soria', 'Valladolid', 'Zamora'],
+        'Cataluña': ['Barcelona', 'Girona', 'Lleida', 'Tarragona'],
+        'Comunidad Valenciana': ['Alicante', 'Castellón', 'Valencia'],
+        'Extremadura': ['Badajoz', 'Cáceres'],
+        'Galicia': ['A Coruña', 'Lugo', 'Ourense', 'Pontevedra'],
+        'Madrid': ['Comunidad de Madrid'],
+        'Murcia': ['Región de Murcia'],
+        'Navarra': ['Comunidad Foral de Navarra'],
+        'País Vasco': ['Álava', 'Guipúzcoa', 'Vizcaya'],
+        'La Rioja': ['La Rioja'],
+    }
+    # Precomputed selection tuples to ensure availability during module load
+    STATE_SELECTION = [(key, key) for key in STATE_PROVINCE_MAP.keys()]
+    _ALL_PROVINCES = []
+    for _lst in STATE_PROVINCE_MAP.values():
+        _ALL_PROVINCES.extend(_lst)
+    PROVINCE_SELECTION = sorted([(p, p) for p in set(_ALL_PROVINCES)], key=lambda x: x[0])
+
+    state_up = fields.Selection(selection=STATE_SELECTION, string="Estado", default='Comunidad Valenciana')
+    province_up = fields.Selection(selection=PROVINCE_SELECTION, string="Provincia", default='Valencia')
+
+    # descarga (delivery) address fields (manual select)
     streetdown = fields.Char(string="Calle")
     streetdown2 = fields.Char(string="Calle 2")
     citydown = fields.Char(string="Ciudad")
     zipdown = fields.Char(string="Código Postal")
-    state_down_id = fields.Many2one('res.country.state', string="Estado")
-    country_down_id = fields.Many2one('res.country', string="País")
+    state_down = fields.Selection(selection=STATE_SELECTION, string="Estado", default='Comunidad Valenciana')
+    province_down = fields.Selection(selection=PROVINCE_SELECTION, string="Provincia", default='Valencia')
 
-    @api.model
-    def create(self, vals):
-        # Set default Spain for pickup address if not provided
-        if 'country_up_id' not in vals or not vals['country_up_id']:
-            spain = self.env.ref('base.es', raise_if_not_found=False)
-            if spain:
-                vals['country_up_id'] = spain.id
-        if 'state_up_id' not in vals or not vals['state_up_id']:
-            madrid = self.env.ref('base.state_es_m', raise_if_not_found=False)
-            if madrid:
-                vals['state_up_id'] = madrid.id
-        return super().create(vals)
+    @api.onchange('state_up')
+    def _onchange_state_up(self):
+        if self.state_up:
+            provinces = self.STATE_PROVINCE_MAP.get(self.state_up, [])
+            if len(provinces) == 1:
+                self.province_up = provinces[0]
+            elif self.province_up not in provinces:
+                self.province_up = False
+
+    @api.onchange('state_down')
+    def _onchange_state_down(self):
+        if self.state_down:
+            provinces = self.STATE_PROVINCE_MAP.get(self.state_down, [])
+            if len(provinces) == 1:
+                self.province_down = provinces[0]
+            elif self.province_down not in provinces:
+                self.province_down = False
