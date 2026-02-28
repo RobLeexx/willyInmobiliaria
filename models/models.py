@@ -20,21 +20,46 @@ class CrmLead(models.Model):
     phone = fields.Char(string="Teléfono")
 
     # Mudanza fields
-    carga = fields.Char(string="Carga")
-    observaciones_carga = fields.Text(string="Observaciones de Carga")
-    descarga = fields.Char(string="Descarga")
-    observaciones_descarga = fields.Text(string="Observaciones de Descarga")
+    cantidad = fields.Integer(string="Cantidad")
+    objeto = fields.Char(string="Objeto")
+    peso = fields.Float(string="KG Aprox.")
+    embalaje = fields.Boolean(string="Embalaje")
+    desmontaje = fields.Boolean(string="Desmontaje")
+    habitacion = fields.Selection(
+        [
+            ('recibidor', 'Recibidor'),
+            ('sala_comedor', 'Sala/Comedor'),
+            ('habitacion_matrimonial', 'Habitación Matrimonial'),
+            ('habitacion_individual', 'Habitación Individual'),
+            ('cocina', 'Cocina'),
+            ('despacho', 'Despacho'),
+            ('terraza_trastero', 'Terraza/Trastero'),
+            ('otros', 'Otros')
+        ],
+        string="Habitación"
+    )
+    observaciones_mudanza = fields.Char(string="Observaciones")
 
-    # Room values
-    recibidor = fields.Char(string="Recibidor")
-    sala_comedor = fields.Char(string="Sala/Comedor")
-    habitacion_matrimonial = fields.Char(string="Habitación Matrimonial")
-    habitacion_individual = fields.Char(string="Habitación Individual")
-    cocina = fields.Char(string="Cocina")
-    despacho = fields.Char(string="Despacho")
-    terraza_trastero = fields.Char(string="Terraza/Trastero")
-    observaciones_mudanza = fields.Text(string="Observaciones")
+    # Offer details
+    #recibidor = fields.Char(string="Recibidor")
+    #sala_comedor = fields.Char(string="Sala/Comedor")
+    #habitacion_matrimonial = fields.Char(string="Habitación Matrimonial")
+    #habitacion_individual = fields.Char(string="Habitación Individual")
+    #cocina = fields.Char(string="Cocina")
+    #despacho = fields.Char(string="Despacho")
+    #terraza_trastero = fields.Char(string="Terraza/Trastero")
 
+    precio_oferta = fields.Float(string="Precio Oferta")
+    tipo_oferta = fields.Selection(
+        [
+            ('baja', 'Baja'),
+            ('media', 'Media'),
+            ('alta', 'Alta'),
+        ],
+        string="Tipo Oferta",
+        default='baja'
+    )
+    
     # carga (pickup) address fields (manual select)
     streetup = fields.Char(string="Calle")
     streetup2 = fields.Char(string="Calle 2")
@@ -96,3 +121,13 @@ class CrmLead(models.Model):
                 self.province_down = provinces[0]
             elif self.province_down not in provinces:
                 self.province_down = False
+
+    @api.onchange('precio_oferta')
+    def _onchange_precio_oferta(self):
+        if self.precio_oferta:
+            if self.precio_oferta < 500:
+                self.tipo_oferta = 'baja'
+            elif self.precio_oferta <= 700:
+                self.tipo_oferta = 'media'
+            else:
+                self.tipo_oferta = 'alta'

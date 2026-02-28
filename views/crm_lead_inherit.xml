@@ -9,29 +9,49 @@
         <xpath expr="//field[@name='function']" position="replace"/>
         <xpath expr="//field[@name='partner_id']" position="replace"/>
         <xpath expr="//group[@name='lead_partner']" position="replace">
-          <div class="row">
-            <div class="col-lg-10 w-100">
-              <group string="Mudanza">
-                <field name="carga" style="border: 1px solid #999; background-color: rgba(0, 0, 0, 0.08); padding: 4px;"/>
-                <field name="observaciones_carga" style="border: 1px solid #999; background-color: rgba(0, 0, 0, 0.08); padding: 4px;"/>
-                <field name="descarga" style="border: 1px solid #999; background-color: rgba(0, 0, 0, 0.08); padding: 4px;"/>
-                <field name="observaciones_descarga" style="border: 1px solid #999; background-color: rgba(0, 0, 0, 0.08); padding: 4px;"/>
-              </group>
+          <group col="16" class="col-lg-8">
+            <separator string="Mudanza" colspan="16"/>
+            <group col="6" colspan="9" class="w-100">
+              <div style="display: flex; flex-direction: row;">
+                <div colspan="2" style="display: flex; flex-direction: column; padding-right: 20px; width: 13%;">
+                  <label for="cantidad" style="font-weight: bold; margin-bottom: 4px;">Cantidad</label>
+                  <field name="cantidad" style="border: 1px solid #999; background-color: rgba(0, 0, 0, 0.08)"/>
+                </div>
+                <div colspan="6" style="display: flex; flex-direction: column; padding-right: 20px;">
+                  <label for="objeto" style="font-weight: bold; margin-bottom: 4px;">Objeto</label>
+                  <field name="objeto" style="border: 1px solid #999; background-color: rgba(0, 0, 0, 0.08)"/>
+                </div>
+                <div colspan="2" style="display: flex; flex-direction: column; padding-right: 20px; width: 13%;">
+                  <label for="peso" style="font-weight: bold; margin-bottom: 4px;">Kg Aprox.</label>
+                  <field name="peso" style="border: 1px solid #999; background-color: rgba(0, 0, 0, 0.08)"/>
+                </div>
+                <div colspan="1" style="display: flex; flex-direction: column; text-align: center; padding-right: 10px;">
+                  <label for="embalaje" style="font-weight: bold; margin-bottom: 4px;">Embalaje</label>
+                  <field name="embalaje"/>
+                </div>
+                <div colspan="1" style="display: flex; flex-direction: column; text-align: center; padding-right: 10px; width: 30%;">
+                  <label for="desmontaje" style="font-weight: bold; margin-bottom: 4px;">Desmontaje</label>
+                  <field name="desmontaje"/>
+                </div>
+                <div colspan="6" style="display: flex; flex-direction: column;">
+                  <label for="habitacion" style="font-weight: bold; margin-bottom: 4px;">Habitación</label>
+                  <field name="habitacion" style="border: 1px solid #999; background-color: rgba(0, 0, 0, 0.08)"/>
+                </div>
+              </div>
+            </group>
+            <div colspan="14">
+              <field name="observaciones_mudanza" style="border: 1px solid #999; background-color: rgba(0, 0, 0, 0.08)"/>
             </div>
-          </div>
+          </group>
 
-          <div class="row">
-            <div class="col-lg-10 w-100">
-              <group string="Habitaciones">
-                <field name="recibidor" style="border: 1px solid #999; background-color: rgba(0, 0, 0, 0.08); padding: 4px;"/>
-                <field name="sala_comedor" style="border: 1px solid #999; background-color: rgba(0, 0, 0, 0.08); padding: 4px;"/>
-                <field name="habitacion_matrimonial" style="border: 1px solid #999; background-color: rgba(0, 0, 0, 0.08); padding: 4px;"/>
-                <field name="habitacion_individual" style="border: 1px solid #999; background-color: rgba(0, 0, 0, 0.08); padding: 4px;"/>
-                <field name="cocina" style="border: 1px solid #999; background-color: rgba(0, 0, 0, 0.08); padding: 4px;"/>
-                <field name="despacho" style="border: 1px solid #999; background-color: rgba(0, 0, 0, 0.08); padding: 4px;"/>
-                <field name="terraza_trastero" style="border: 1px solid #999; background-color: rgba(0, 0, 0, 0.08); padding: 4px;"/>
-                <field name="observaciones_mudanza" style="border: 1px solid #999; background-color: rgba(0, 0, 0, 0.08); padding: 4px;"/>
-              </group>
+          <div class="col-lg-4" style="flex: 0 0 33.333%; max-width: 33.333%;">
+            <div class="row">
+              <div class="w-100">
+                <group string="Oferta">
+                  <field name="precio_oferta" style="border: 1px solid #999; background-color: rgba(0, 0, 0, 0.08); padding: 4px;"/>
+                  <field name="tipo_oferta" style="border: 1px solid #999; background-color: rgba(0, 0, 0, 0.08); padding: 4px;"/>
+                </group>
+              </div>
             </div>
           </div>
 
