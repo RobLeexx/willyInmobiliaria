@@ -2,3 +2,4 @@ id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
 access_mudanzas_province,access.mudanzas.province,model_mudanzas_province,,1,0,0,0
 access_mudanzas_object_catalog,access.mudanzas.object.catalog,model_mudanzas_object_catalog,,1,0,0,0
 access_mudanzas_lead_object_line,access.mudanzas.lead.object.line,model_mudanzas_lead_object_line,base.group_user,1,1,1,1
+access_mudanzas_lead_media,access.mudanzas.lead.media,model_mudanzas_lead_media,base.group_user,1,1,1,1

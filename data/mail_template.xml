@@ -13,11 +13,11 @@
   <h3>Objetos registrados</h3>
   <ul>
     % for line in object.mudanza_line_ids:
-      <li>${line.cantidad or 1} x ${line.objeto_manual or line.objeto_catalogo_id.name or line.objeto or 'Objeto sin nombre'} - ${line.peso or 0} kg aprox.</li>
+      <li>${line.cantidad or 1} x ${line.objeto_manual or line.objeto_catalogo_id.name or line.objeto or 'Objeto sin nombre'} - ${line.peso or 0} M3 aprox.</li>
     % endfor
   </ul>
   % if not object.mudanza_line_ids:
-    <p>${object.cantidad or 1} x ${object.objeto_manual or object.objeto_catalogo_id.name or object.objeto or 'Objeto sin nombre'} - ${object.peso or 0} kg aprox.</p>
+    <p>${object.cantidad or 1} x ${object.objeto_manual or object.objeto_catalogo_id.name or object.objeto or 'Objeto sin nombre'} - ${object.peso or 0} M3 aprox.</p>
   % endif
 
   <h3>Direcciones</h3>

@@ -64,7 +64,7 @@ class MudanzasLeadObjectLine(models.Model):
         readonly=True,
     )
     objeto_manual = fields.Char(string='Otro objeto')
-    peso = fields.Float(string='KG')
+    peso = fields.Float(string='M³')
     embalaje = fields.Boolean(string='Embalaje')
     desmontaje = fields.Boolean(string='Desmontaje')
     habitacion = fields.Selection(selection=HABITACION_SELECTION, string='Habitación')
@@ -101,6 +101,26 @@ class MudanzasLeadObjectLine(models.Model):
                 raise ValidationError(_("Debes indicar el nombre en 'Otro objeto'."))
 
 
+class MudanzasLeadMedia(models.Model):
+    _name = 'mudanzas.lead.media'
+    _description = 'Archivo multimedia de mudanza'
+    _order = 'id desc'
+
+    lead_id = fields.Many2one('crm.lead', string='Lead', required=True, ondelete='cascade')
+    name = fields.Char(string='Nombre', required=True)
+    media_kind = fields.Selection(
+        [
+            ('photo', 'Foto'),
+            ('video', 'Video'),
+        ],
+        string='Tipo de medio',
+        required=True,
+        default='photo',
+    )
+    file_data = fields.Binary(string='Archivo', required=True, attachment=True)
+    file_name = fields.Char(string='Nombre de archivo')
+
+
 class CrmLead(models.Model):
     _inherit = 'crm.lead'
 
@@ -125,7 +145,7 @@ class CrmLead(models.Model):
         readonly=True,
     )
     objeto_manual = fields.Char(string='Otro objeto')
-    peso = fields.Float(string='KG')
+    peso = fields.Float(string='M³')
     embalaje = fields.Boolean(string='Embalaje')
     desmontaje = fields.Boolean(string='Desmontaje')
     habitacion = fields.Selection(selection=HABITACION_SELECTION, string='Habitación')
@@ -134,7 +154,21 @@ class CrmLead(models.Model):
         'lead_id',
         string='Objetos de mudanza',
     )
+    mudanza_media_ids = fields.Many2many(
+        'ir.attachment',
+        'mudanzas_crm_lead_ir_attachment_rel',
+        'lead_id',
+        'attachment_id',
+        string='Multimedia',
+        copy=False,
+    )
     observaciones_mudanza = fields.Char(string='Observaciones')
+    fecha_mudanza = fields.Date(string='Fecha de mudanza')
+    horas = fields.Integer(string='Horas estimadas')
+    ascensor = fields.Boolean(string='Ascensor')
+    mas_de_dos_dias = fields.Boolean(string='Más de 2 Días')
+    elevador = fields.Boolean(string='Elevador')
+    horas_elevador = fields.Integer(string='Horas de elevador')
 
     # Offer details
     precio_oferta = fields.Float(string='Precio Oferta')
@@ -182,7 +216,8 @@ class CrmLead(models.Model):
 
     state_up = fields.Selection(selection=STATE_SELECTION, string='Estado', default='Comunidad Valenciana')
     province_up = fields.Selection(selection=PROVINCE_SELECTION, string='Provincia', default='Valencia')
-    province_up_id = fields.Many2one('mudanzas.province', string='Provincia (registro)')
+    province_up_id = fields.Many2one('mudanzas.province', string='Provincia')
+    poblation_up = fields.Char(string='Población')
 
     # descarga (delivery) address fields (manual select)
     streetdown = fields.Char(string='Calle')
@@ -191,7 +226,8 @@ class CrmLead(models.Model):
     zipdown = fields.Char(string='Código Postal')
     state_down = fields.Selection(selection=STATE_SELECTION, string='Estado', default='Comunidad Valenciana')
     province_down = fields.Selection(selection=PROVINCE_SELECTION, string='Provincia', default='Valencia')
-    province_down_id = fields.Many2one('mudanzas.province', string='Provincia (registro)')
+    province_down_id = fields.Many2one('mudanzas.province', string='Provincia')
+    poblation_down = fields.Char(string='Población')
 
     @api.onchange('state_up')
     def _onchange_state_up(self):
