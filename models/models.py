@@ -1,5 +1,5 @@
 from odoo import api, fields, models, _
-from odoo.exceptions import ValidationError
+from odoo.exceptions import UserError, ValidationError
 
 
 class MudanzasProvince(models.Model):
@@ -329,3 +329,27 @@ class CrmLead(models.Model):
         vals['expected_revenue'] = source_value
         vals['precio_oferta'] = source_value
         return vals
+
+    def action_send_offer_email(self):
+        self.ensure_one()
+        if not self.email_from:
+            raise UserError(_("El lead no tiene email. Completa el campo 'Email' antes de enviar la oferta."))
+
+        template = self.env.ref('mudanzas_crm.mail_template_mudanza_oferta', raise_if_not_found=False)
+        if not template:
+            raise UserError(_("No se encontro la plantilla de correo de oferta."))
+
+        return {
+            'type': 'ir.actions.act_window',
+            'res_model': 'mail.compose.message',
+            'view_mode': 'form',
+            'target': 'new',
+            'context': {
+                'default_model': 'crm.lead',
+                'default_res_ids': [self.id],
+                'default_use_template': bool(template.id),
+                'default_template_id': template.id,
+                'default_composition_mode': 'comment',
+                'force_email': True,
+            },
+        }

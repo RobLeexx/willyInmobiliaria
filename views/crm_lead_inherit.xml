@@ -5,6 +5,9 @@
       <field name="model">crm.lead</field>
       <field name="inherit_id" ref="crm.crm_lead_view_form"/>
       <field name="arch" type="xml">
+        <xpath expr="//header" position="inside">
+          <button name="action_send_offer_email" type="object" string="Enviar oferta por email" class="btn-primary" invisible="not email_from"/>
+        </xpath>
         <xpath expr="//field[@name='partner_name']" position="replace"/>
         <xpath expr="//field[@name='function']" position="replace"/>
         <xpath expr="//field[@name='partner_id']" position="replace"/>
