@@ -28,6 +28,7 @@ Long description of module's purpose
         'data/mail_template.xml',
         'views/views.xml',
         'views/crm_lead_inherit.xml',
+        'views/res_partner_inherit.xml',
         'views/templates.xml',
     ],
     'assets': {},

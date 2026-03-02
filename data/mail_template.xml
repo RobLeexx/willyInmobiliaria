@@ -21,8 +21,8 @@
   % endif
 
   <h3>Direcciones</h3>
-  <p><strong>Carga:</strong> ${', '.join(filter(None, [object.streetup, object.streetup2, object.zipup, object.cityup, object.state_up, object.province_up_id and object.province_up_id.name])) or 'Pendiente de definir'}</p>
-  <p><strong>Descarga:</strong> ${', '.join(filter(None, [object.streetdown, object.streetdown2, object.zipdown, object.citydown, object.state_down, object.province_down_id and object.province_down_id.name])) or 'Pendiente de definir'}</p>
+  <p><strong>Carga:</strong> ${', '.join(filter(None, [object.streetup, object.streetup2, object.zipup, object.floorup, object.state_up, object.province_up_id and object.province_up_id.name])) or 'Pendiente de definir'}</p>
+  <p><strong>Descarga:</strong> ${', '.join(filter(None, [object.streetdown, object.streetdown2, object.zipdown, object.floordown, object.state_down, object.province_down_id and object.province_down_id.name])) or 'Pendiente de definir'}</p>
 
   <h3>Oferta economica</h3>
   <p><strong>Precio oferta:</strong> ${format_amount(object.precio_oferta or 0.0, object.company_id.currency_id)}</p>

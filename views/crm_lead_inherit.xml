@@ -66,7 +66,7 @@
                 <i class="fa fa-arrow-right" role="img" aria-label="De carga a descarga" colspan="1"/>
                 <field name="zipup" placeholder="C.P." class="o_address_zip" style="border: 1px solid #999; background-color: rgba(0, 0, 0, 0.08); padding: 4px;" colspan="3"/>
                 <i class="fa fa-arrow-right" role="img" aria-label="De carga a descarga" colspan="1"/>
-                <field name="cityup" placeholder="Ciudad" class="o_address_city" style="border: 1px solid #999; background-color: rgba(0, 0, 0, 0.08); padding: 4px;" colspan="3"/>
+                <field name="floorup" placeholder="Piso" class="o_address_city" style="border: 1px solid #999; background-color: rgba(0, 0, 0, 0.08); padding: 4px;" colspan="3"/>
                 <i class="fa fa-arrow-right" role="img" aria-label="De carga a descarga" colspan="1"/>
                 <field name="state_up" class="o_address_state" placeholder="Estado" style="border: 1px solid #999; background-color: rgba(0, 0, 0, 0.08); padding: 4px;" options="{'no_open': True}" colspan="3"/>
                 <i class="fa fa-arrow-right" role="img" aria-label="De carga a descarga" colspan="1"/>
@@ -82,7 +82,7 @@
                 <field name="streetdown" placeholder="Calle..." class="o_address_street" style="border: 1px solid #999; background-color: rgba(0, 0, 0, 0.08); padding: 4px;" colspan="4"/>
                 <field name="streetdown2" placeholder="Calle 2..." class="o_address_street" style="border: 1px solid #999; background-color: rgba(0, 0, 0, 0.08); padding: 4px;" colspan="4"/>
                 <field name="zipdown" placeholder="C.P." class="o_address_zip" style="border: 1px solid #999; background-color: rgba(0, 0, 0, 0.08); padding: 4px;" colspan="4"/>
-                <field name="citydown" placeholder="Ciudad" class="o_address_city" style="border: 1px solid #999; background-color: rgba(0, 0, 0, 0.08); padding: 4px;" colspan="4"/>
+                <field name="floordown" placeholder="Piso" class="o_address_city" style="border: 1px solid #999; background-color: rgba(0, 0, 0, 0.08); padding: 4px;" colspan="4"/>
                 <field name="state_down" class="o_address_state" placeholder="Estado" style="border: 1px solid #999; background-color: rgba(0, 0, 0, 0.08); padding: 4px;" options="{'no_open': True}" colspan="4"/>
                 <field name="province_down_id" class="o_address_state" placeholder="Provincia" style="border: 1px solid #999; background-color: rgba(0, 0, 0, 0.08); padding: 4px;" options="{'no_open': True, 'no_create': True, 'no_create_edit': True}" domain="[('state', '=', state_down)]" colspan="4"/>
               </group>

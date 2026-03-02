@@ -151,7 +151,7 @@ class CrmLead(models.Model):
     # carga (pickup) address fields (manual select)
     streetup = fields.Char(string='Calle')
     streetup2 = fields.Char(string='Calle 2')
-    cityup = fields.Char(string='Ciudad')
+    floorup = fields.Integer(string='Piso')
     zipup = fields.Char(string='Código Postal')
 
     # map of Spanish comunidades to their provincias; used for both pickup and delivery
@@ -187,7 +187,7 @@ class CrmLead(models.Model):
     # descarga (delivery) address fields (manual select)
     streetdown = fields.Char(string='Calle')
     streetdown2 = fields.Char(string='Calle 2')
-    citydown = fields.Char(string='Ciudad')
+    floordown = fields.Integer(string='Piso')
     zipdown = fields.Char(string='Código Postal')
     state_down = fields.Selection(selection=STATE_SELECTION, string='Estado', default='Comunidad Valenciana')
     province_down = fields.Selection(selection=PROVINCE_SELECTION, string='Provincia', default='Valencia')
@@ -376,3 +376,24 @@ class MailTemplate(models.Model):
             selected_code = spanish_lang.code if spanish_lang else False
 
         template.sudo().write({'lang': selected_code})
+
+
+class ResPartner(models.Model):
+    _inherit = 'res.partner'
+
+    medio_contacto = fields.Selection(
+        [
+            ('whatsapp', 'WhatsApp'),
+            ('formulario_web', 'Formulario Web'),
+            ('visita', 'Visita'),
+            ('llamada_otros', 'Otros (indicar en campo "Otros")'),
+        ],
+        string='Medio de contacto',
+    )
+    medio_contacto_otro = fields.Char(string='Otros')
+
+    @api.constrains('medio_contacto', 'medio_contacto_otro')
+    def _check_medio_contacto_otro(self):
+        for partner in self:
+            if partner.medio_contacto == 'llamada_otros' and not partner.medio_contacto_otro:
+                raise ValidationError(_("Debes indicar el valor de 'Otros'."))
