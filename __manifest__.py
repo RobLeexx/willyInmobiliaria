@@ -29,11 +29,7 @@ Long description of module's purpose
         'views/crm_lead_inherit.xml',
         'views/templates.xml',
     ],
-    'assets': {
-        'web.assets_backend': [
-            'mudanzas_crm/static/src/js/mudanzas_province_widget.js',
-        ],
-    },
+    'assets': {},
     # only loaded in demonstration mode
     'demo': [
         'demo/demo.xml',

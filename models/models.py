@@ -1,5 +1,6 @@
-from odoo import models, fields, api, _
+from odoo import api, fields, models, _
 from odoo.exceptions import ValidationError
+
 
 class MudanzasProvince(models.Model):
     _name = 'mudanzas.province'
@@ -32,19 +33,26 @@ class MudanzasObjectCatalog(models.Model):
     is_other = fields.Boolean(string='Es opcion manual', default=False)
 
 
-class CrmLead(models.Model):
-    _inherit = "crm.lead"
+HABITACION_SELECTION = [
+    ('recibidor', 'Recibidor'),
+    ('sala_comedor', 'Sala/Comedor'),
+    ('habitacion_matrimonial', 'Habitación Matrimonial'),
+    ('habitacion_individual', 'Habitación Individual'),
+    ('cocina', 'Cocina'),
+    ('despacho', 'Despacho'),
+    ('terraza_trastero', 'Terraza/Trastero'),
+    ('otros', 'Otros'),
+]
 
-    test_debug_field = fields.Char(string="Test Debug Field")
 
-    # Personal information
-    contact_name = fields.Char(string="Contacto")
-    email_form = fields.Char(string="Email")
-    phone = fields.Char(string="Teléfono")
+class MudanzasLeadObjectLine(models.Model):
+    _name = 'mudanzas.lead.object.line'
+    _description = 'Linea de objeto de mudanza'
+    _order = 'id'
 
-    # Mudanza fields
-    cantidad = fields.Integer(string="Cantidad")
-    objeto = fields.Char(string="Objetos")
+    lead_id = fields.Many2one('crm.lead', string='Lead', required=True, ondelete='cascade')
+    cantidad = fields.Integer(string='Cantidad', default=1)
+    objeto = fields.Char(string='Objeto')
     objeto_catalogo_id = fields.Many2one(
         'mudanzas.object.catalog',
         string='Objeto (catalogo)',
@@ -55,50 +63,96 @@ class CrmLead(models.Model):
         related='objeto_catalogo_id.is_other',
         readonly=True,
     )
-    objeto_manual = fields.Char(string="Otro objeto")
-    peso = fields.Float(string="KG")
-    embalaje = fields.Boolean(string="Embalaje")
-    desmontaje = fields.Boolean(string="Desmontaje")
-    habitacion = fields.Selection(
-        [
-            ('recibidor', 'Recibidor'),
-            ('sala_comedor', 'Sala/Comedor'),
-            ('habitacion_matrimonial', 'Habitación Matrimonial'),
-            ('habitacion_individual', 'Habitación Individual'),
-            ('cocina', 'Cocina'),
-            ('despacho', 'Despacho'),
-            ('terraza_trastero', 'Terraza/Trastero'),
-            ('otros', 'Otros')
-        ],
-        string="Habitación"
+    objeto_manual = fields.Char(string='Otro objeto')
+    peso = fields.Float(string='KG')
+    embalaje = fields.Boolean(string='Embalaje')
+    desmontaje = fields.Boolean(string='Desmontaje')
+    habitacion = fields.Selection(selection=HABITACION_SELECTION, string='Habitación')
+
+    @api.onchange('objeto_catalogo_id')
+    def _onchange_objeto_catalogo_id(self):
+        for line in self:
+            catalog = line.objeto_catalogo_id
+            if not catalog:
+                continue
+
+            if catalog.is_other:
+                line.objeto = line.objeto_manual
+                continue
+
+            line.objeto = catalog.name
+            line.objeto_manual = False
+            line.peso = catalog.peso_referencia or 0.0
+            if catalog.embalaje_recomendado:
+                line.embalaje = True
+            if catalog.desmontaje_recomendado:
+                line.desmontaje = True
+
+    @api.onchange('objeto_manual')
+    def _onchange_objeto_manual(self):
+        for line in self:
+            if line.objeto_catalogo_id and line.objeto_catalogo_id.is_other:
+                line.objeto = line.objeto_manual
+
+    @api.constrains('objeto_catalogo_id', 'objeto_manual')
+    def _check_objeto_manual_required(self):
+        for line in self:
+            if line.objeto_catalogo_id and line.objeto_catalogo_id.is_other and not line.objeto_manual:
+                raise ValidationError(_("Debes indicar el nombre en 'Otro objeto'."))
+
+
+class CrmLead(models.Model):
+    _inherit = 'crm.lead'
+
+    test_debug_field = fields.Char(string='Test Debug Field')
+
+    # Personal information
+    contact_name = fields.Char(string='Contacto')
+    email_form = fields.Char(string='Email')
+    phone = fields.Char(string='Teléfono')
+
+    # Mudanza fields (legacy single row + new line array)
+    cantidad = fields.Integer(string='Cantidad')
+    objeto = fields.Char(string='Objetos')
+    objeto_catalogo_id = fields.Many2one(
+        'mudanzas.object.catalog',
+        string='Objeto (catalogo)',
+        help='Busca y selecciona un objeto frecuente de mudanza.',
     )
-    observaciones_mudanza = fields.Char(string="Observaciones")
+    objeto_es_otro = fields.Boolean(
+        string='Objeto manual',
+        related='objeto_catalogo_id.is_other',
+        readonly=True,
+    )
+    objeto_manual = fields.Char(string='Otro objeto')
+    peso = fields.Float(string='KG')
+    embalaje = fields.Boolean(string='Embalaje')
+    desmontaje = fields.Boolean(string='Desmontaje')
+    habitacion = fields.Selection(selection=HABITACION_SELECTION, string='Habitación')
+    mudanza_line_ids = fields.One2many(
+        'mudanzas.lead.object.line',
+        'lead_id',
+        string='Objetos de mudanza',
+    )
+    observaciones_mudanza = fields.Char(string='Observaciones')
 
     # Offer details
-    #recibidor = fields.Char(string="Recibidor")
-    #sala_comedor = fields.Char(string="Sala/Comedor")
-    #habitacion_matrimonial = fields.Char(string="Habitación Matrimonial")
-    #habitacion_individual = fields.Char(string="Habitación Individual")
-    #cocina = fields.Char(string="Cocina")
-    #despacho = fields.Char(string="Despacho")
-    #terraza_trastero = fields.Char(string="Terraza/Trastero")
-
-    precio_oferta = fields.Float(string="Precio Oferta")
+    precio_oferta = fields.Float(string='Precio Oferta')
     tipo_oferta = fields.Selection(
         [
             ('baja', 'Baja'),
             ('media', 'Media'),
             ('alta', 'Alta'),
         ],
-        string="Tipo Oferta",
-        default='baja'
+        string='Tipo Oferta',
+        default='baja',
     )
-    
+
     # carga (pickup) address fields (manual select)
-    streetup = fields.Char(string="Calle")
-    streetup2 = fields.Char(string="Calle 2")
-    cityup = fields.Char(string="Ciudad")
-    zipup = fields.Char(string="Código Postal")
+    streetup = fields.Char(string='Calle')
+    streetup2 = fields.Char(string='Calle 2')
+    cityup = fields.Char(string='Ciudad')
+    zipup = fields.Char(string='Código Postal')
 
     # map of Spanish comunidades to their provincias; used for both pickup and delivery
     STATE_PROVINCE_MAP = {
@@ -120,73 +174,66 @@ class CrmLead(models.Model):
         'País Vasco': ['Álava', 'Guipúzcoa', 'Vizcaya'],
         'La Rioja': ['La Rioja'],
     }
-    # Precomputed selection tuples to ensure availability during module load
     STATE_SELECTION = [(key, key) for key in STATE_PROVINCE_MAP.keys()]
     _ALL_PROVINCES = []
     for _lst in STATE_PROVINCE_MAP.values():
         _ALL_PROVINCES.extend(_lst)
     PROVINCE_SELECTION = sorted([(p, p) for p in set(_ALL_PROVINCES)], key=lambda x: x[0])
 
-    state_up = fields.Selection(selection=STATE_SELECTION, string="Estado", default='Comunidad Valenciana')
-    province_up = fields.Selection(selection=PROVINCE_SELECTION, string="Provincia", default='Valencia')
+    state_up = fields.Selection(selection=STATE_SELECTION, string='Estado', default='Comunidad Valenciana')
+    province_up = fields.Selection(selection=PROVINCE_SELECTION, string='Provincia', default='Valencia')
+    province_up_id = fields.Many2one('mudanzas.province', string='Provincia (registro)')
 
     # descarga (delivery) address fields (manual select)
-    streetdown = fields.Char(string="Calle")
-    streetdown2 = fields.Char(string="Calle 2")
-    citydown = fields.Char(string="Ciudad")
-    zipdown = fields.Char(string="Código Postal")
-    state_down = fields.Selection(selection=STATE_SELECTION, string="Estado", default='Comunidad Valenciana')
-    province_down = fields.Selection(selection=PROVINCE_SELECTION, string="Provincia", default='Valencia')
+    streetdown = fields.Char(string='Calle')
+    streetdown2 = fields.Char(string='Calle 2')
+    citydown = fields.Char(string='Ciudad')
+    zipdown = fields.Char(string='Código Postal')
+    state_down = fields.Selection(selection=STATE_SELECTION, string='Estado', default='Comunidad Valenciana')
+    province_down = fields.Selection(selection=PROVINCE_SELECTION, string='Provincia', default='Valencia')
+    province_down_id = fields.Many2one('mudanzas.province', string='Provincia (registro)')
 
     @api.onchange('state_up')
     def _onchange_state_up(self):
         if self.state_up:
             provinces = self.STATE_PROVINCE_MAP.get(self.state_up, [])
-            if len(provinces) == 1:
-                self.province_up = provinces[0]
-            elif self.province_up not in provinces:
+            if self.province_up and self.province_up not in provinces:
                 self.province_up = False
+            if self.province_up_id and self.province_up_id.name not in provinces:
+                self.province_up_id = False
+            if not self.province_up_id and provinces:
+                self.province_up_id = self.env['mudanzas.province'].search(
+                    [('state', '=', self.state_up), ('name', 'in', provinces)],
+                    limit=1,
+                )
 
     @api.onchange('state_down')
     def _onchange_state_down(self):
         if self.state_down:
             provinces = self.STATE_PROVINCE_MAP.get(self.state_down, [])
-            if len(provinces) == 1:
-                self.province_down = provinces[0]
-            elif self.province_down not in provinces:
+            if self.province_down and self.province_down not in provinces:
                 self.province_down = False
+            if self.province_down_id and self.province_down_id.name not in provinces:
+                self.province_down_id = False
+            if not self.province_down_id and provinces:
+                self.province_down_id = self.env['mudanzas.province'].search(
+                    [('state', '=', self.state_down), ('name', 'in', provinces)],
+                    limit=1,
+                )
 
     @api.onchange('precio_oferta')
     def _onchange_precio_oferta(self):
-        if self.precio_oferta:
-            if self.precio_oferta < 500:
-                self.tipo_oferta = 'baja'
-            elif self.precio_oferta <= 700:
-                self.tipo_oferta = 'media'
-            else:
-                self.tipo_oferta = 'alta'
+        self.expected_revenue = self.precio_oferta or 0.0
+        if self.precio_oferta < 500:
+            self.tipo_oferta = 'baja'
+        elif self.precio_oferta <= 700:
+            self.tipo_oferta = 'media'
+        else:
+            self.tipo_oferta = 'alta'
 
-    @api.model
-    def create(self, vals):
-        if 'precio_oferta' not in vals and 'expected_revenue' in vals:
-            vals['precio_oferta'] = vals['expected_revenue']
-        vals = self._prepare_objeto_vals(vals)
-        return super().create(vals)
-
-    def write(self, vals):
-        if 'objeto_catalogo_id' in vals or 'objeto_manual' in vals:
-            for lead in self:
-                lead_vals = lead._prepare_objeto_vals(dict(vals))
-                super(CrmLead, lead).write(lead_vals)
-            return True
-
-        vals = self._prepare_objeto_vals(vals)
-        return super().write(vals)
-    
     @api.onchange('expected_revenue')
     def _onchange_expected_revenue(self):
-        if self.expected_revenue:
-            self.precio_oferta = self.expected_revenue
+        self.precio_oferta = self.expected_revenue or 0.0
 
     @api.onchange('objeto_catalogo_id')
     def _onchange_objeto_catalogo_id(self):
@@ -204,19 +251,36 @@ class CrmLead(models.Model):
             if lead.objeto_catalogo_id and lead.objeto_catalogo_id.is_other and not lead.objeto_manual:
                 raise ValidationError(_("Debes indicar el nombre en 'Otro objeto'."))
 
+    @api.model
+    def create(self, vals):
+        vals = self._prepare_offer_vals(vals)
+        vals = self._prepare_objeto_vals(vals)
+        return super().create(vals)
+
+    def write(self, vals):
+        if 'objeto_catalogo_id' in vals or 'objeto_manual' in vals:
+            for lead in self:
+                lead_vals = lead._prepare_offer_vals(dict(vals))
+                lead_vals = lead._prepare_objeto_vals(lead_vals)
+                super(CrmLead, lead).write(lead_vals)
+            return True
+
+        vals = self._prepare_offer_vals(vals)
+        vals = self._prepare_objeto_vals(vals)
+        return super().write(vals)
+
     def _apply_objeto_catalogo_defaults(self):
         for lead in self:
             catalog = lead.objeto_catalogo_id
             if not catalog:
                 continue
-
             if catalog.is_other:
                 lead.objeto = lead.objeto_manual
                 continue
 
             lead.objeto = catalog.name
             lead.objeto_manual = False
-            lead.peso = catalog.peso_referencia or False
+            lead.peso = catalog.peso_referencia or 0.0
             if catalog.embalaje_recomendado:
                 lead.embalaje = True
             if catalog.desmontaje_recomendado:
@@ -252,4 +316,16 @@ class CrmLead(models.Model):
             vals.setdefault('embalaje', True)
         if catalog.desmontaje_recomendado:
             vals.setdefault('desmontaje', True)
+        return vals
+
+    def _prepare_offer_vals(self, vals):
+        if 'expected_revenue' not in vals and 'precio_oferta' not in vals:
+            return vals
+
+        source_value = vals.get('expected_revenue', vals.get('precio_oferta'))
+        if source_value in (False, None):
+            source_value = 0.0
+
+        vals['expected_revenue'] = source_value
+        vals['precio_oferta'] = source_value
         return vals
