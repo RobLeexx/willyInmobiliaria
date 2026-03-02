@@ -353,3 +353,26 @@ class CrmLead(models.Model):
                 'force_email': True,
             },
         }
+
+
+class MailTemplate(models.Model):
+    _inherit = 'mail.template'
+
+    @api.model
+    def mudanzas_set_offer_lang(self):
+        template = self.env.ref('mudanzas_crm.mail_template_mudanza_oferta', raise_if_not_found=False)
+        if not template:
+            return
+
+        lang_model = self.env['res.lang'].sudo()
+        selected_code = False
+        for code in ('es_AR', 'es_ES'):
+            if lang_model.search([('code', '=', code)], limit=1):
+                selected_code = code
+                break
+
+        if not selected_code:
+            spanish_lang = lang_model.search([('code', 'like', 'es_%')], limit=1)
+            selected_code = spanish_lang.code if spanish_lang else False
+
+        template.sudo().write({'lang': selected_code})

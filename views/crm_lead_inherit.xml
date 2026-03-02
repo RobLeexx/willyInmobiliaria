@@ -12,7 +12,7 @@
         <xpath expr="//field[@name='function']" position="replace"/>
         <xpath expr="//field[@name='partner_id']" position="replace"/>
         <xpath expr="//group[@name='lead_partner']" position="replace">
-          <group col="16" class="col-lg-8">
+          <group col="16" class="col-lg-9" style="padding-right: 0;">
             <separator string="Mudanza" colspan="16"/>
                         <group col="6" colspan="9" class="w-100">
               <field name="mudanza_line_ids" colspan="6">
@@ -28,13 +28,13 @@
                 </list>
                 <form>
                   <group col="2">
-                    <field name="cantidad"/>
+                    <field name="cantidad" style="text-align: center;"/>
                     <field name="objeto_catalogo_id" options="{'no_open': True, 'no_create': True, 'no_create_edit': True}"/>
                     <field name="objeto_es_otro" invisible="1"/>
                     <field name="objeto_manual" invisible="not objeto_es_otro" required="objeto_es_otro"/>
                     <field name="peso"/>
-                    <field name="embalaje"/>
-                    <field name="desmontaje"/>
+                    <field name="embalaje" style="display: flex; justify-content: center;"/>
+                    <field name="desmontaje" style="display: flex; justify-content: center;"/>
                     <field name="habitacion"/>
                   </group>
                 </form>
@@ -46,7 +46,7 @@
             </div>
           </group>
 
-          <div class="col-lg-4" style="flex: 0 0 33.333%; max-width: 33.333%;">
+          <div class="col-lg-4" style="flex: 0 0 27%; max-width: 27%;">
             <div class="row">
               <div class="w-100">
                 <group string="Oferta">
@@ -96,4 +96,3 @@
     </record>
   </data>
 </odoo>
-

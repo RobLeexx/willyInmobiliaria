@@ -4,7 +4,6 @@
     <field name="model_id" ref="crm.model_crm_lead"/>
     <field name="subject">Oferta de mudanza - ${object.name or 'Sin referencia'}</field>
     <field name="email_to">${object.email_from or ''}</field>
-    <field name="lang">es_AR</field>
     <field name="auto_delete" eval="False"/>
     <field name="body_html"><![CDATA[
 <div style="font-family: Arial, sans-serif; font-size: 14px;">
@@ -41,4 +40,5 @@
 </div>
     ]]></field>
   </record>
+  <function model="mail.template" name="mudanzas_set_offer_lang"/>
 </odoo>
