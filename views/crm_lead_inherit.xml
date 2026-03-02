@@ -18,8 +18,10 @@
                   <field name="cantidad" style="border: 1px solid #999; background-color: rgba(0, 0, 0, 0.08)"/>
                 </div>
                 <div colspan="6" style="display: flex; flex-direction: column; padding-right: 20px;">
-                  <label for="objeto" style="font-weight: bold; margin-bottom: 4px;">Objeto</label>
-                  <field name="objeto" style="border: 1px solid #999; background-color: rgba(0, 0, 0, 0.08)"/>
+                  <label for="objeto_catalogo_id" style="font-weight: bold; margin-bottom: 4px; padding-bottom: 4px;">Objeto</label>
+                  <field name="objeto_es_otro" invisible="1"/>
+                  <field name="objeto_catalogo_id" placeholder="Ej.: Cama, Armario, Sofa..." options="{'no_open': True, 'no_create': True, 'no_create_edit': True}" style="border: 1px solid #999; background-color: rgba(0, 0, 0, 0.08)"/>
+                  <field name="objeto_manual" placeholder="Escribe el objeto especial (ej.: Piano, Caja fuerte...)" invisible="not objeto_es_otro" required="objeto_es_otro" style="border: 1px solid #999; background-color: rgba(0, 0, 0, 0.08); margin-top: 6px;"/>
                 </div>
                 <div colspan="2" style="display: flex; flex-direction: column; padding-right: 20px; width: 13%;">
                   <label for="peso" style="font-weight: bold; margin-bottom: 4px;">Kg Aprox.</label>
@@ -40,6 +42,7 @@
               </div>
             </group>
             <div colspan="14">
+              <label for="observaciones_mudanza" style="font-weight: bold; margin-bottom: 4px;">Observaciones</label>
               <field name="observaciones_mudanza" style="border: 1px solid #999; background-color: rgba(0, 0, 0, 0.08)"/>
             </div>
           </group>

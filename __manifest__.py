@@ -24,6 +24,7 @@ Long description of module's purpose
     'data': [
         'security/ir.model.access.csv',
         'data/provinces.xml',
+        'data/object_catalog.xml',
         'views/views.xml',
         'views/crm_lead_inherit.xml',
         'views/templates.xml',

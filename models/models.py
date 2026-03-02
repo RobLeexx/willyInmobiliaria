@@ -1,5 +1,5 @@
 from odoo import models, fields, api, _
-from odoo.exceptions import UserError
+from odoo.exceptions import ValidationError
 
 class MudanzasProvince(models.Model):
     _name = 'mudanzas.province'
@@ -7,6 +7,29 @@ class MudanzasProvince(models.Model):
 
     name = fields.Char(string='Provincia', required=True)
     state = fields.Char(string='Estado')
+
+
+class MudanzasObjectCatalog(models.Model):
+    _name = 'mudanzas.object.catalog'
+    _description = 'Catalogo de objetos para mudanza'
+    _order = 'sequence, name'
+
+    name = fields.Char(string='Objeto', required=True, translate=False)
+    sequence = fields.Integer(string='Secuencia', default=10)
+    category = fields.Selection(
+        [
+            ('inmueble', 'Inmueble'),
+            ('objeto', 'Objeto'),
+            ('especial', 'Especial'),
+        ],
+        string='Categoria',
+        default='objeto',
+        required=True,
+    )
+    peso_referencia = fields.Float(string='Kg de referencia')
+    embalaje_recomendado = fields.Boolean(string='Embalaje recomendado')
+    desmontaje_recomendado = fields.Boolean(string='Desmontaje recomendado')
+    is_other = fields.Boolean(string='Es opcion manual', default=False)
 
 
 class CrmLead(models.Model):
@@ -21,8 +44,19 @@ class CrmLead(models.Model):
 
     # Mudanza fields
     cantidad = fields.Integer(string="Cantidad")
-    objeto = fields.Char(string="Objeto")
-    peso = fields.Float(string="KG Aprox.")
+    objeto = fields.Char(string="Objetos")
+    objeto_catalogo_id = fields.Many2one(
+        'mudanzas.object.catalog',
+        string='Objeto (catalogo)',
+        help='Busca y selecciona un objeto frecuente de mudanza.',
+    )
+    objeto_es_otro = fields.Boolean(
+        string='Objeto manual',
+        related='objeto_catalogo_id.is_other',
+        readonly=True,
+    )
+    objeto_manual = fields.Char(string="Otro objeto")
+    peso = fields.Float(string="KG")
     embalaje = fields.Boolean(string="Embalaje")
     desmontaje = fields.Boolean(string="Desmontaje")
     habitacion = fields.Selection(
@@ -131,3 +165,91 @@ class CrmLead(models.Model):
                 self.tipo_oferta = 'media'
             else:
                 self.tipo_oferta = 'alta'
+
+    @api.model
+    def create(self, vals):
+        if 'precio_oferta' not in vals and 'expected_revenue' in vals:
+            vals['precio_oferta'] = vals['expected_revenue']
+        vals = self._prepare_objeto_vals(vals)
+        return super().create(vals)
+
+    def write(self, vals):
+        if 'objeto_catalogo_id' in vals or 'objeto_manual' in vals:
+            for lead in self:
+                lead_vals = lead._prepare_objeto_vals(dict(vals))
+                super(CrmLead, lead).write(lead_vals)
+            return True
+
+        vals = self._prepare_objeto_vals(vals)
+        return super().write(vals)
+    
+    @api.onchange('expected_revenue')
+    def _onchange_expected_revenue(self):
+        if self.expected_revenue:
+            self.precio_oferta = self.expected_revenue
+
+    @api.onchange('objeto_catalogo_id')
+    def _onchange_objeto_catalogo_id(self):
+        self._apply_objeto_catalogo_defaults()
+
+    @api.onchange('objeto_manual')
+    def _onchange_objeto_manual(self):
+        for lead in self:
+            if lead.objeto_catalogo_id and lead.objeto_catalogo_id.is_other:
+                lead.objeto = lead.objeto_manual
+
+    @api.constrains('objeto_catalogo_id', 'objeto_manual')
+    def _check_objeto_manual_required(self):
+        for lead in self:
+            if lead.objeto_catalogo_id and lead.objeto_catalogo_id.is_other and not lead.objeto_manual:
+                raise ValidationError(_("Debes indicar el nombre en 'Otro objeto'."))
+
+    def _apply_objeto_catalogo_defaults(self):
+        for lead in self:
+            catalog = lead.objeto_catalogo_id
+            if not catalog:
+                continue
+
+            if catalog.is_other:
+                lead.objeto = lead.objeto_manual
+                continue
+
+            lead.objeto = catalog.name
+            lead.objeto_manual = False
+            lead.peso = catalog.peso_referencia or False
+            if catalog.embalaje_recomendado:
+                lead.embalaje = True
+            if catalog.desmontaje_recomendado:
+                lead.desmontaje = True
+
+    def _prepare_objeto_vals(self, vals):
+        if 'objeto_catalogo_id' not in vals and 'objeto_manual' not in vals:
+            return vals
+
+        catalog_id = vals.get('objeto_catalogo_id')
+        if catalog_id is None and self:
+            catalog_id = self[0].objeto_catalogo_id.id
+
+        if not catalog_id:
+            return vals
+
+        catalog = self.env['mudanzas.object.catalog'].browse(catalog_id)
+        if not catalog.exists():
+            return vals
+
+        if catalog.is_other:
+            manual_name = vals.get('objeto_manual')
+            if manual_name is None and self:
+                manual_name = self[0].objeto_manual
+            vals['objeto'] = manual_name or False
+            return vals
+
+        vals['objeto'] = catalog.name
+        vals.setdefault('objeto_manual', False)
+        if not vals.get('peso') and catalog.peso_referencia:
+            vals['peso'] = catalog.peso_referencia
+        if catalog.embalaje_recomendado:
+            vals.setdefault('embalaje', True)
+        if catalog.desmontaje_recomendado:
+            vals.setdefault('desmontaje', True)
+        return vals
