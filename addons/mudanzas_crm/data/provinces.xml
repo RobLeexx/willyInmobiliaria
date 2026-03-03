@@ -1,0 +1,87 @@
+<odoo>
+  <data noupdate="1">
+    <!-- Comunidad Valenciana -->
+    <record id="province_alicante" model="mudanzas.province"><field name="name">Alicante</field><field name="state">Comunidad Valenciana</field></record>
+    <record id="province_castellon" model="mudanzas.province"><field name="name">Castellón</field><field name="state">Comunidad Valenciana</field></record>
+    <record id="province_valencia" model="mudanzas.province"><field name="name">Valencia</field><field name="state">Comunidad Valenciana</field></record>
+
+    <!-- Andalucía -->
+    <record id="province_almeria" model="mudanzas.province"><field name="name">Almería</field><field name="state">Andalucía</field></record>
+    <record id="province_cadiz" model="mudanzas.province"><field name="name">Cádiz</field><field name="state">Andalucía</field></record>
+    <record id="province_cordoba" model="mudanzas.province"><field name="name">Córdoba</field><field name="state">Andalucía</field></record>
+    <record id="province_granada" model="mudanzas.province"><field name="name">Granada</field><field name="state">Andalucía</field></record>
+    <record id="province_huelva" model="mudanzas.province"><field name="name">Huelva</field><field name="state">Andalucía</field></record>
+    <record id="province_jaen" model="mudanzas.province"><field name="name">Jaén</field><field name="state">Andalucía</field></record>
+    <record id="province_malaga" model="mudanzas.province"><field name="name">Málaga</field><field name="state">Andalucía</field></record>
+    <record id="province_sevilla" model="mudanzas.province"><field name="name">Sevilla</field><field name="state">Andalucía</field></record>
+
+    <!-- Aragón -->
+    <record id="province_huesca" model="mudanzas.province"><field name="name">Huesca</field><field name="state">Aragón</field></record>
+    <record id="province_teruel" model="mudanzas.province"><field name="name">Teruel</field><field name="state">Aragón</field></record>
+    <record id="province_zaragoza" model="mudanzas.province"><field name="name">Zaragoza</field><field name="state">Aragón</field></record>
+
+    <!-- Asturias -->
+    <record id="province_asturias" model="mudanzas.province"><field name="name">Principado de Asturias</field><field name="state">Asturias</field></record>
+
+    <!-- Baleares -->
+    <record id="province_baleares" model="mudanzas.province"><field name="name">Islas Baleares</field><field name="state">Baleares</field></record>
+
+    <!-- Canarias -->
+    <record id="province_las_palmas" model="mudanzas.province"><field name="name">Las Palmas</field><field name="state">Canarias</field></record>
+    <record id="province_santa_cruz_de_tenerife" model="mudanzas.province"><field name="name">Santa Cruz de Tenerife</field><field name="state">Canarias</field></record>
+
+    <!-- Cantabria -->
+    <record id="province_cantabria" model="mudanzas.province"><field name="name">Cantabria</field><field name="state">Cantabria</field></record>
+
+    <!-- Castilla-La Mancha -->
+    <record id="province_albacete" model="mudanzas.province"><field name="name">Albacete</field><field name="state">Castilla-La Mancha</field></record>
+    <record id="province_ciudad_real" model="mudanzas.province"><field name="name">Ciudad Real</field><field name="state">Castilla-La Mancha</field></record>
+    <record id="province_cuenca" model="mudanzas.province"><field name="name">Cuenca</field><field name="state">Castilla-La Mancha</field></record>
+    <record id="province_guadalajara" model="mudanzas.province"><field name="name">Guadalajara</field><field name="state">Castilla-La Mancha</field></record>
+    <record id="province_toledo" model="mudanzas.province"><field name="name">Toledo</field><field name="state">Castilla-La Mancha</field></record>
+
+    <!-- Castilla y León -->
+    <record id="province_avila" model="mudanzas.province"><field name="name">Ávila</field><field name="state">Castilla y León</field></record>
+    <record id="province_burgos" model="mudanzas.province"><field name="name">Burgos</field><field name="state">Castilla y León</field></record>
+    <record id="province_leon" model="mudanzas.province"><field name="name">León</field><field name="state">Castilla y León</field></record>
+    <record id="province_palencia" model="mudanzas.province"><field name="name">Palencia</field><field name="state">Castilla y León</field></record>
+    <record id="province_salamanca" model="mudanzas.province"><field name="name">Salamanca</field><field name="state">Castilla y León</field></record>
+    <record id="province_segovia" model="mudanzas.province"><field name="name">Segovia</field><field name="state">Castilla y León</field></record>
+    <record id="province_soria" model="mudanzas.province"><field name="name">Soria</field><field name="state">Castilla y León</field></record>
+    <record id="province_valladolid" model="mudanzas.province"><field name="name">Valladolid</field><field name="state">Castilla y León</field></record>
+    <record id="province_zamora" model="mudanzas.province"><field name="name">Zamora</field><field name="state">Castilla y León</field></record>
+
+    <!-- Cataluña -->
+    <record id="province_barcelona" model="mudanzas.province"><field name="name">Barcelona</field><field name="state">Cataluña</field></record>
+    <record id="province_girona" model="mudanzas.province"><field name="name">Girona</field><field name="state">Cataluña</field></record>
+    <record id="province_lleida" model="mudanzas.province"><field name="name">Lleida</field><field name="state">Cataluña</field></record>
+    <record id="province_tarragona" model="mudanzas.province"><field name="name">Tarragona</field><field name="state">Cataluña</field></record>
+
+    <!-- Extremadura -->
+    <record id="province_badajoz" model="mudanzas.province"><field name="name">Badajoz</field><field name="state">Extremadura</field></record>
+    <record id="province_caceres" model="mudanzas.province"><field name="name">Cáceres</field><field name="state">Extremadura</field></record>
+
+    <!-- Galicia -->
+    <record id="province_a_coruna" model="mudanzas.province"><field name="name">A Coruña</field><field name="state">Galicia</field></record>
+    <record id="province_lugo" model="mudanzas.province"><field name="name">Lugo</field><field name="state">Galicia</field></record>
+    <record id="province_ourense" model="mudanzas.province"><field name="name">Ourense</field><field name="state">Galicia</field></record>
+    <record id="province_pontevedra" model="mudanzas.province"><field name="name">Pontevedra</field><field name="state">Galicia</field></record>
+
+    <!-- Madrid -->
+    <record id="province_madrid" model="mudanzas.province"><field name="name">Comunidad de Madrid</field><field name="state">Madrid</field></record>
+
+    <!-- Murcia -->
+    <record id="province_murcia" model="mudanzas.province"><field name="name">Región de Murcia</field><field name="state">Murcia</field></record>
+
+    <!-- Navarra -->
+    <record id="province_navarra" model="mudanzas.province"><field name="name">Comunidad Foral de Navarra</field><field name="state">Navarra</field></record>
+
+    <!-- País Vasco -->
+    <record id="province_alava" model="mudanzas.province"><field name="name">Álava</field><field name="state">País Vasco</field></record>
+    <record id="province_guipuzcoa" model="mudanzas.province"><field name="name">Guipúzcoa</field><field name="state">País Vasco</field></record>
+    <record id="province_vizcaya" model="mudanzas.province"><field name="name">Vizcaya</field><field name="state">País Vasco</field></record>
+
+    <!-- La Rioja -->
+    <record id="province_la_rioja" model="mudanzas.province"><field name="name">La Rioja</field><field name="state">La Rioja</field></record>
+  </data>
+</odoo>
