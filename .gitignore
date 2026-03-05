@@ -26,3 +26,4 @@ venv/
 .venv/
 env/
 ENV/
+docker-compose.yml
