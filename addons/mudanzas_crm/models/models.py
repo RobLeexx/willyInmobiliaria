@@ -1,5 +1,6 @@
 from odoo import api, fields, models, _
 from odoo.exceptions import UserError, ValidationError
+from markupsafe import Markup
 
 
 class MudanzasProvince(models.Model):
@@ -72,7 +73,8 @@ class MudanzasObjectCatalog(models.Model):
         default='objeto',
         required=True,
     )
-    peso_referencia = fields.Float(string='M³ de referencia')
+    volumen_referencia = fields.Float(string='M³ de referencia')
+    peso_referencia = fields.Float(string='Kg de referencia')
     embalaje_recomendado = fields.Boolean(string='Embalaje recomendado')
     desmontaje_recomendado = fields.Boolean(string='Desmontaje recomendado')
     is_other = fields.Boolean(string='Es opcion manual', default=False)
@@ -82,7 +84,7 @@ class MudanzasObjectCatalog(models.Model):
         for xmlid_suffix, volume in self._REFERENCE_VOLUME_BY_XMLID.items():
             record = self.env.ref(f'mudanzas_crm.{xmlid_suffix}', raise_if_not_found=False)
             if record:
-                record.write({'peso_referencia': volume})
+                record.write({'volumen_referencia': volume})
 
 
 HABITACION_SELECTION = [
@@ -116,7 +118,8 @@ class MudanzasLeadObjectLine(models.Model):
         readonly=True,
     )
     objeto_manual = fields.Char(string='Otro objeto')
-    peso = fields.Float(string='M³')
+    peso = fields.Float(string='Kg')
+    volumen = fields.Float(string='M³')
     embalaje = fields.Boolean(string='Embalaje')
     desmontaje = fields.Boolean(string='Desmontaje')
     habitacion = fields.Selection(selection=HABITACION_SELECTION, string='Habitación')
@@ -134,7 +137,7 @@ class MudanzasLeadObjectLine(models.Model):
 
             line.objeto = catalog.name
             line.objeto_manual = False
-            line.peso = catalog.peso_referencia or 0.0
+            line.volumen = catalog.volumen_referencia or 0.0
             if catalog.embalaje_recomendado:
                 line.embalaje = True
             if catalog.desmontaje_recomendado:
@@ -218,7 +221,8 @@ class CrmLead(models.Model):
         readonly=True,
     )
     objeto_manual = fields.Char(string='Otro objeto')
-    peso = fields.Float(string='M³')
+    peso = fields.Float(string='Kg')
+    volumen = fields.Float(string='M³')
     embalaje = fields.Boolean(string='Embalaje')
     desmontaje = fields.Boolean(string='Desmontaje')
     habitacion = fields.Selection(selection=HABITACION_SELECTION, string='Habitación')
@@ -234,6 +238,11 @@ class CrmLead(models.Model):
         'attachment_id',
         string='Multimedia',
         copy=False,
+    )
+    mudanza_media_preview = fields.Html(
+        string='Vista previa multimedia',
+        compute='_compute_mudanza_media_preview',
+        sanitize=False,
     )
     observaciones_mudanza = fields.Char(string='Observaciones')
     fecha_mudanza = fields.Date(string='Fecha de mudanza')
@@ -259,6 +268,7 @@ class CrmLead(models.Model):
     streetup = fields.Char(string='Calle')
     streetup2 = fields.Char(string='Calle 2')
     floorup = fields.Integer(string='Piso')
+    zipup = fields.Char(string='Código Postal')
     doorup = fields.Char(string='Puerta')
     elevatorup = fields.Char(string='Ascensor')
 
@@ -297,12 +307,106 @@ class CrmLead(models.Model):
     streetdown = fields.Char(string='Calle')
     streetdown2 = fields.Char(string='Calle 2')
     floordown = fields.Integer(string='Piso')
+    zipdown = fields.Char(string='Código Postal')
     doordown = fields.Char(string='Puerta')
     elevatordown = fields.Char(string='Ascensor')
     state_down = fields.Selection(selection=STATE_SELECTION, string='Estado', default='Comunidad Valenciana')
     province_down = fields.Selection(selection=PROVINCE_SELECTION, string='Provincia', default='Valencia')
     province_down_id = fields.Many2one('mudanzas.province', string='Provincia')
     poblation_down = fields.Char(string='Población')
+
+    @api.depends('mudanza_media_ids', 'mudanza_media_ids.mimetype', 'mudanza_media_ids.name')
+    def _compute_mudanza_media_preview(self):
+        for lead in self:
+            image_attachments = lead.mudanza_media_ids.filtered(
+                lambda att: isinstance(att.id, int) and (att.mimetype or '').startswith('image/')
+            )
+            video_attachments = lead.mudanza_media_ids.filtered(
+                lambda att: isinstance(att.id, int) and (att.mimetype or '').startswith('video/')
+            )
+
+            photo_section = ''
+            video_section = ''
+
+            if image_attachments:
+                carousel_id = f'mudanza-media-carousel-{lead.id or "new"}'
+                indicators = []
+                slides = []
+                for index, attachment in enumerate(image_attachments):
+                    active_class = ' active' if index == 0 else ''
+                    indicators.append(
+                        f'<button type="button" data-bs-target="#{carousel_id}" '
+                        f'data-bs-slide-to="{index}" class="{active_class.strip()}" '
+                        f'aria-current="{"true" if index == 0 else "false"}" '
+                        f'aria-label="Slide {index + 1}"></button>'
+                    )
+                    slides.append(
+                        f'''
+                        <div class="carousel-item{active_class}">
+                          <img src="/web/image/{attachment.id}"
+                               alt="{attachment.name or "Foto de mudanza"}"
+                               style="width: 100%; height: 560px; object-fit: cover; border-radius: 14px;"/>
+                        </div>
+                        '''
+                    )
+                photo_section = (
+                    f'''
+                    <div style="width: 100%; min-width: 0;">
+                      <div style="font-weight: 700; font-size: 18px; margin-bottom: 10px;">Fotos</div>
+                      <div id="{carousel_id}" class="carousel slide" data-bs-ride="carousel">
+                        <div class="carousel-indicators">
+                          {''.join(indicators)}
+                        </div>
+                        <div class="carousel-inner" style="border-radius: 14px; overflow: hidden; background: #f5f5f5;">
+                          {''.join(slides)}
+                        </div>
+                        <button class="carousel-control-prev" type="button" data-bs-target="#{carousel_id}" data-bs-slide="prev">
+                          <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                          <span class="visually-hidden">Previous</span>
+                        </button>
+                        <button class="carousel-control-next" type="button" data-bs-target="#{carousel_id}" data-bs-slide="next">
+                          <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                          <span class="visually-hidden">Next</span>
+                        </button>
+                      </div>
+                    </div>
+                    '''
+                )
+
+            if video_attachments:
+                video_cards = []
+                for attachment in video_attachments:
+                    video_cards.append(
+                        f'''
+                        <div style="margin-bottom: 16px;">
+                          <div style="font-weight: 600; margin-bottom: 8px;">{attachment.name or "Video"}</div>
+                          <video controls preload="metadata" style="width: 100%; height: 560px; background: #000; border-radius: 14px; object-fit: contain;">
+                            <source src="/web/content/{attachment.id}" type="{attachment.mimetype or "video/mp4"}"/>
+                            Tu navegador no soporta video HTML5.
+                          </video>
+                        </div>
+                        '''
+                    )
+                video_section = (
+                    f'''
+                    <div style="width: 100%; min-width: 0;">
+                      <div style="font-weight: 700; font-size: 18px; margin-bottom: 10px;">Videos</div>
+                      {''.join(video_cards)}
+                    </div>
+                    '''
+                )
+
+            if photo_section or video_section:
+                lead.mudanza_media_preview = Markup(
+                    f'''
+                    <div style="display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 24px; width: 100%; margin-top: 16px; align-items: start;">
+                      <div style="width: 100%; min-width: 0;">{photo_section}</div>
+                      <div style="width: 100%; min-width: 0;">{video_section}</div>
+                    </div>
+                    '''
+                )
+            else:
+                lead.mudanza_media_preview = False
 
     @api.onchange('state_up')
     def _onchange_state_up(self):
@@ -391,7 +495,7 @@ class CrmLead(models.Model):
 
             lead.objeto = catalog.name
             lead.objeto_manual = False
-            lead.peso = catalog.peso_referencia or 0.0
+            lead.volumen = catalog.volumen_referencia or 0.0
             if catalog.embalaje_recomendado:
                 lead.embalaje = True
             if catalog.desmontaje_recomendado:
@@ -421,8 +525,8 @@ class CrmLead(models.Model):
 
         vals['objeto'] = catalog.name
         vals.setdefault('objeto_manual', False)
-        if not vals.get('peso') and catalog.peso_referencia:
-            vals['peso'] = catalog.peso_referencia
+        if not vals.get('volumen') and catalog.volumen_referencia:
+            vals['volumen'] = catalog.volumen_referencia
         if catalog.embalaje_recomendado:
             vals.setdefault('embalaje', True)
         if catalog.desmontaje_recomendado:
