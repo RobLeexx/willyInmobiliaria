@@ -96,16 +96,17 @@
             </group>
           </group>
 
-          <group string="Fotos y Videos" class="col-12 w-100" style="flex: 0 0 100%; max-width: 100%; border-top: 1px solid #ddd; padding-top: 16px; margin-top: 12px;" invisible="not partner_medio_contacto">
+          <group string="Fotos y Videos" col="1" colspan="16" class="col-12 w-100" style="flex: 0 0 100%; max-width: 100%; width: 100%; border-top: 1px solid #ddd; padding-top: 16px; margin-top: 12px;" invisible="not partner_medio_contacto">
             <field
               name="mudanza_media_ids"
+              colspan="16"
               widget="many2many_binary"
               options="{'no_create': True, 'no_open': True}"
               context="{'default_res_model': 'crm.lead', 'default_res_id': id}"
               domain="[('res_model', '=', 'crm.lead'), ('res_id', '=', id)]"
               style="width: 100%; border: 1px solid #999; background-color: rgba(0, 0, 0, 0.08); padding: 8px;"
             />
-            <field name="mudanza_media_preview" widget="html" nolabel="1" readonly="1" style="width: 100%;"/>
+            <field name="mudanza_media_preview" colspan="16" widget="html" nolabel="1" readonly="1" style="width: 100%;"/>
           </group>
 
           <div class="col-lg-5" style="flex: 0 0 33%; max-width: 33%;" invisible="not partner_medio_contacto">
