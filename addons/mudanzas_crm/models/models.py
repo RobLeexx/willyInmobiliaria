@@ -259,7 +259,8 @@ class CrmLead(models.Model):
     streetup = fields.Char(string='Calle')
     streetup2 = fields.Char(string='Calle 2')
     floorup = fields.Integer(string='Piso')
-    zipup = fields.Char(string='Código Postal')
+    doorup = fields.Char(string='Puerta')
+    elevatorup = fields.Char(string='Ascensor')
 
     # map of Spanish comunidades to their provincias; used for both pickup and delivery
     STATE_PROVINCE_MAP = {
@@ -296,7 +297,8 @@ class CrmLead(models.Model):
     streetdown = fields.Char(string='Calle')
     streetdown2 = fields.Char(string='Calle 2')
     floordown = fields.Integer(string='Piso')
-    zipdown = fields.Char(string='Código Postal')
+    doordown = fields.Char(string='Puerta')
+    elevatordown = fields.Char(string='Ascensor')
     state_down = fields.Selection(selection=STATE_SELECTION, string='Estado', default='Comunidad Valenciana')
     province_down = fields.Selection(selection=PROVINCE_SELECTION, string='Provincia', default='Valencia')
     province_down_id = fields.Many2one('mudanzas.province', string='Provincia')
