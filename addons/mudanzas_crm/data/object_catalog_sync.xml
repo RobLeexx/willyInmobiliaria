@@ -1,0 +1,5 @@
+<odoo>
+  <data>
+    <function model="mudanzas.object.catalog" name="sync_reference_volumes"/>
+  </data>
+</odoo>

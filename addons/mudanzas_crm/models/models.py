@@ -15,6 +15,51 @@ class MudanzasObjectCatalog(models.Model):
     _description = 'Catalogo de objetos para mudanza'
     _order = 'sequence, name'
 
+    _REFERENCE_VOLUME_BY_XMLID = {
+        'objeto_catalogo_cama_matrimonial': 1.71,
+        'objeto_catalogo_cama_individual': 1.0,
+        'objeto_catalogo_cuna': 0.57,
+        'objeto_catalogo_colchon': 0.71,
+        'objeto_catalogo_armario_2': 2.57,
+        'objeto_catalogo_armario_4': 4.86,
+        'objeto_catalogo_mesita_noche': 0.34,
+        'objeto_catalogo_comoda': 1.14,
+        'objeto_catalogo_tocador': 1.0,
+        'objeto_catalogo_zapatero': 0.71,
+        'objeto_catalogo_sofa_3': 2.14,
+        'objeto_catalogo_sofa_2': 1.57,
+        'objeto_catalogo_sillon': 1.0,
+        'objeto_catalogo_mueble_tv': 1.0,
+        'objeto_catalogo_mesa_centro': 0.57,
+        'objeto_catalogo_librero': 1.29,
+        'objeto_catalogo_aparador': 1.43,
+        'objeto_catalogo_puff': 0.23,
+        'objeto_catalogo_lampara_pie': 0.2,
+        'objeto_catalogo_mesa_comedor_grande': 1.71,
+        'objeto_catalogo_mesa_comedor_pequena': 1.0,
+        'objeto_catalogo_silla_comedor': 0.2,
+        'objeto_catalogo_frigorifico': 2.43,
+        'objeto_catalogo_lavadora_secadora': 2.0,
+        'objeto_catalogo_lavavajillas': 1.43,
+        'objeto_catalogo_microondas': 0.43,
+        'objeto_catalogo_horno_cocina': 1.86,
+        'objeto_catalogo_alacena': 1.29,
+        'objeto_catalogo_escritorio': 1.0,
+        'objeto_catalogo_silla_ergonomica': 0.4,
+        'objeto_catalogo_archivador': 0.86,
+        'objeto_catalogo_estanteria_metalica': 1.14,
+        'objeto_catalogo_monitor_pc': 0.34,
+        'objeto_catalogo_impresora_grande': 0.71,
+        'objeto_catalogo_caja_pequena': 0.43,
+        'objeto_catalogo_caja_grande': 0.29,
+        'objeto_catalogo_espejo_grande': 0.34,
+        'objeto_catalogo_cuadro': 0.11,
+        'objeto_catalogo_alfombra': 0.23,
+        'objeto_catalogo_bicicleta': 0.37,
+        'objeto_catalogo_planta_grande': 0.51,
+        'objeto_catalogo_maleta': 0.34,
+    }
+
     name = fields.Char(string='Objeto', required=True, translate=False)
     sequence = fields.Integer(string='Secuencia', default=10)
     category = fields.Selection(
@@ -27,10 +72,17 @@ class MudanzasObjectCatalog(models.Model):
         default='objeto',
         required=True,
     )
-    peso_referencia = fields.Float(string='Kg de referencia')
+    peso_referencia = fields.Float(string='M³ de referencia')
     embalaje_recomendado = fields.Boolean(string='Embalaje recomendado')
     desmontaje_recomendado = fields.Boolean(string='Desmontaje recomendado')
     is_other = fields.Boolean(string='Es opcion manual', default=False)
+
+    @api.model
+    def sync_reference_volumes(self):
+        for xmlid_suffix, volume in self._REFERENCE_VOLUME_BY_XMLID.items():
+            record = self.env.ref(f'mudanzas_crm.{xmlid_suffix}', raise_if_not_found=False)
+            if record:
+                record.write({'peso_referencia': volume})
 
 
 HABITACION_SELECTION = [
