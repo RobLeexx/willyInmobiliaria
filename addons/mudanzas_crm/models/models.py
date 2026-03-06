@@ -182,6 +182,27 @@ class CrmLead(models.Model):
     contact_name = fields.Char(string='Contacto')
     email_form = fields.Char(string='Email')
     phone = fields.Char(string='Teléfono')
+    partner_vat = fields.Char(
+        string='NIF',
+        related='partner_id.vat',
+        readonly=False,
+    )
+    partner_category_ids = fields.Many2many(
+        'res.partner.category',
+        string='Etiquetas del cliente',
+        related='partner_id.category_id',
+        readonly=False,
+    )
+    partner_medio_contacto = fields.Selection(
+        related='partner_id.medio_contacto',
+        string='Medio de contacto',
+        readonly=False,
+    )
+    partner_medio_contacto_otro = fields.Char(
+        related='partner_id.medio_contacto_otro',
+        string='Otros',
+        readonly=False,
+    )
 
     # Mudanza fields (legacy single row + new line array)
     cantidad = fields.Integer(string='Cantidad')
