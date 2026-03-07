@@ -1,5 +1,6 @@
 from odoo import api, fields, models, _
 from odoo.exceptions import UserError, ValidationError
+from markupsafe import Markup
 
 
 class MudanzasProvince(models.Model):
@@ -15,6 +16,51 @@ class MudanzasObjectCatalog(models.Model):
     _description = 'Catalogo de objetos para mudanza'
     _order = 'sequence, name'
 
+    _REFERENCE_VOLUME_BY_XMLID = {
+        'objeto_catalogo_cama_matrimonial': 1.71,
+        'objeto_catalogo_cama_individual': 1.0,
+        'objeto_catalogo_cuna': 0.57,
+        'objeto_catalogo_colchon': 0.71,
+        'objeto_catalogo_armario_2': 2.57,
+        'objeto_catalogo_armario_4': 4.86,
+        'objeto_catalogo_mesita_noche': 0.34,
+        'objeto_catalogo_comoda': 1.14,
+        'objeto_catalogo_tocador': 1.0,
+        'objeto_catalogo_zapatero': 0.71,
+        'objeto_catalogo_sofa_3': 2.14,
+        'objeto_catalogo_sofa_2': 1.57,
+        'objeto_catalogo_sillon': 1.0,
+        'objeto_catalogo_mueble_tv': 1.0,
+        'objeto_catalogo_mesa_centro': 0.57,
+        'objeto_catalogo_librero': 1.29,
+        'objeto_catalogo_aparador': 1.43,
+        'objeto_catalogo_puff': 0.23,
+        'objeto_catalogo_lampara_pie': 0.2,
+        'objeto_catalogo_mesa_comedor_grande': 1.71,
+        'objeto_catalogo_mesa_comedor_pequena': 1.0,
+        'objeto_catalogo_silla_comedor': 0.2,
+        'objeto_catalogo_frigorifico': 2.43,
+        'objeto_catalogo_lavadora_secadora': 2.0,
+        'objeto_catalogo_lavavajillas': 1.43,
+        'objeto_catalogo_microondas': 0.43,
+        'objeto_catalogo_horno_cocina': 1.86,
+        'objeto_catalogo_alacena': 1.29,
+        'objeto_catalogo_escritorio': 1.0,
+        'objeto_catalogo_silla_ergonomica': 0.4,
+        'objeto_catalogo_archivador': 0.86,
+        'objeto_catalogo_estanteria_metalica': 1.14,
+        'objeto_catalogo_monitor_pc': 0.34,
+        'objeto_catalogo_impresora_grande': 0.71,
+        'objeto_catalogo_caja_pequena': 0.43,
+        'objeto_catalogo_caja_grande': 0.29,
+        'objeto_catalogo_espejo_grande': 0.34,
+        'objeto_catalogo_cuadro': 0.11,
+        'objeto_catalogo_alfombra': 0.23,
+        'objeto_catalogo_bicicleta': 0.37,
+        'objeto_catalogo_planta_grande': 0.51,
+        'objeto_catalogo_maleta': 0.34,
+    }
+
     name = fields.Char(string='Objeto', required=True, translate=False)
     sequence = fields.Integer(string='Secuencia', default=10)
     category = fields.Selection(
@@ -27,10 +73,18 @@ class MudanzasObjectCatalog(models.Model):
         default='objeto',
         required=True,
     )
+    volumen_referencia = fields.Float(string='M³ de referencia')
     peso_referencia = fields.Float(string='Kg de referencia')
     embalaje_recomendado = fields.Boolean(string='Embalaje recomendado')
     desmontaje_recomendado = fields.Boolean(string='Desmontaje recomendado')
     is_other = fields.Boolean(string='Es opcion manual', default=False)
+
+    @api.model
+    def sync_reference_volumes(self):
+        for xmlid_suffix, volume in self._REFERENCE_VOLUME_BY_XMLID.items():
+            record = self.env.ref(f'mudanzas_crm.{xmlid_suffix}', raise_if_not_found=False)
+            if record:
+                record.write({'volumen_referencia': volume})
 
 
 HABITACION_SELECTION = [
@@ -64,7 +118,8 @@ class MudanzasLeadObjectLine(models.Model):
         readonly=True,
     )
     objeto_manual = fields.Char(string='Otro objeto')
-    peso = fields.Float(string='M³')
+    peso = fields.Float(string='Kg')
+    volumen = fields.Float(string='M³')
     embalaje = fields.Boolean(string='Embalaje')
     desmontaje = fields.Boolean(string='Desmontaje')
     habitacion = fields.Selection(selection=HABITACION_SELECTION, string='Habitación')
@@ -82,7 +137,7 @@ class MudanzasLeadObjectLine(models.Model):
 
             line.objeto = catalog.name
             line.objeto_manual = False
-            line.peso = catalog.peso_referencia or 0.0
+            line.volumen = catalog.volumen_referencia or 0.0
             if catalog.embalaje_recomendado:
                 line.embalaje = True
             if catalog.desmontaje_recomendado:
@@ -130,6 +185,27 @@ class CrmLead(models.Model):
     contact_name = fields.Char(string='Contacto')
     email_form = fields.Char(string='Email')
     phone = fields.Char(string='Teléfono')
+    partner_vat = fields.Char(
+        string='NIF',
+        related='partner_id.vat',
+        readonly=False,
+    )
+    partner_category_ids = fields.Many2many(
+        'res.partner.category',
+        string='Etiquetas del cliente',
+        related='partner_id.category_id',
+        readonly=False,
+    )
+    partner_medio_contacto = fields.Selection(
+        related='partner_id.medio_contacto',
+        string='Medio de contacto',
+        readonly=False,
+    )
+    partner_medio_contacto_otro = fields.Char(
+        related='partner_id.medio_contacto_otro',
+        string='Otros',
+        readonly=False,
+    )
 
     # Mudanza fields (legacy single row + new line array)
     cantidad = fields.Integer(string='Cantidad')
@@ -145,7 +221,8 @@ class CrmLead(models.Model):
         readonly=True,
     )
     objeto_manual = fields.Char(string='Otro objeto')
-    peso = fields.Float(string='M³')
+    peso = fields.Float(string='Kg')
+    volumen = fields.Float(string='M³')
     embalaje = fields.Boolean(string='Embalaje')
     desmontaje = fields.Boolean(string='Desmontaje')
     habitacion = fields.Selection(selection=HABITACION_SELECTION, string='Habitación')
@@ -161,6 +238,11 @@ class CrmLead(models.Model):
         'attachment_id',
         string='Multimedia',
         copy=False,
+    )
+    mudanza_media_preview = fields.Html(
+        string='Vista previa multimedia',
+        compute='_compute_mudanza_media_preview',
+        sanitize=False,
     )
     observaciones_mudanza = fields.Char(string='Observaciones')
     fecha_mudanza = fields.Date(string='Fecha de mudanza')
@@ -187,6 +269,8 @@ class CrmLead(models.Model):
     streetup2 = fields.Char(string='Calle 2')
     floorup = fields.Integer(string='Piso')
     zipup = fields.Char(string='Código Postal')
+    doorup = fields.Char(string='Puerta')
+    elevatorup = fields.Char(string='Ascensor')
 
     # map of Spanish comunidades to their provincias; used for both pickup and delivery
     STATE_PROVINCE_MAP = {
@@ -224,10 +308,105 @@ class CrmLead(models.Model):
     streetdown2 = fields.Char(string='Calle 2')
     floordown = fields.Integer(string='Piso')
     zipdown = fields.Char(string='Código Postal')
+    doordown = fields.Char(string='Puerta')
+    elevatordown = fields.Char(string='Ascensor')
     state_down = fields.Selection(selection=STATE_SELECTION, string='Estado', default='Comunidad Valenciana')
     province_down = fields.Selection(selection=PROVINCE_SELECTION, string='Provincia', default='Valencia')
     province_down_id = fields.Many2one('mudanzas.province', string='Provincia')
     poblation_down = fields.Char(string='Población')
+
+    @api.depends('mudanza_media_ids', 'mudanza_media_ids.mimetype', 'mudanza_media_ids.name')
+    def _compute_mudanza_media_preview(self):
+        for lead in self:
+            image_attachments = lead.mudanza_media_ids.filtered(
+                lambda att: isinstance(att.id, int) and (att.mimetype or '').startswith('image/')
+            )
+            video_attachments = lead.mudanza_media_ids.filtered(
+                lambda att: isinstance(att.id, int) and (att.mimetype or '').startswith('video/')
+            )
+
+            photo_section = ''
+            video_section = ''
+
+            if image_attachments:
+                carousel_id = f'mudanza-media-carousel-{lead.id or "new"}'
+                indicators = []
+                slides = []
+                for index, attachment in enumerate(image_attachments):
+                    active_class = ' active' if index == 0 else ''
+                    indicators.append(
+                        f'<button type="button" data-bs-target="#{carousel_id}" '
+                        f'data-bs-slide-to="{index}" class="{active_class.strip()}" '
+                        f'aria-current="{"true" if index == 0 else "false"}" '
+                        f'aria-label="Slide {index + 1}"></button>'
+                    )
+                    slides.append(
+                        f'''
+                        <div class="carousel-item{active_class}">
+                          <img src="/web/image/{attachment.id}"
+                               alt="{attachment.name or "Foto de mudanza"}"
+                               style="width: 100%; height: 560px; object-fit: cover; border-radius: 14px;"/>
+                        </div>
+                        '''
+                    )
+                photo_section = (
+                    f'''
+                    <div style="width: 100%; min-width: 0;">
+                      <div style="font-weight: 700; font-size: 18px; margin-bottom: 10px;">Fotos</div>
+                      <div id="{carousel_id}" class="carousel slide" data-bs-ride="carousel">
+                        <div class="carousel-indicators">
+                          {''.join(indicators)}
+                        </div>
+                        <div class="carousel-inner" style="border-radius: 14px; overflow: hidden; background: #f5f5f5;">
+                          {''.join(slides)}
+                        </div>
+                        <button class="carousel-control-prev" type="button" data-bs-target="#{carousel_id}" data-bs-slide="prev">
+                          <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                          <span class="visually-hidden">Previous</span>
+                        </button>
+                        <button class="carousel-control-next" type="button" data-bs-target="#{carousel_id}" data-bs-slide="next">
+                          <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                          <span class="visually-hidden">Next</span>
+                        </button>
+                      </div>
+                    </div>
+                    '''
+                )
+
+            if video_attachments:
+                video_cards = []
+                for attachment in video_attachments:
+                    video_cards.append(
+                        f'''
+                        <div style="margin-bottom: 16px;">
+                          <div style="font-weight: 600; margin-bottom: 8px;">{attachment.name or "Video"}</div>
+                          <video controls preload="metadata" style="width: 100%; height: 560px; background: #000; border-radius: 14px; object-fit: contain;">
+                            <source src="/web/content/{attachment.id}" type="{attachment.mimetype or "video/mp4"}"/>
+                            Tu navegador no soporta video HTML5.
+                          </video>
+                        </div>
+                        '''
+                    )
+                video_section = (
+                    f'''
+                    <div style="width: 100%; min-width: 0;">
+                      <div style="font-weight: 700; font-size: 18px; margin-bottom: 10px;">Videos</div>
+                      {''.join(video_cards)}
+                    </div>
+                    '''
+                )
+
+            if photo_section or video_section:
+                lead.mudanza_media_preview = Markup(
+                    f'''
+                    <div style="display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 24px; width: 100%; margin-top: 16px; align-items: start;">
+                      <div style="width: 100%; min-width: 0;">{photo_section}</div>
+                      <div style="width: 100%; min-width: 0;">{video_section}</div>
+                    </div>
+                    '''
+                )
+            else:
+                lead.mudanza_media_preview = False
 
     @api.onchange('state_up')
     def _onchange_state_up(self):
@@ -316,7 +495,7 @@ class CrmLead(models.Model):
 
             lead.objeto = catalog.name
             lead.objeto_manual = False
-            lead.peso = catalog.peso_referencia or 0.0
+            lead.volumen = catalog.volumen_referencia or 0.0
             if catalog.embalaje_recomendado:
                 lead.embalaje = True
             if catalog.desmontaje_recomendado:
@@ -346,8 +525,8 @@ class CrmLead(models.Model):
 
         vals['objeto'] = catalog.name
         vals.setdefault('objeto_manual', False)
-        if not vals.get('peso') and catalog.peso_referencia:
-            vals['peso'] = catalog.peso_referencia
+        if not vals.get('volumen') and catalog.volumen_referencia:
+            vals['volumen'] = catalog.volumen_referencia
         if catalog.embalaje_recomendado:
             vals.setdefault('embalaje', True)
         if catalog.desmontaje_recomendado:
