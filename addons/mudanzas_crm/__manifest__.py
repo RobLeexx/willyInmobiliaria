@@ -14,6 +14,7 @@
         'data/auth_config.xml',
         'data/object_catalog.xml',
         'data/object_catalog_sync.xml',
+        'report/offer_report.xml',
         'data/mail_template.xml',
         'views/views.xml',
         'views/crm_lead_inherit.xml',

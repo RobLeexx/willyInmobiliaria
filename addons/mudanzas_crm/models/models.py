@@ -263,6 +263,18 @@ class CrmLead(models.Model):
         string='Tipo Oferta',
         default='baja',
     )
+    offer_email_cc = fields.Char(
+        string='CC oferta',
+        compute='_compute_offer_email_settings',
+    )
+    offer_email_from = fields.Char(
+        string='Remitente oferta',
+        compute='_compute_offer_email_settings',
+    )
+    offer_report_filename = fields.Char(
+        string='Nombre PDF oferta',
+        compute='_compute_offer_report_filename',
+    )
 
     # carga (pickup) address fields (manual select)
     streetup = fields.Char(string='Calle')
@@ -408,6 +420,18 @@ class CrmLead(models.Model):
             else:
                 lead.mudanza_media_preview = False
 
+    @api.depends_context('uid')
+    def _compute_offer_email_settings(self):
+        user_email = self.env.user.email or False
+        for lead in self:
+            lead.offer_email_cc = user_email
+            lead.offer_email_from = False
+
+    @api.depends('partner_id.name', 'contact_name', 'name', 'create_date')
+    def _compute_offer_report_filename(self):
+        for lead in self:
+            lead.offer_report_filename = lead._get_offer_report_filename()
+
     @api.onchange('state_up')
     def _onchange_state_up(self):
         if self.state_up:
@@ -544,6 +568,71 @@ class CrmLead(models.Model):
         vals['expected_revenue'] = source_value
         vals['precio_oferta'] = source_value
         return vals
+
+    def _get_offer_client_name(self):
+        self.ensure_one()
+        return self.partner_id.name or self.contact_name or self.name or _('Cliente')
+
+    def _get_offer_report_date(self):
+        self.ensure_one()
+        return fields.Date.to_string(self.create_date.date()) if self.create_date else fields.Date.to_string(fields.Date.context_today(self))
+
+    def _get_offer_report_filename(self):
+        self.ensure_one()
+        client_name = ' '.join((self._get_offer_client_name() or '').split()) or 'Cliente'
+        safe_client_name = client_name.replace('/', '-').replace('\\', '-')
+        return f"Presupuesto {safe_client_name} {self._get_offer_report_date()}"
+
+    def _get_offer_lines_for_report(self):
+        self.ensure_one()
+        if self.mudanza_line_ids:
+            return [
+                {
+                    'cantidad': line.cantidad or 1,
+                    'nombre': line.objeto_manual or line.objeto_catalogo_id.name or line.objeto or _('Objeto sin nombre'),
+                    'volumen': line.volumen or 0.0,
+                    'embalaje': line.embalaje,
+                    'desmontaje': line.desmontaje,
+                    'habitacion': dict(line._fields['habitacion'].selection).get(line.habitacion, ''),
+                }
+                for line in self.mudanza_line_ids
+            ]
+        return [{
+            'cantidad': self.cantidad or 1,
+            'nombre': self.objeto_manual or self.objeto_catalogo_id.name or self.objeto or _('Objeto sin nombre'),
+            'volumen': self.volumen or 0.0,
+            'embalaje': self.embalaje,
+            'desmontaje': self.desmontaje,
+            'habitacion': dict(self._fields['habitacion'].selection).get(self.habitacion, ''),
+        }]
+
+    def _get_offer_address_lines(self, move_type):
+        self.ensure_one()
+        if move_type == 'pickup':
+            values = [
+                self.streetup,
+                self.streetup2,
+                self.zipup,
+                self.doorup,
+                self.elevatorup,
+                self.floorup and _('Piso %s') % self.floorup,
+                self.state_up,
+                self.province_up_id.name if self.province_up_id else self.province_up,
+                self.poblation_up,
+            ]
+        else:
+            values = [
+                self.streetdown,
+                self.streetdown2,
+                self.zipdown,
+                self.doordown,
+                self.elevatordown,
+                self.floordown and _('Piso %s') % self.floordown,
+                self.state_down,
+                self.province_down_id.name if self.province_down_id else self.province_down,
+                self.poblation_down,
+            ]
+        return [value for value in values if value]
 
     def action_send_offer_email(self):
         self.ensure_one()
