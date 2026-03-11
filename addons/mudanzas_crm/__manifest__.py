@@ -21,7 +21,11 @@
         'views/res_partner_inherit.xml',
         'views/templates.xml',
     ],
-    'assets': {},
+    'assets': {
+        'web.assets_backend': [
+            'mudanzas_crm/static/src/scss/crm_lead_form.scss',
+        ],
+    },
     'demo': [
         'demo/demo.xml',
     ],

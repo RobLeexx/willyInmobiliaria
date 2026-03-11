@@ -8,7 +8,7 @@ class MudanzasProvince(models.Model):
     _description = 'Province for Mudanzas'
 
     name = fields.Char(string='Provincia', required=True)
-    state = fields.Char(string='Estado')
+    state = fields.Char(string='Comunidad')
 
 
 class MudanzasObjectCatalog(models.Model):
@@ -96,6 +96,11 @@ HABITACION_SELECTION = [
     ('despacho', 'Despacho'),
     ('terraza_trastero', 'Terraza/Trastero'),
     ('otros', 'Otros'),
+]
+
+ELEVATOR_SELECTION = [
+    ('tiene', 'Tiene'),
+    ('no_tiene', 'NO Tiene'),
 ]
 
 
@@ -248,7 +253,7 @@ class CrmLead(models.Model):
     fecha_mudanza = fields.Date(string='Fecha de mudanza')
     horas = fields.Integer(string='Horas estimadas')
     ascensor = fields.Boolean(string='Ascensor')
-    mas_de_dos_dias = fields.Boolean(string='Más de 2 Días')
+    mas_de_dos_dias = fields.Boolean(string='Más de 1 Día')
     elevador = fields.Boolean(string='Elevador')
     horas_elevador = fields.Integer(string='Horas de elevador')
 
@@ -282,7 +287,7 @@ class CrmLead(models.Model):
     floorup = fields.Integer(string='Piso')
     zipup = fields.Char(string='Código Postal')
     doorup = fields.Char(string='Puerta')
-    elevatorup = fields.Char(string='Ascensor')
+    elevatorup = fields.Selection(selection=ELEVATOR_SELECTION, string='Ascensor')
 
     # map of Spanish comunidades to their provincias; used for both pickup and delivery
     STATE_PROVINCE_MAP = {
@@ -310,7 +315,7 @@ class CrmLead(models.Model):
         _ALL_PROVINCES.extend(_lst)
     PROVINCE_SELECTION = sorted([(p, p) for p in set(_ALL_PROVINCES)], key=lambda x: x[0])
 
-    state_up = fields.Selection(selection=STATE_SELECTION, string='Estado', default='Comunidad Valenciana')
+    state_up = fields.Selection(selection=STATE_SELECTION, string='Comunidad', default='Comunidad Valenciana')
     province_up = fields.Selection(selection=PROVINCE_SELECTION, string='Provincia', default='Valencia')
     province_up_id = fields.Many2one('mudanzas.province', string='Provincia')
     poblation_up = fields.Char(string='Población')
@@ -321,8 +326,8 @@ class CrmLead(models.Model):
     floordown = fields.Integer(string='Piso')
     zipdown = fields.Char(string='Código Postal')
     doordown = fields.Char(string='Puerta')
-    elevatordown = fields.Char(string='Ascensor')
-    state_down = fields.Selection(selection=STATE_SELECTION, string='Estado', default='Comunidad Valenciana')
+    elevatordown = fields.Selection(selection=ELEVATOR_SELECTION, string='Ascensor')
+    state_down = fields.Selection(selection=STATE_SELECTION, string='Comunidad', default='Comunidad Valenciana')
     province_down = fields.Selection(selection=PROVINCE_SELECTION, string='Provincia', default='Valencia')
     province_down_id = fields.Many2one('mudanzas.province', string='Provincia')
     poblation_down = fields.Char(string='Población')
