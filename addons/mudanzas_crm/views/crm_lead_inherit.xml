@@ -65,7 +65,55 @@
                 <field name="tag_ids" widget="many2many_tags" options="{'color_field': 'color', 'no_create_edit': True}"/>
               </group>
             </group>
-            <separator string="Mudanza" colspan="16" invisible="not partner_medio_contacto"/>
+
+          <div class="row mudanzas-full-row" invisible="not partner_medio_contacto">
+            <div class="col-6 mr-0 pr-0 w-50">
+              <group string="Carga" col="4">
+                <field name="streetup" placeholder="Calle..." class="o_address_street mudanzas-soft-field" colspan="3"/>
+                <i class="fa fa-arrow-right" role="img" aria-label="De carga a descarga" colspan="1"/>
+                <field name="streetup2" placeholder="Calle 2..." class="o_address_street mudanzas-soft-field" colspan="3"/>
+                <i class="fa fa-arrow-right" role="img" aria-label="De carga a descarga" colspan="1"/>
+                <field name="doorup" placeholder="Puerta" class="o_address_zip mudanzas-soft-field" colspan="3"/>
+                <i class="fa fa-arrow-right" role="img" aria-label="De carga a descarga" colspan="1"/>
+                <field name="state_up" class="o_address_state mudanzas-soft-field" placeholder="Estado" options="{'no_open': True}" colspan="3"/>
+                <i class="fa fa-arrow-right" role="img" aria-label="De carga a descarga" colspan="1"/>
+                <field name="province_up_id" class="o_address_state mudanzas-soft-field" placeholder="Provincia" options="{'no_open': True, 'no_create': True, 'no_create_edit': True}" domain="[('state', '=', state_up)]" colspan="3"/>
+                <i class="fa fa-arrow-right" role="img" aria-label="De carga a descarga" colspan="1"/>
+                <field name="poblation_up" placeholder="Población" class="o_address_city mudanzas-soft-field" colspan="3"/>
+                <i class="fa fa-arrow-right" role="img" aria-label="De carga a descarga" colspan="1"/>
+                <field name="elevatorup" placeholder="Ascensor" class="o_address_zip mudanzas-soft-field" invisible="elevatorup" colspan="3"/>
+                <field name="elevatorup" class="o_address_zip" invisible="elevatorup != 'tiene'" style="border: 1px solid #8ecae6; background-color: #e8f7ff; color: #0b5f7a; padding: 4px;" colspan="3"/>
+                <field name="elevatorup" class="o_address_zip" invisible="elevatorup != 'no_tiene'" style="border: 1px solid #e7b26a; background-color: #fff2e2; color: #9a4d00; padding: 4px;" colspan="3"/>
+                <field name="floorup" placeholder="Piso" class="o_address_city" invisible="floorup &gt;= 2" style="border: 1px solid #8ecae6; background-color: #e8f7ff; color: #0b5f7a; padding: 4px;" colspan="3"/>
+                <field name="floorup" class="o_address_city" invisible="floorup &lt; 2 or floorup &gt;= 4" style="border: 1px solid #d8c27a; background-color: #fff7da; color: #8a6a00; padding: 4px;" colspan="3"/>
+                <field name="floorup" class="o_address_city" invisible="floorup &lt; 4 or floorup &gt;= 6" style="border: 1px solid #e7b26a; background-color: #fff0d9; color: #9a4d00; padding: 4px;" colspan="3"/>
+                <field name="floorup" class="o_address_city" invisible="floorup &lt; 6 or floorup &gt;= 8" style="border: 1px solid #d98a8a; background-color: #ffe3e3; color: #a12626; padding: 4px;" colspan="3"/>
+                <field name="floorup" class="o_address_city" invisible="floorup &lt; 8" style="border: 1px solid #d98a8a; background-color: #ffe3e3; color: #a12626; padding: 4px;" colspan="4"/>
+                <i class="fa fa-arrow-right" role="img" aria-label="De carga a descarga" colspan="1"/>
+              </group>
+            </div>
+
+            <div class="col-6 w-50">
+              <group string="Descarga" col="4">
+                <field name="streetdown" placeholder="Calle..." class="o_address_street mudanzas-soft-field" colspan="4"/>
+                <field name="streetdown2" placeholder="Calle 2..." class="o_address_street mudanzas-soft-field" colspan="4"/>
+                <field name="doordown" placeholder="Puerta" class="o_address_zip mudanzas-soft-field" colspan="4"/>
+                <field name="state_down" class="o_address_state mudanzas-soft-field" placeholder="Estado" options="{'no_open': True}" colspan="4"/>
+                <field name="province_down_id" class="o_address_state mudanzas-soft-field" placeholder="Provincia" options="{'no_open': True, 'no_create': True, 'no_create_edit': True}" domain="[('state', '=', state_down)]" colspan="4"/>
+                <field name="poblation_down" placeholder="Población" class="o_address_city mudanzas-soft-field" colspan="4"/>
+                <field name="elevatordown" placeholder="Ascensor" class="o_address_zip mudanzas-soft-field" invisible="elevatordown" colspan="4"/>
+                <field name="elevatordown" class="o_address_zip" invisible="elevatordown != 'tiene'" style="border: 1px solid #8ecae6; background-color: #e8f7ff; color: #0b5f7a; padding: 4px;" colspan="4"/>
+                <field name="elevatordown" class="o_address_zip" invisible="elevatordown != 'no_tiene'" style="border: 1px solid #e7b26a; background-color: #fff2e2; color: #9a4d00; padding: 4px;" colspan="4"/>
+                <field name="floordown" placeholder="Piso" class="o_address_city" invisible="floordown &gt;= 2" style="border: 1px solid #8ecae6; background-color: #e8f7ff; color: #0b5f7a; padding: 4px;" colspan="4"/>
+                <field name="floordown" class="o_address_city" invisible="floordown &lt; 2 or floordown &gt;= 4" style="border: 1px solid #d8c27a; background-color: #fff7da; color: #8a6a00; padding: 4px;" colspan="4"/>
+                <field name="floordown" class="o_address_city" invisible="floordown &lt; 4 or floordown &gt;= 6" style="border: 1px solid #e7b26a; background-color: #fff0d9; color: #9a4d00; padding: 4px;" colspan="4"/>
+                <field name="floordown" class="o_address_city" invisible="floordown &lt; 6 or floordown &gt;= 8" style="border: 1px solid #d98a8a; background-color: #ffe3e3; color: #a12626; padding: 4px;" colspan="3"/>
+                <field name="floordown" class="o_address_city" invisible="floordown &lt; 8" style="border: 1px solid #d98a8a; background-color: #ffe3e3; color: #a12626; padding: 4px;" colspan="4"/>
+              </group>
+            </div>
+          </div>
+
+          <separator string="Mudanza" colspan="16" invisible="not partner_medio_contacto"/>
             <group col="6" colspan="9" class="w-100" invisible="not partner_medio_contacto">
               <field name="mudanza_line_ids" colspan="6">
                 <list editable="bottom">
@@ -114,61 +162,19 @@
             <field name="mudanza_media_preview" colspan="16" widget="html" nolabel="1" readonly="1" class="mudanzas-media-preview"/>
           </group>
 
-          <div class="col-lg-5 mudanzas-offer-column" invisible="not partner_medio_contacto">
-            <div class="row">
-              <div class="w-100">
-                <group string="Oferta">
-                  <field name="precio_oferta" class="mudanzas-soft-field me-1"/>
-                  <field name="tipo_oferta" class="mudanzas-soft-field me-1"/>
-                </group>
-              </div>
-            </div>
-          </div>
-
           <div class="row mudanzas-full-row" invisible="not partner_medio_contacto">
             <div class="col-6 mr-0 pr-0 w-50">
-              <group string="Carga" col="4">
-                <field name="streetup" placeholder="Calle..." class="o_address_street mudanzas-soft-field" colspan="3"/>
-                <i class="fa fa-arrow-right" role="img" aria-label="De carga a descarga" colspan="1"/>
-                <field name="streetup2" placeholder="Calle 2..." class="o_address_street mudanzas-soft-field" colspan="3"/>
-                <i class="fa fa-arrow-right" role="img" aria-label="De carga a descarga" colspan="1"/>
-                <field name="doorup" placeholder="Puerta" class="o_address_zip mudanzas-soft-field" colspan="3"/>
-                <i class="fa fa-arrow-right" role="img" aria-label="De carga a descarga" colspan="1"/>
-                <field name="state_up" class="o_address_state mudanzas-soft-field" placeholder="Estado" options="{'no_open': True}" colspan="3"/>
-                <i class="fa fa-arrow-right" role="img" aria-label="De carga a descarga" colspan="1"/>
-                <field name="province_up_id" class="o_address_state mudanzas-soft-field" placeholder="Provincia" options="{'no_open': True, 'no_create': True, 'no_create_edit': True}" domain="[('state', '=', state_up)]" colspan="3"/>
-                <i class="fa fa-arrow-right" role="img" aria-label="De carga a descarga" colspan="1"/>
-                <field name="poblation_up" placeholder="Población" class="o_address_city mudanzas-soft-field" colspan="3"/>
-                <i class="fa fa-arrow-right" role="img" aria-label="De carga a descarga" colspan="1"/>
-                <field name="elevatorup" placeholder="Ascensor" class="o_address_zip mudanzas-soft-field" invisible="elevatorup" colspan="3"/>
-                <field name="elevatorup" class="o_address_zip" invisible="elevatorup != 'tiene'" style="border: 1px solid #8ecae6; background-color: #e8f7ff; color: #0b5f7a; padding: 4px;" colspan="3"/>
-                <field name="elevatorup" class="o_address_zip" invisible="elevatorup != 'no_tiene'" style="border: 1px solid #e7b26a; background-color: #fff2e2; color: #9a4d00; padding: 4px;" colspan="3"/>
-                <i class="fa fa-arrow-right" role="img" aria-label="De carga a descarga" colspan="1"/>
-                <field name="floorup" placeholder="Piso" class="o_address_city" invisible="floorup &gt;= 2" style="border: 1px solid #8ecae6; background-color: #e8f7ff; color: #0b5f7a; padding: 4px;" colspan="3"/>
-                <field name="floorup" class="o_address_city" invisible="floorup &lt; 2 or floorup &gt;= 4" style="border: 1px solid #d8c27a; background-color: #fff7da; color: #8a6a00; padding: 4px;" colspan="3"/>
-                <field name="floorup" class="o_address_city" invisible="floorup &lt; 4 or floorup &gt;= 6" style="border: 1px solid #e7b26a; background-color: #fff0d9; color: #9a4d00; padding: 4px;" colspan="3"/>
-                <field name="floorup" class="o_address_city" invisible="floorup &lt; 6 or floorup &gt;= 8" style="border: 1px solid #d98a8a; background-color: #ffe3e3; color: #a12626; padding: 4px;" colspan="3"/>
-                <field name="floorup" class="o_address_city" invisible="floorup &lt; 8" style="border: 1px solid #d98a8a; background-color: #ffe3e3; color: #a12626; padding: 4px;" colspan="3"/>
-                <i class="fa fa-arrow-right" role="img" aria-label="De carga a descarga" colspan="1"/>
+              <group string="Oferta">
+                <field name="precio_oferta" class="mudanzas-soft-field me-1"/>
+                <field name="tipo_oferta" class="mudanzas-soft-field me-1"/>
               </group>
             </div>
-
-            <div class="col-6 w-50">
-              <group string="Descarga" col="4">
-                <field name="streetdown" placeholder="Calle..." class="o_address_street mudanzas-soft-field" colspan="4"/>
-                <field name="streetdown2" placeholder="Calle 2..." class="o_address_street mudanzas-soft-field" colspan="4"/>
-                <field name="doordown" placeholder="Puerta" class="o_address_zip mudanzas-soft-field" colspan="4"/>
-                <field name="state_down" class="o_address_state mudanzas-soft-field" placeholder="Estado" options="{'no_open': True}" colspan="4"/>
-                <field name="province_down_id" class="o_address_state mudanzas-soft-field" placeholder="Provincia" options="{'no_open': True, 'no_create': True, 'no_create_edit': True}" domain="[('state', '=', state_down)]" colspan="4"/>
-                <field name="poblation_down" placeholder="Población" class="o_address_city mudanzas-soft-field" colspan="4"/>
-                <field name="elevatordown" placeholder="Ascensor" class="o_address_zip mudanzas-soft-field" invisible="elevatordown" colspan="4"/>
-                <field name="elevatordown" class="o_address_zip" invisible="elevatordown != 'tiene'" style="border: 1px solid #8ecae6; background-color: #e8f7ff; color: #0b5f7a; padding: 4px;" colspan="4"/>
-                <field name="elevatordown" class="o_address_zip" invisible="elevatordown != 'no_tiene'" style="border: 1px solid #e7b26a; background-color: #fff2e2; color: #9a4d00; padding: 4px;" colspan="4"/>
-                <field name="floordown" placeholder="Piso" class="o_address_city" invisible="floordown &gt;= 2" style="border: 1px solid #8ecae6; background-color: #e8f7ff; color: #0b5f7a; padding: 4px;" colspan="4"/>
-                <field name="floordown" class="o_address_city" invisible="floordown &lt; 2 or floordown &gt;= 4" style="border: 1px solid #d8c27a; background-color: #fff7da; color: #8a6a00; padding: 4px;" colspan="4"/>
-                <field name="floordown" class="o_address_city" invisible="floordown &lt; 4 or floordown &gt;= 6" style="border: 1px solid #e7b26a; background-color: #fff0d9; color: #9a4d00; padding: 4px;" colspan="4"/>
-                <field name="floordown" class="o_address_city" invisible="floordown &lt; 6 or floordown &gt;= 8" style="border: 1px solid #d98a8a; background-color: #ffe3e3; color: #a12626; padding: 4px;" colspan="3"/>
-                <field name="floordown" class="o_address_city" invisible="floordown &lt; 8" style="border: 1px solid #d98a8a; background-color: #ffe3e3; color: #a12626; padding: 4px;" colspan="4"/>
+            <div class="col-6 mr-0 pr-0 w-50">
+              <group string="Servicios adicionales">
+                <field name="offer_include_client_boxes_transport"/>
+                <field name="offer_client_boxes_quantity" invisible="not offer_include_client_boxes_transport"/>
+                <field name="offer_include_storage"/>
+                <field name="offer_storage_months" invisible="not offer_include_storage"/>
               </group>
             </div>
           </div>

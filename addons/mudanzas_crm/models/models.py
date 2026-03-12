@@ -1,3 +1,5 @@
+import unicodedata
+
 from odoo import api, fields, models, _
 from odoo.exceptions import UserError, ValidationError
 from markupsafe import Markup
@@ -268,6 +270,18 @@ class CrmLead(models.Model):
         string='Tipo Oferta',
         default='baja',
     )
+    offer_include_furniture_handling = fields.Boolean(
+        string='Incluir desmontaje/montaje',
+        compute='_compute_offer_service_flags',
+    )
+    offer_include_client_boxes_transport = fields.Boolean(string='Incluir bultos y cajas')
+    offer_client_boxes_quantity = fields.Integer(string='Cantidad aprox. bultos/cajas', default=2)
+    offer_include_packing_material = fields.Boolean(
+        string='Incluir material de embalaje',
+        compute='_compute_offer_service_flags',
+    )
+    offer_include_storage = fields.Boolean(string='Incluir guardamuebles')
+    offer_storage_months = fields.Integer(string='Meses de guardamuebles', default=5)
     offer_email_cc = fields.Char(
         string='CC oferta',
         compute='_compute_offer_email_settings',
@@ -425,6 +439,19 @@ class CrmLead(models.Model):
             else:
                 lead.mudanza_media_preview = False
 
+    @api.depends(
+        'embalaje',
+        'desmontaje',
+        'mudanza_line_ids.embalaje',
+        'mudanza_line_ids.desmontaje',
+    )
+    def _compute_offer_service_flags(self):
+        for lead in self:
+            line_has_disassembly = any(line.desmontaje for line in lead.mudanza_line_ids)
+            line_has_packing = any(line.embalaje for line in lead.mudanza_line_ids)
+            lead.offer_include_furniture_handling = bool(lead.desmontaje or line_has_disassembly)
+            lead.offer_include_packing_material = bool(lead.embalaje or line_has_packing)
+
     @api.depends_context('uid')
     def _compute_offer_email_settings(self):
         user_email = self.env.user.email or False
@@ -574,13 +601,51 @@ class CrmLead(models.Model):
         vals['precio_oferta'] = source_value
         return vals
 
+    def _normalize_offer_report_text(self, value):
+        if not isinstance(value, str):
+            return value
+        if 'Ã' not in value and 'Â' not in value:
+            return value
+        try:
+            return value.encode('latin1').decode('utf-8')
+        except (UnicodeEncodeError, UnicodeDecodeError):
+            return value
+
     def _get_offer_client_name(self):
         self.ensure_one()
-        return self.partner_id.name or self.contact_name or self.name or _('Cliente')
+        value = self.partner_id.name or self.contact_name or self.name or _('Cliente')
+        return self._repair_report_text(value)
+
+    def _repair_report_text(self, value):
+        if not isinstance(value, str):
+            return value
+        if '\u00c3' not in value and '\u00c2' not in value:
+            repaired = value
+        else:
+            try:
+                repaired = value.encode('latin1').decode('utf-8')
+            except (UnicodeEncodeError, UnicodeDecodeError):
+                repaired = value
+        normalized = unicodedata.normalize('NFKD', repaired)
+        return normalized.encode('ascii', 'ignore').decode('ascii')
+
+    def _normalize_report_text(self, value):
+        if not isinstance(value, str):
+            return value
+        if 'Ã' not in value and 'Â' not in value:
+            return value
+        try:
+            return value.encode('latin1').decode('utf-8')
+        except (UnicodeEncodeError, UnicodeDecodeError):
+            return value
 
     def _get_offer_report_date(self):
         self.ensure_one()
         return fields.Date.to_string(self.create_date.date()) if self.create_date else fields.Date.to_string(fields.Date.context_today(self))
+
+    def _get_offer_current_date(self):
+        self.ensure_one()
+        return fields.Date.to_string(fields.Date.context_today(self))
 
     def _get_offer_report_filename(self):
         self.ensure_one()
@@ -594,21 +659,21 @@ class CrmLead(models.Model):
             return [
                 {
                     'cantidad': line.cantidad or 1,
-                    'nombre': line.objeto_manual or line.objeto_catalogo_id.name or line.objeto or _('Objeto sin nombre'),
+                    'nombre': self._repair_report_text(line.objeto_manual or line.objeto_catalogo_id.name or line.objeto or _('Objeto sin nombre')),
                     'volumen': line.volumen or 0.0,
                     'embalaje': line.embalaje,
                     'desmontaje': line.desmontaje,
-                    'habitacion': dict(line._fields['habitacion'].selection).get(line.habitacion, ''),
+                    'habitacion': self._repair_report_text(dict(line._fields['habitacion'].selection).get(line.habitacion, '')),
                 }
                 for line in self.mudanza_line_ids
             ]
         return [{
             'cantidad': self.cantidad or 1,
-            'nombre': self.objeto_manual or self.objeto_catalogo_id.name or self.objeto or _('Objeto sin nombre'),
+            'nombre': self._repair_report_text(self.objeto_manual or self.objeto_catalogo_id.name or self.objeto or _('Objeto sin nombre')),
             'volumen': self.volumen or 0.0,
             'embalaje': self.embalaje,
             'desmontaje': self.desmontaje,
-            'habitacion': dict(self._fields['habitacion'].selection).get(self.habitacion, ''),
+            'habitacion': self._repair_report_text(dict(self._fields['habitacion'].selection).get(self.habitacion, '')),
         }]
 
     def _get_offer_address_lines(self, move_type):
@@ -637,7 +702,52 @@ class CrmLead(models.Model):
                 self.province_down_id.name if self.province_down_id else self.province_down,
                 self.poblation_down,
             ]
-        return [value for value in values if value]
+        return [self._repair_report_text(value) for value in values if value]
+
+    def _get_offer_address_entries(self, move_type):
+        self.ensure_one()
+
+        def _label(field_name):
+            return self._repair_report_text(self._fields[field_name].string or field_name)
+
+        def _selection_value(field_name, value):
+            if not value:
+                return value
+            selection = dict(self._fields[field_name].selection or [])
+            return selection.get(value, value)
+
+        if move_type == 'pickup':
+            entries = [
+                (_label('streetup'), self.streetup),
+                (_label('streetup2'), self.streetup2),
+                (_label('zipup'), self.zipup),
+                (_label('doorup'), self.doorup),
+                (_label('elevatorup'), _selection_value('elevatorup', self.elevatorup)),
+                (_label('floorup'), self.floorup),
+                (_label('state_up'), self.state_up),
+                (_label('province_up_id'), self.province_up_id.name if self.province_up_id else self.province_up),
+                (_label('poblation_up'), self.poblation_up),
+            ]
+        else:
+            entries = [
+                (_label('streetdown'), self.streetdown),
+                (_label('streetdown2'), self.streetdown2),
+                (_label('zipdown'), self.zipdown),
+                (_label('doordown'), self.doordown),
+                (_label('elevatordown'), _selection_value('elevatordown', self.elevatordown)),
+                (_label('floordown'), self.floordown),
+                (_label('state_down'), self.state_down),
+                (_label('province_down_id'), self.province_down_id.name if self.province_down_id else self.province_down),
+                (_label('poblation_down'), self.poblation_down),
+            ]
+
+        return [
+            {
+                'label': label,
+                'value': self._repair_report_text(value),
+            }
+            for label, value in entries if value not in (False, None, '')
+        ]
 
     def action_send_offer_email(self):
         self.ensure_one()

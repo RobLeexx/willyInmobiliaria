@@ -38,3 +38,7 @@ models/__pycache__/
 
 filestore/
 sessions/
+
+## Prettier
+.prettier*
+package.json

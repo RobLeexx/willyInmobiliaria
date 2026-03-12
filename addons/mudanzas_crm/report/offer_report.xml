@@ -1,99 +1,269 @@
 <odoo>
   <data>
+    <record id="paperformat_mudanzas_offer" model="report.paperformat">
+      <field name="name">Mudanzas Offer PDF</field>
+      <field name="default" eval="False"/>
+      <field name="format">A4</field>
+      <field name="orientation">Portrait</field>
+      <field name="margin_top">8</field>
+      <field name="margin_bottom">10</field>
+      <field name="margin_left">7</field>
+      <field name="margin_right">7</field>
+      <field name="header_line" eval="False"/>
+      <field name="header_spacing">0</field>
+      <field name="dpi">90</field>
+    </record>
+
     <record id="action_report_mudanzas_offer" model="ir.actions.report">
       <field name="name">Presupuesto de Mudanzas Willy</field>
       <field name="model">crm.lead</field>
       <field name="report_type">qweb-pdf</field>
-      <field name="report_name">mudanzas_crm.report_mudanzas_offer_document</field>
-      <field name="report_file">mudanzas_crm.report_mudanzas_offer_document</field>
+      <field name="report_name">mudanzas_crm.report_mudanzas_offer_document_v2</field>
+      <field name="report_file">mudanzas_crm.report_mudanzas_offer_document_v2</field>
       <field name="print_report_name">object.offer_report_filename</field>
+      <field name="paperformat_id" ref="mudanzas_crm.paperformat_mudanzas_offer"/>
     </record>
 
-    <template id="report_mudanzas_offer_document">
+    <template id="report_mudanzas_offer_document_v2">
       <t t-call="web.html_container">
         <t t-foreach="docs" t-as="o">
-          <t t-call="web.external_layout">
-            <div class="page">
-              <div style="margin-bottom: 24px;">
-                <h2 style="margin: 0 0 8px 0;">Presupuesto de mudanza</h2>
-                <div><strong>Cliente:</strong> <span t-out="o._get_offer_client_name()"/></div>
-                <div><strong>Fecha:</strong> <span t-out="o._get_offer_report_date()"/></div>
-                <div t-if="o.fecha_mudanza"><strong>Fecha prevista:</strong> <span t-field="o.fecha_mudanza"/></div>
-              </div>
+          <style>
+            @page {
+              margin: 8mm 7mm 10mm 7mm;
+            }
+            html, body, main {
+              margin: 0 !important;
+              padding: 0 !important;
+            }
+            .article,
+            .article.o_report_layout_standard,
+            .page,
+            .o_report_layout_standard,
+            .o_report_layout_standard .page {
+              margin-top: 0 !important;
+              padding-top: 0 !important;
+            }
+          </style>
 
-              <div style="margin-bottom: 24px;">
-                <h3 style="margin: 0 0 10px 0;">Inventario</h3>
-                <table style="width: 100%; border-collapse: collapse; font-size: 12px;">
-                  <thead>
-                    <tr>
-                      <th style="border-bottom: 1px solid #444; text-align: left; padding: 6px;">Cantidad</th>
-                      <th style="border-bottom: 1px solid #444; text-align: left; padding: 6px;">Objeto</th>
-                      <th style="border-bottom: 1px solid #444; text-align: left; padding: 6px;">Volumen</th>
-                      <th style="border-bottom: 1px solid #444; text-align: left; padding: 6px;">Servicios</th>
-                      <th style="border-bottom: 1px solid #444; text-align: left; padding: 6px;">Habitacion</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr t-foreach="o._get_offer_lines_for_report()" t-as="line">
-                      <td style="border-bottom: 1px solid #ddd; padding: 6px;" t-out="line['cantidad']"/>
-                      <td style="border-bottom: 1px solid #ddd; padding: 6px;" t-out="line['nombre']"/>
-                      <td style="border-bottom: 1px solid #ddd; padding: 6px;">
-                        <span t-out="line['volumen']"/> m3
-                      </td>
-                      <td style="border-bottom: 1px solid #ddd; padding: 6px;">
-                        <t t-set="services" t-value="' / '.join([label for label, enabled in [('Embalaje', line['embalaje']), ('Desmontaje', line['desmontaje'])] if enabled])"/>
-                        <span t-out="services or '-'"/>
-                      </td>
-                      <td style="border-bottom: 1px solid #ddd; padding: 6px;" t-out="line['habitacion'] or '-'"/>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
+          <div class="page" style="margin-top: 0; color: #123e63;">
+            <table style="width: 100%; border-collapse: collapse; margin-bottom: 18px;">
+              <tr>
+                <td style="width: 24%; vertical-align: top; border: none; padding: 0;">
+                  <img
+                    t-if="o.company_id.logo"
+                    t-att-src="image_data_uri(o.company_id.logo)"
+                    alt="Logo"
+                    style="max-width: 340px; max-height: 190px; width: auto; height: auto;"
+                  />
+                </td>
+                <td style="width: 46%; vertical-align: top; border: none; padding: 40px 18px 0 18px; text-align: center;">
+                  <div style="font-size: 28px; font-weight: 800; letter-spacing: 0.4px; text-transform: uppercase; line-height: 1.08; color: #15507E;">
+                    Presupuesto de mudanza
+                  </div>
+                  <div style="margin-top: 10px; font-size: 13px; color: #0077c8;">
+                    Compromiso profesional para traslados, embalaje y coordinamientos de mudanzas
+                  </div>
+                </td>
+                <td style="width: 30%; vertical-align: top; border: none; padding: 40px 0 0 0; text-align: right;">
+                  <div style="display: inline-block; text-align: left;">
+                    <div style="display: flex; align-items: center; justify-content: flex-end; gap: 8px; margin-bottom: 6px;">
+                      <img t-att-src="'%s/mudanzas_crm/static/src/img/whatsapp.png' % web_base_url" alt="WhatsApp" style="width: 18px; height: 18px;"/>
+                      <span style="font-size: 12px; font-weight: 700; color: #15507E; line-height: 18px;">656 933 048</span>
+                    </div>
+                    <div style="display: flex; align-items: center; justify-content: flex-end; gap: 8px; margin-bottom: 6px;">
+                      <img t-att-src="'%s/mudanzas_crm/static/src/img/local_phone.png' % web_base_url" alt="Telefono" style="width: 18px; height: 18px;"/>
+                      <span style="font-size: 12px; font-weight: 700; color: #15507E; line-height: 18px;">96 185 39 54</span>
+                    </div>
+                    <div style="display: flex; align-items: center; justify-content: flex-end; gap: 8px; margin-bottom: 6px;">
+                      <img t-att-src="'%s/mudanzas_crm/static/src/img/instagram.png' % web_base_url" alt="Instagram" style="width: 18px; height: 18px;"/>
+                      <span style="font-size: 12px; font-weight: 700; color: #15507E; line-height: 18px;">@mudanzasenvalencia</span>
+                    </div>
+                    <div style="display: flex; align-items: center; justify-content: flex-end; gap: 8px;">
+                      <img t-att-src="'%s/mudanzas_crm/static/src/img/mail.png' % web_base_url" alt="Correo" style="width: 18px; height: 18px;"/>
+                      <span style="font-size: 12px; font-weight: 700; color: #15507E; line-height: 18px;">oficinamudanzaswilly@gmail.com</span>
+                    </div>
+                  </div>
+                </td>
+              </tr>
+            </table>
 
-              <div style="display: flex; gap: 20px; margin-bottom: 24px;">
-                <div style="width: 50%;">
-                  <h3 style="margin: 0 0 10px 0;">Carga</h3>
-                  <ul style="margin: 0; padding-left: 18px;">
-                    <li t-foreach="o._get_offer_address_lines('pickup')" t-as="item">
-                      <span t-out="item"/>
-                    </li>
-                    <li t-if="not o._get_offer_address_lines('pickup')">Pendiente de definir</li>
-                  </ul>
-                </div>
-                <div style="width: 50%;">
-                  <h3 style="margin: 0 0 10px 0;">Descarga</h3>
-                  <ul style="margin: 0; padding-left: 18px;">
-                    <li t-foreach="o._get_offer_address_lines('delivery')" t-as="item">
-                      <span t-out="item"/>
-                    </li>
-                    <li t-if="not o._get_offer_address_lines('delivery')">Pendiente de definir</li>
-                  </ul>
-                </div>
-              </div>
+            <table style="width: 100%; border-collapse: collapse; margin-bottom: 24px;">
+              <tr>
+                <td style="width: 33%; vertical-align: top; border: none; padding: 0; font-size: 13px; margin-left: 5px">
+                  <div><strong>Comercial:</strong> <span t-out="o.user_id.name or ''"/></div>
+                  <div style="margin-top: 4px;"><strong>Fecha actual:</strong> <span t-out="time.strftime('%d/%m/%Y')"/></div>
+                </td>
+                <td style="width: 33%; vertical-align: top; border: none; padding: 0; font-size: 13px; text-align: left; ; margin-left: 3px">
+                  <div><strong>Cliente:</strong> <span t-out="o._get_offer_client_name()"/></div>
+                  <div style="margin-top: 4px;">
+                    <t t-if="o.fecha_mudanza">
+                      <span><strong>Fecha mudanza:</strong> <span t-field="o.fecha_mudanza"/></span>
+                    </t>
+                  </div>
+                </td>
+              </tr>
+            </table>
 
-              <div style="margin-bottom: 24px;">
-                <h3 style="margin: 0 0 10px 0;">Condiciones del servicio</h3>
-                <p style="margin: 0 0 8px 0;">
-                  Este presupuesto se ha calculado segun el inventario, accesos y direcciones registradas en este momento.
-                </p>
-                <p style="margin: 0;">
-                  Cualquier cambio en volumen, accesos, kilometraje o servicios especiales puede requerir una revision economica antes de la confirmacion final.
-                </p>
-              </div>
+            <table style="width: 100%; border-collapse: separate; border-spacing: 20px 0; margin: 0 -20px 24px -20px;">
+              <tr>
+                <td style="width: 50%; vertical-align: top; background: #ffffff; border-radius: 14px; padding: 16px;">
+                  <h3 style="margin: 0 0 10px 0; color: #15507E;">Carga</h3>
+                  <div t-if="o.streetup" style="margin-bottom: 6px; font-size: 12px; line-height: 1.45;">
+                    <strong style="font-weight: 700; color: #15507E;" t-out="o._fields['streetup'].string + ':'"/>
+                    <span style="margin-left: 4px;" t-out="o._repair_report_text(o.streetup)"/>
+                  </div>
+                  <div t-if="o.streetup2" style="margin-bottom: 6px; font-size: 12px; line-height: 1.45;">
+                    <strong style="font-weight: 700; color: #15507E;" t-out="o._fields['streetup2'].string + ':'"/>
+                    <span style="margin-left: 4px;" t-out="o._repair_report_text(o.streetup2)"/>
+                  </div>
+                  <div t-if="o.zipup" style="margin-bottom: 6px; font-size: 12px; line-height: 1.45;">
+                    <strong style="font-weight: 700; color: #15507E;" t-out="o._fields['zipup'].string + ':'"/>
+                    <span style="margin-left: 4px;" t-out="o._repair_report_text(o.zipup)"/>
+                  </div>
+                  <div t-if="o.doorup" style="margin-bottom: 6px; font-size: 12px; line-height: 1.45;">
+                    <strong style="font-weight: 700; color: #15507E;" t-out="o._fields['doorup'].string + ':'"/>
+                    <span style="margin-left: 4px;" t-out="o._repair_report_text(o.doorup)"/>
+                  </div>
+                  <div t-if="o.elevatorup" style="margin-bottom: 6px; font-size: 12px; line-height: 1.45;">
+                    <strong style="font-weight: 700; color: #15507E;" t-out="o._fields['elevatorup'].string + ':'"/>
+                    <span style="margin-left: 4px;" t-out="o._repair_report_text(dict(o._fields['elevatorup'].selection).get(o.elevatorup, o.elevatorup))"/>
+                  </div>
+                  <div t-if="o.floorup or o.floorup == 0" style="margin-bottom: 6px; font-size: 12px; line-height: 1.45;">
+                    <strong style="font-weight: 700; color: #15507E;" t-out="o._fields['floorup'].string + ':'"/>
+                    <span style="margin-left: 4px;" t-out="o.floorup"/>
+                  </div>
+                  <div t-if="o.state_up" style="margin-bottom: 6px; font-size: 12px; line-height: 1.45;">
+                    <strong style="font-weight: 700; color: #15507E;" t-out="o._fields['state_up'].string + ':'"/>
+                    <span style="margin-left: 4px;" t-out="o._repair_report_text(o.state_up)"/>
+                  </div>
+                  <div t-if="o.province_up_id or o.province_up" style="margin-bottom: 6px; font-size: 12px; line-height: 1.45;">
+                    <strong style="font-weight: 700; color: #15507E;" t-out="o._fields['province_up_id'].string + ':'"/>
+                    <span style="margin-left: 4px;" t-out="o._repair_report_text((o.province_up_id and o.province_up_id.name) or o.province_up)"/>
+                  </div>
+                  <div t-if="o.poblation_up" style="margin-bottom: 6px; font-size: 12px; line-height: 1.45;">
+                    <strong style="font-weight: 700; color: #15507E;" t-out="o._repair_report_text(o._fields['poblation_up'].string + ':')"/>
+                    <span style="margin-left: 4px;" t-out="o._repair_report_text(o.poblation_up)"/>
+                  </div>
+                  <div t-if="not (o.streetup or o.streetup2 or o.zipup or o.doorup or o.elevatorup or o.floorup or o.floorup == 0 or o.state_up or o.province_up_id or o.province_up or o.poblation_up)" style="font-size: 12px;">Pendiente de definir</div>
+                </td>
+                <td style="width: 50%; vertical-align: top; background: #ffffff; border-radius: 14px; padding: 16px;">
+                  <h3 style="margin: 0 0 10px 0; color: #15507E;">Descarga</h3>
+                  <div t-if="o.streetdown" style="margin-bottom: 6px; font-size: 12px; line-height: 1.45;">
+                    <strong style="font-weight: 700; color: #15507E;" t-out="o._fields['streetdown'].string + ':'"/>
+                    <span style="margin-left: 4px;" t-out="o._repair_report_text(o.streetdown)"/>
+                  </div>
+                  <div t-if="o.streetdown2" style="margin-bottom: 6px; font-size: 12px; line-height: 1.45;">
+                    <strong style="font-weight: 700; color: #15507E;" t-out="o._fields['streetdown2'].string + ':'"/>
+                    <span style="margin-left: 4px;" t-out="o._repair_report_text(o.streetdown2)"/>
+                  </div>
+                  <div t-if="o.zipdown" style="margin-bottom: 6px; font-size: 12px; line-height: 1.45;">
+                    <strong style="font-weight: 700; color: #15507E;" t-out="o._fields['zipdown'].string + ':'"/>
+                    <span style="margin-left: 4px;" t-out="o._repair_report_text(o.zipdown)"/>
+                  </div>
+                  <div t-if="o.doordown" style="margin-bottom: 6px; font-size: 12px; line-height: 1.45;">
+                    <strong style="font-weight: 700; color: #15507E;" t-out="o._fields['doordown'].string + ':'"/>
+                    <span style="margin-left: 4px;" t-out="o._repair_report_text(o.doordown)"/>
+                  </div>
+                  <div t-if="o.elevatordown" style="margin-bottom: 6px; font-size: 12px; line-height: 1.45;">
+                    <strong style="font-weight: 700; color: #15507E;" t-out="o._fields['elevatordown'].string + ':'"/>
+                    <span style="margin-left: 4px;" t-out="o._repair_report_text(dict(o._fields['elevatordown'].selection).get(o.elevatordown, o.elevatordown))"/>
+                  </div>
+                  <div t-if="o.floordown or o.floordown == 0" style="margin-bottom: 6px; font-size: 12px; line-height: 1.45;">
+                    <strong style="font-weight: 700; color: #15507E;" t-out="o._fields['floordown'].string + ':'"/>
+                    <span style="margin-left: 4px;" t-out="o.floordown"/>
+                  </div>
+                  <div t-if="o.state_down" style="margin-bottom: 6px; font-size: 12px; line-height: 1.45;">
+                    <strong style="font-weight: 700; color: #15507E;" t-out="o._fields['state_down'].string + ':'"/>
+                    <span style="margin-left: 4px;" t-out="o._repair_report_text(o.state_down)"/>
+                  </div>
+                  <div t-if="o.province_down_id or o.province_down" style="margin-bottom: 6px; font-size: 12px; line-height: 1.45;">
+                    <strong style="font-weight: 700; color: #15507E;" t-out="o._fields['province_down_id'].string + ':'"/>
+                    <span style="margin-left: 4px;" t-out="o._repair_report_text((o.province_down_id and o.province_down_id.name) or o.province_down)"/>
+                  </div>
+                  <div t-if="o.poblation_down" style="margin-bottom: 6px; font-size: 12px; line-height: 1.45;">
+                    <strong style="font-weight: 700; color: #15507E;" t-out="o._repair_report_text(o._fields['poblation_down'].string + ':')"/>
+                    <span style="margin-left: 4px;" t-out="o._repair_report_text(o.poblation_down)"/>
+                  </div>
+                  <div t-if="not (o.streetdown or o.streetdown2 or o.zipdown or o.doordown or o.elevatordown or o.floordown or o.floordown == 0 or o.state_down or o.province_down_id or o.province_down or o.poblation_down)" style="font-size: 12px;">Pendiente de definir</div>
+                </td>
+              </tr>
+            </table>
 
-              <div style="border-top: 1px solid #ccc; padding-top: 16px;">
-                <div style="font-size: 18px; font-weight: 700; margin-bottom: 6px;">Importe ofertado</div>
-                <div t-if="o.precio_oferta" style="font-size: 24px; font-weight: 700;">
-                  <span t-field="o.precio_oferta" t-options="{'widget': 'monetary', 'display_currency': o.company_id.currency_id}"/>
-                </div>
-                <div t-else="" style="font-size: 16px;">Pendiente de confirmar</div>
-                <div t-if="o.observaciones_mudanza" style="margin-top: 12px;">
-                  <strong>Observaciones:</strong>
-                  <span t-field="o.observaciones_mudanza"/>
-                </div>
+            <div style="margin-bottom: 24px;">
+              <h3 style="margin: 0 0 10px 0; color: #15507E;">Inventario</h3>
+              <table style="width: 100%; border-collapse: collapse; font-size: 12px; background: #ffffff; border-radius: 12px; overflow: hidden;">
+                <thead>
+                  <tr style="background: #15507E; color: #ffffff;">
+                    <th style="text-align: left; padding: 8px 10px;">Cantidad</th>
+                    <th style="text-align: left; padding: 8px 10px;">Objeto</th>
+                    <th style="text-align: left; padding: 8px 10px;">Volumen</th>
+                    <th style="text-align: left; padding: 8px 10px;">Servicios</th>
+                    <th style="text-align: left; padding: 8px 10px;">Habitacion</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr t-foreach="o._get_offer_lines_for_report()" t-as="line">
+                    <td style="border: none; padding: 8px 10px;" t-out="line['cantidad']"/>
+                    <td style="border: none; padding: 8px 10px;" t-out="line['nombre']"/>
+                    <td style="border: none; padding: 8px 10px;"><span t-out="line['volumen']"/> m3</td>
+                    <td style="border: none; padding: 8px 10px;">
+                      <t t-set="services" t-value="' / '.join([label for label, enabled in [('Embalaje', line['embalaje']), ('Desmontaje', line['desmontaje'])] if enabled])"/>
+                      <span t-out="services or 'Solo Transporte'"/>
+                    </td>
+                    <td style="border: none; padding: 8px 10px;" t-out="line['habitacion'] or '-'"/>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div style="margin-bottom: 18px; border-radius: 14px; background: #ffffff; padding: 18px 20px;">
+              <h3 style="margin: 0 0 10px 0; color: #15507E;">Condiciones del servicio</h3>
+              <p style="margin: 0 0 8px 0;">
+                Este presupuesto se ha calculado en base al inventario, accesos y direcciones registradas en este momento.
+              </p>
+              <p style="margin: 0;">
+                Cualquier cambio en volumen, accesos, kilometraje o servicios especiales puede requerir una revision exahustiva antes de la confirmacion final.
+              </p>
+            </div>
+
+            <div style="margin-bottom: 18px; border-radius: 14px; background: #ffffff; padding: 18px 20px;">
+              <h3 style="margin: 0 0 12px 0; color: #15507E;">Servicios que se incluyen</h3>
+              <ul style="margin: 0; padding-left: 18px;">
+                <li t-if="o.offer_include_furniture_handling" style="margin-bottom: 6px;">Desmontaje y montaje de muebles</li>
+                <li t-if="o.offer_include_packing_material" style="margin-bottom: 6px;">Material de embalaje (precintos, papel Kraft)</li>
+                <li style="margin-bottom: 6px;">Enmantado de muebles por nuestro personal para su transporte con precinto</li>
+                <li style="margin-bottom: 6px;">Transporte de muebles y enseres</li>
+                <li style="margin-bottom: 6px;">Seguro responsabilidad civil hasta 1.000.000 de euros con seguro de carga y descarga</li>
+                <li style="margin-bottom: 6px;">Solicitud de permisos y colocacion de indicaciones en Valencia capital</li>
+                <li t-if="o.offer_include_client_boxes_transport" style="margin-bottom: 6px;">Transporte de bultos y cajas embaladas por el cliente, hasta <span t-out="o.offer_client_boxes_quantity"/> aproximadamente</li>
+                <li t-if="o.offer_include_storage" style="margin-bottom: 6px;"><span t-out="o.offer_storage_months"/> meses de guardamuebles.</li>
+              </ul>
+            </div>
+
+            <div style="margin-bottom: 18px; border-radius: 14px; background: #ffffff; padding: 18px 20px;">
+              <h3 style="margin: 0 0 12px 0; color: #15507E;">Servicios NO incluidos, que deben presupuestarse o asegurarse aparte (abonando la prima por su valor)</h3>
+              <ul style="margin: 0; padding-left: 18px;">
+                <li style="margin-bottom: 6px;">Desmontaje de muebles complejos, Boiseries, antenas, aires acondicionados, lamparas, cortinas estores, accesorios lavabo o cocina, colocacion de muebles en pladur o paredes fragiles.</li>
+                <li style="margin-bottom: 6px;">Trabajos de electricidad, fontaneria, carpinteria y de otros profesionales ajenos a nuestro sector</li>
+                <li style="margin-bottom: 6px;">Transporte de pianos, cajas de seguridad, mercancias pesadas o similares</li>
+                <li style="margin-bottom: 6px;">Material de embalaje ( cajas, armarios, papel burbuja)</li>
+                <li style="margin-bottom: 6px;">Uso de elevadores externos: maquinas monta muebles, gruas especiales o similares</li>
+                <li>Salida de guardamuebles.</li>
+              </ul>
+            </div>
+
+            <div style="border-radius: 16px; padding: 18px 22px; background: linear-gradient(135deg, #15507E 0%, #0066cc 55%, #0050a3 100%); color: #ffffff;">
+              <div style="font-size: 18px; font-weight: 700; margin-bottom: 6px;">Importe ofertado</div>
+              <div t-if="o.precio_oferta" style="font-size: 28px; font-weight: 800;">
+                <span t-field="o.precio_oferta" t-options="{'widget': 'monetary', 'display_currency': o.company_id.currency_id}"/>
+              </div>
+              <div t-else="" style="font-size: 16px;">Pendiente de confirmar</div>
+              <div t-if="o.observaciones_mudanza" style="margin-top: 12px; color: #fff8ee;">
+                <strong>Observaciones:</strong>
+                <span t-field="o.observaciones_mudanza"/>
               </div>
             </div>
-          </t>
+          </div>
         </t>
       </t>
     </template>
