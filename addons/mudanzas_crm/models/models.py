@@ -1,5 +1,6 @@
 ﻿
 import os
+import unicodedata
 import xml.etree.ElementTree as ET
 
 from odoo import api, fields, models, _
@@ -1129,12 +1130,28 @@ class CrmLead(models.Model):
     def _repair_report_text(self, value):
         if not isinstance(value, str):
             return value
-        if '\u00c3' not in value and '\u00c2' not in value:
-            return value
-        try:
-            return value.encode('latin1').decode('utf-8')
-        except (UnicodeEncodeError, UnicodeDecodeError):
-            return value
+        repaired = value
+        mojibake_markers = ('Ã', 'Â', 'â', '€', '™', '�')
+        if any(marker in repaired for marker in mojibake_markers):
+            for _ in range(2):
+                updated = repaired
+                for source_encoding in ('latin1', 'cp1252'):
+                    try:
+                        candidate = updated.encode(source_encoding).decode('utf-8')
+                    except (UnicodeEncodeError, UnicodeDecodeError):
+                        continue
+                    if candidate != updated:
+                        updated = candidate
+                        break
+                if updated == repaired:
+                    break
+                repaired = updated
+                if not any(marker in repaired for marker in mojibake_markers):
+                    break
+
+        normalized = unicodedata.normalize('NFKD', repaired)
+        ascii_text = normalized.encode('ascii', 'ignore').decode('ascii')
+        return ascii_text or repaired
 
     def _get_offer_report_date(self):
         self.ensure_one()

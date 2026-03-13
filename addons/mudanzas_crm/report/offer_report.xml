@@ -104,6 +104,62 @@
               </tr>
             </table>
 
+            <t t-set="offer_total_amount" t-value="o.expected_revenue or 0.0"/>
+            <t t-set="base_offer_amount" t-value="offer_total_amount / 1.21 if offer_total_amount else 0.0"/>
+            <t t-set="offer_vat_amount" t-value="offer_total_amount - base_offer_amount"/>
+            <t t-set="effective_operarios" t-value="o._get_effective_num_operarios()"/>
+
+            <div style="margin-bottom: 24px; border-radius: 14px; background: #ffffff; padding: 18px 20px;">
+              <h3 style="margin: 0 0 12px 0; color: #15507E;">Resumen operativo y economico</h3>
+              <table style="width: 100%; border-collapse: collapse; font-size: 12px;">
+                <tr>
+                  <td style="width: 25%; padding: 0 12px 8px 0; vertical-align: top;">
+                    <div style="font-weight: 700; color: #15507E;">Operarios</div>
+                    <div style="margin-top: 3px;" t-out="effective_operarios"/>
+                  </td>
+                  <td style="width: 25%; padding: 0 12px 8px 0; vertical-align: top;">
+                    <div style="font-weight: 700; color: #15507E;">Horas de viaje</div>
+                    <div style="margin-top: 3px;" t-out="o.horas_viaje or 0"/>
+                  </td>
+                  <td style="width: 25%; padding: 0 12px 8px 0; vertical-align: top;">
+                    <div style="font-weight: 700; color: #15507E;">Mas de un dia</div>
+                    <div style="margin-top: 3px;" t-out="'Si' if o.mas_de_dos_dias else 'No'"/>
+                  </td>
+                  <td style="width: 25%; padding: 0 0 8px 0; vertical-align: top;">
+                    <div style="font-weight: 700; color: #15507E;">Elevador</div>
+                    <div style="margin-top: 3px;">
+                      <span t-out="'Si' if o.elevador else 'No'"/>
+                      <t t-if="o.elevador and o.horas_elevador">
+                        <span t-out="' (%s h)' % o.horas_elevador"/>
+                      </t>
+                    </div>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding: 8px 12px 0 0; vertical-align: top;">
+                    <div style="font-weight: 700; color: #15507E;">Horas totales aprox.</div>
+                    <div style="margin-top: 3px;" t-out="o.horas_totales_aprox or 0.0"/>
+                  </td>
+                  <td style="padding: 8px 12px 0 0; vertical-align: top;">
+                    <div style="font-weight: 700; color: #15507E;">Base imponible</div>
+                    <div style="margin-top: 3px;">
+                      <span t-out="'%.2f' % base_offer_amount"/> EUR
+                    </div>
+                  </td>
+                  <td style="padding: 8px 12px 0 0; vertical-align: top;">
+                    <div style="font-weight: 700; color: #15507E;">IVA (21%)</div>
+                    <div style="margin-top: 3px;">
+                      <span t-out="'%.2f' % offer_vat_amount"/> EUR
+                    </div>
+                  </td>
+                  <td style="padding: 8px 0 0 0; vertical-align: top;">
+                    <div style="font-weight: 700; color: #15507E;">Total con IVA</div>
+                    <div style="margin-top: 3px; font-size: 18px; font-weight: 800;" t-out="'%.2f EUR' % offer_total_amount"/>
+                  </td>
+                </tr>
+              </table>
+            </div>
+
             <table style="width: 100%; border-collapse: separate; border-spacing: 20px 0; margin: 0 -20px 24px -20px;">
               <tr>
                 <td style="width: 50%; vertical-align: top; background: #ffffff; border-radius: 14px; padding: 16px;">
@@ -204,13 +260,13 @@
                 <tbody>
                   <tr t-foreach="o._get_offer_lines_for_report()" t-as="line">
                     <td style="border: none; padding: 8px 10px;" t-out="line['cantidad']"/>
-                    <td style="border: none; padding: 8px 10px;" t-out="line['nombre']"/>
+                    <td style="border: none; padding: 8px 10px;" t-out="o._repair_report_text(line['nombre'])"/>
                     <td style="border: none; padding: 8px 10px;"><span t-out="line['volumen']"/> m3</td>
                     <td style="border: none; padding: 8px 10px;">
                       <t t-set="services" t-value="' / '.join([label for label, enabled in [('Embalaje', line['embalaje']), ('Desmontaje', line['desmontaje'])] if enabled])"/>
                       <span t-out="services or 'Solo Transporte'"/>
                     </td>
-                    <td style="border: none; padding: 8px 10px;" t-out="line['habitacion'] or '-'"/>
+                    <td style="border: none; padding: 8px 10px;" t-out="o._repair_report_text(line['habitacion']) or '-'"/>
                   </tr>
                 </tbody>
               </table>
@@ -240,8 +296,8 @@
               </ul>
             </div>
 
-            <div style="margin-bottom: 18px; border-radius: 14px; background: #ffffff; padding: 18px 20px;">
-              <h3 style="margin: 0 0 12px 0; color: #15507E;">Servicios NO incluidos, que deben presupuestarse o asegurarse aparte (abonando la prima por su valor)</h3>
+            <div style="margin-bottom: 8px; border-radius: 14px; background: #ffffff; padding: 18px 20px;">
+              <h3 style="margin: 0 0 10px 0; color: #15507E;">Servicios NO incluidos, que deben presupuestarse o asegurarse aparte (abonando la prima por su valor)</h3>
               <ul style="margin: 0; padding-left: 18px;">
                 <li style="margin-bottom: 6px;">Desmontaje de muebles complejos, Boiseries, antenas, aires acondicionados, lamparas, cortinas estores, accesorios lavabo o cocina, colocacion de muebles en pladur o paredes fragiles.</li>
                 <li style="margin-bottom: 6px;">Trabajos de electricidad, fontaneria, carpinteria y de otros profesionales ajenos a nuestro sector</li>
@@ -252,16 +308,89 @@
               </ul>
             </div>
 
-            <div style="border-radius: 16px; padding: 18px 22px; background: linear-gradient(135deg, #15507E 0%, #0066cc 55%, #0050a3 100%); color: #ffffff;">
-              <div style="font-size: 18px; font-weight: 700; margin-bottom: 6px;">Importe ofertado</div>
-              <div t-if="o.precio_oferta" style="font-size: 28px; font-weight: 800;">
-                <span t-field="o.precio_oferta" t-options="{'widget': 'monetary', 'display_currency': o.company_id.currency_id}"/>
+            <div style="margin-bottom: 10px; border-radius: 16px; padding: 18px 22px; background: linear-gradient(135deg, #15507E 0%, #0066cc 55%, #0050a3 100%); color: #ffffff;">
+              <div style="font-size: 18px; font-weight: 700; margin-bottom: 10px;">Oferta final</div>
+              <div t-if="offer_total_amount" style="font-size: 14px; line-height: 1.7;">
+                <div>
+                  <strong>Base imponible:</strong>
+                  <span t-out="'%.2f EUR' % base_offer_amount"/>
+                </div>
+                <div>
+                  <strong>IVA (21%):</strong>
+                  <span t-out="'%.2f EUR' % offer_vat_amount"/>
+                </div>
+                <div style="font-size: 36px; font-weight: 900; margin-top: 10px; line-height: 1.15;">
+                  <strong>Total con IVA:</strong>
+                  <span t-out="'%.2f EUR' % offer_total_amount"/>
+                </div>
               </div>
               <div t-else="" style="font-size: 16px;">Pendiente de confirmar</div>
               <div t-if="o.observaciones_mudanza" style="margin-top: 12px; color: #fff8ee;">
                 <strong>Observaciones:</strong>
                 <span t-field="o.observaciones_mudanza"/>
               </div>
+            </div>
+
+            <div style="margin-top: -30px; margin-bottom: 15px; border-radius: 16px; background: linear-gradient(135deg, #f4fbff 0%, #e8f5ff 100%); border: 1px solid #c8e6fb; padding: 16px 18px 18px 18px; text-align: center;">
+              <table style="width: 100%; border-collapse: separate; border-spacing: 10px 0; margin: 0 0 14px 0;">
+                <tr>
+                  <td style="width: 31%; text-align: center; vertical-align: middle; padding: 0;">
+                    <div style="width: 220px; height: 220px; margin: 0 auto; overflow: hidden; border-radius: 18px; border: 1px solid #b9dbf4; background: #dfeffc;">
+                      <img
+                        t-att-src="'%s/mudanzas_crm/static/src/img/main_photo_email.JPEG' % web_base_url"
+                        alt="Mudanzas Willy"
+                        style="display: block; width: 220px; height: 220px; object-fit: cover; object-position: center center;"
+                      />
+                    </div>
+                  </td>
+                  <td style="width: 38%; text-align: center; vertical-align: middle; padding: 0;">
+                    <div style="width: 264px; height: 264px; margin: 0 auto; overflow: hidden; border-radius: 22px; border: 1px solid #9ecdec; background: #dfeffc;">
+                      <img
+                        t-att-src="'%s/mudanzas_crm/static/src/img/img3.JPEG' % web_base_url"
+                        alt="Mudanzas Willy centro"
+                        style="display: block; width: 264px; height: 264px; object-fit: cover; object-position: center center;"
+                      />
+                    </div>
+                  </td>
+                  <td style="width: 31%; text-align: center; vertical-align: middle; padding: 0;">
+                    <div style="width: 220px; height: 220px; margin: 0 auto; overflow: hidden; border-radius: 18px; border: 1px solid #b9dbf4; background: #dfeffc;">
+                      <img
+                        t-att-src="'%s/mudanzas_crm/static/src/img/img2.JPEG' % web_base_url"
+                        alt="Mudanzas Willy derecha"
+                        style="display: block; width: 220px; height: 220px; object-fit: cover; object-position: center center;"
+                      />
+                    </div>
+                  </td>
+                </tr>
+              </table>
+              <div style="font-size: 22px; font-weight: 800; line-height: 1.15; color: #15507E; margin-bottom: 10px;">
+                Mudanzas en Valencia desde 1987
+              </div>
+              <div style="font-size: 12px; line-height: 1.7; margin: 0 auto 10px auto; max-width: 92%; color: #14496f;">
+                Empresa de mudanzas en Valencia desde 1987 con un servicio de mudanzas. Nuestro equipo humano es sinonimo de profesionalidad y disponen de la mas moderna maquinaria y medios de elevacion.
+              </div>
+              <div style="font-size: 12px; line-height: 1.7; margin: 0 auto; max-width: 92%; color: #14496f;">
+                Las mudanzas en Valencia son cosa de Mudanzas Willy. Proporcionamos un eficaz y rapido servicio de mudanzas baratas en Valencia. Tambien realizamos traslados de instalaciones laborales, portes de objetos y otros servicios de transportes de enseres.
+              </div>
+            </div>
+
+            <div style="border-radius: 14px; background: #ffffff; padding-inline: 18px; font-size: 11px; line-height: 1.55; color: #163d5c;">
+              <h3 style="margin: 0 0 12px 0; color: #15507E;">Condiciones generales y ley proteccion de datos</h3>
+              <p style="margin: 0 0 10px 0;">
+                <strong>1era RESERVA:</strong> La mudanza se considerara reservada solo con el envio del justificante dentro de las 24 horas siguientes, tambien puede abonarse con tarjeta bancaria. El encargo se considera en firme a partir de la recepcion de la reserva, pudiendo la empresa cubrir el dia elegido con otro encargo si esta no se recibiera en tiempo y forma.
+              </p>
+              <p style="margin: 0 0 10px 0;">
+                <strong>2da FORMA DE PAGO:</strong> Reserva por transferencia del 30 % IVA, resto en efectivo al acabar la carga.
+              </p>
+              <p style="margin: 0 0 10px 0;">
+                <strong>3era RESERVA DE FECHAS:</strong> Se aconseja realizar la reserva con un minimo de 21 dias de antelacion.
+              </p>
+              <p style="margin: 0 0 10px 0;">
+                Para cualquier duda o pregunta o para realizar contrataciones no incluidas en las condiciones generales puede contactar con nuestras oficinas de lunes a viernes de 9.30 a 13.30 y de 16.00 a 20.00 horas por estos medios: Telefono 96 185 39 54, WhatsApp 656 933 048 o al email de la oficina: oficinamudanzaswilly@gmail.com
+              </p>
+              <p style="margin: 0;">
+                <strong>Ley de Proteccion de datos:</strong> En cumplimiento de lo dispuesto el art. 13 de Reglamento (UE) 2016/679 del Parlamento Europeo y del Consejo le informamos que Mudanzas y Transportes Willy SL es el responsable del tratamiento y que dicho tratamiento se lleva a cabo con la finalidad de la gestion administrativa contable y posibles acciones comerciales, siendo su consentimiento nuestra base legal para ello. Asimismo, le informamos de la posibilidad que tiene de ejercer todos sus derechos sobre tratamiento de sus datos de caracter personal dirigiendose por escrito al email info@mudanzaswilly.com con el asunto "Proteccion de Datos".
+              </p>
             </div>
           </div>
         </t>
