@@ -2,6 +2,7 @@
 import os
 import unicodedata
 import xml.etree.ElementTree as ET
+import re
 
 from odoo import api, fields, models, _
 from odoo.exceptions import UserError, ValidationError
@@ -466,6 +467,24 @@ class CrmLead(models.Model):
     _inherit = 'crm.lead'
 
     test_debug_field = fields.Char(string='Test Debug Field')
+    duplicate_phone_lead_id = fields.Many2one(
+        'crm.lead',
+        string='Lead duplicado por teléfono',
+        compute='_compute_duplicate_phone_warning',
+    )
+    duplicate_phone_lead_name = fields.Char(
+        string='Nombre lead duplicado',
+        compute='_compute_duplicate_phone_warning',
+    )
+    duplicate_vat_lead_id = fields.Many2one(
+        'crm.lead',
+        string='Lead duplicado por NIF',
+        compute='_compute_duplicate_vat_warning',
+    )
+    duplicate_vat_lead_name = fields.Char(
+        string='Nombre lead duplicado por NIF',
+        compute='_compute_duplicate_vat_warning',
+    )
 
     # Personal information
     contact_name = fields.Char(string='Contacto')
@@ -644,6 +663,126 @@ class CrmLead(models.Model):
     province_down = fields.Selection(selection=PROVINCE_SELECTION, string='Provincia', default='Valencia')
     province_down_id = fields.Many2one('mudanzas.province', string='Provincia')
     poblation_down = fields.Char(string='Población')
+
+    @api.depends('phone')
+    def _compute_duplicate_phone_warning(self):
+        for lead in self:
+            duplicate = lead._find_duplicate_phone_lead()
+            lead.duplicate_phone_lead_id = duplicate
+            lead.duplicate_phone_lead_name = duplicate.name if duplicate else False
+
+    @api.depends('partner_vat')
+    def _compute_duplicate_vat_warning(self):
+        for lead in self:
+            duplicate = lead._find_duplicate_vat_lead()
+            lead.duplicate_vat_lead_id = duplicate
+            lead.duplicate_vat_lead_name = duplicate.name if duplicate else False
+
+    @api.onchange('phone')
+    def _onchange_phone_duplicate_warning(self):
+        self._compute_duplicate_phone_warning()
+        if self.duplicate_phone_lead_id:
+            return {
+                'warning': {
+                    'title': _('Teléfono duplicado'),
+                    'message': _(
+                        "Ya existe un lead con este teléfono: %(lead_name)s."
+                    ) % {
+                        'lead_name': self.duplicate_phone_lead_name or _('Sin nombre'),
+                    },
+                }
+            }
+        return {}
+
+    @api.onchange('partner_vat')
+    def _onchange_vat_duplicate_warning(self):
+        self._compute_duplicate_vat_warning()
+        if self.duplicate_vat_lead_id:
+            return {
+                'warning': {
+                    'title': _('NIF duplicado'),
+                    'message': _(
+                        "Ya existe un lead con este NIF: %(lead_name)s."
+                    ) % {
+                        'lead_name': self.duplicate_vat_lead_name or _('Sin nombre'),
+                    },
+                }
+            }
+        return {}
+
+    @staticmethod
+    def _normalize_phone_for_duplicate(phone_value):
+        phone_value = phone_value or ''
+        return re.sub(r'\D+', '', phone_value)
+
+    @staticmethod
+    def _normalize_vat_for_duplicate(vat_value):
+        vat_value = (vat_value or '').upper().strip()
+        return re.sub(r'[^A-Z0-9]', '', vat_value)
+
+    def _find_duplicate_phone_lead(self):
+        self.ensure_one()
+        normalized_phone = self._normalize_phone_for_duplicate(self.phone)
+        if not normalized_phone:
+            return self.env['crm.lead']
+
+        candidate_domain = [('phone', '!=', False)]
+        if self.id:
+            candidate_domain.append(('id', '!=', self.id))
+        if self._origin and self._origin.id:
+            candidate_domain.append(('id', '!=', self._origin.id))
+
+        candidates = self.search(candidate_domain, order='id desc')
+        for candidate in candidates:
+            if self._normalize_phone_for_duplicate(candidate.phone) == normalized_phone:
+                return candidate
+        return self.env['crm.lead']
+
+    def _find_duplicate_vat_lead(self):
+        self.ensure_one()
+        normalized_vat = self._normalize_vat_for_duplicate(self.partner_vat)
+        if not normalized_vat:
+            return self.env['crm.lead']
+
+        candidate_domain = [('partner_id.vat', '!=', False)]
+        if self.id:
+            candidate_domain.append(('id', '!=', self.id))
+        if self._origin and self._origin.id:
+            candidate_domain.append(('id', '!=', self._origin.id))
+
+        candidates = self.search(candidate_domain, order='id desc')
+        for candidate in candidates:
+            if self._normalize_vat_for_duplicate(candidate.partner_id.vat) == normalized_vat:
+                return candidate
+        return self.env['crm.lead']
+
+    def action_open_duplicate_phone_lead(self):
+        self.ensure_one()
+        duplicate = self.duplicate_phone_lead_id
+        if not duplicate:
+            return False
+        return {
+            'type': 'ir.actions.act_window',
+            'name': _('Lead existente'),
+            'res_model': 'crm.lead',
+            'view_mode': 'form',
+            'res_id': duplicate.id,
+            'target': 'current',
+        }
+
+    def action_open_duplicate_vat_lead(self):
+        self.ensure_one()
+        duplicate = self.duplicate_vat_lead_id
+        if not duplicate:
+            return False
+        return {
+            'type': 'ir.actions.act_window',
+            'name': _('Lead existente'),
+            'res_model': 'crm.lead',
+            'view_mode': 'form',
+            'res_id': duplicate.id,
+            'target': 'current',
+        }
 
     @api.depends('mudanza_media_ids', 'mudanza_media_ids.mimetype', 'mudanza_media_ids.name')
     def _compute_mudanza_media_preview(self):

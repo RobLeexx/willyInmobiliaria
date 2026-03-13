@@ -61,7 +61,7 @@
                     Presupuesto de mudanza
                   </div>
                   <div style="margin-top: 10px; font-size: 13px; color: #0077c8;">
-                    Compromiso profesional para traslados, embalaje y coordinamientos de mudanzas
+                    Especialista en la logistica de la mudanza desde 1987
                   </div>
                 </td>
                 <td style="width: 30%; vertical-align: top; border: none; padding: 40px 0 0 0; text-align: right;">
@@ -136,10 +136,6 @@
                   </td>
                 </tr>
                 <tr>
-                  <td style="padding: 8px 12px 0 0; vertical-align: top;">
-                    <div style="font-weight: 700; color: #15507E;">Horas totales aprox.</div>
-                    <div style="margin-top: 3px;" t-out="o.horas_totales_aprox or 0.0"/>
-                  </td>
                   <td style="padding: 8px 12px 0 0; vertical-align: top;">
                     <div style="font-weight: 700; color: #15507E;">Base imponible</div>
                     <div style="margin-top: 3px;">
