@@ -1,8 +1,24 @@
-import unicodedata
+﻿
+import os
+import xml.etree.ElementTree as ET
 
 from odoo import api, fields, models, _
 from odoo.exceptions import UserError, ValidationError
 from markupsafe import Markup
+
+
+def _env_float(name, default):
+    try:
+        return float(os.getenv(name, default))
+    except (TypeError, ValueError):
+        return float(default)
+
+
+def _env_int(name, default):
+    try:
+        return int(float(os.getenv(name, default)))
+    except (TypeError, ValueError):
+        return int(default)
 
 
 class MudanzasProvince(models.Model):
@@ -18,49 +34,30 @@ class MudanzasObjectCatalog(models.Model):
     _description = 'Catalogo de objetos para mudanza'
     _order = 'sequence, name'
 
-    _REFERENCE_VOLUME_BY_XMLID = {
-        'objeto_catalogo_cama_matrimonial': 1.71,
-        'objeto_catalogo_cama_individual': 1.0,
-        'objeto_catalogo_cuna': 0.57,
-        'objeto_catalogo_colchon': 0.71,
-        'objeto_catalogo_armario_2': 2.57,
-        'objeto_catalogo_armario_4': 4.86,
-        'objeto_catalogo_mesita_noche': 0.34,
-        'objeto_catalogo_comoda': 1.14,
-        'objeto_catalogo_tocador': 1.0,
-        'objeto_catalogo_zapatero': 0.71,
-        'objeto_catalogo_sofa_3': 2.14,
-        'objeto_catalogo_sofa_2': 1.57,
-        'objeto_catalogo_sillon': 1.0,
-        'objeto_catalogo_mueble_tv': 1.0,
-        'objeto_catalogo_mesa_centro': 0.57,
-        'objeto_catalogo_librero': 1.29,
-        'objeto_catalogo_aparador': 1.43,
-        'objeto_catalogo_puff': 0.23,
-        'objeto_catalogo_lampara_pie': 0.2,
-        'objeto_catalogo_mesa_comedor_grande': 1.71,
-        'objeto_catalogo_mesa_comedor_pequena': 1.0,
-        'objeto_catalogo_silla_comedor': 0.2,
-        'objeto_catalogo_frigorifico': 2.43,
-        'objeto_catalogo_lavadora_secadora': 2.0,
-        'objeto_catalogo_lavavajillas': 1.43,
-        'objeto_catalogo_microondas': 0.43,
-        'objeto_catalogo_horno_cocina': 1.86,
-        'objeto_catalogo_alacena': 1.29,
-        'objeto_catalogo_escritorio': 1.0,
-        'objeto_catalogo_silla_ergonomica': 0.4,
-        'objeto_catalogo_archivador': 0.86,
-        'objeto_catalogo_estanteria_metalica': 1.14,
-        'objeto_catalogo_monitor_pc': 0.34,
-        'objeto_catalogo_impresora_grande': 0.71,
-        'objeto_catalogo_caja_pequena': 0.43,
-        'objeto_catalogo_caja_grande': 0.29,
-        'objeto_catalogo_espejo_grande': 0.34,
-        'objeto_catalogo_cuadro': 0.11,
-        'objeto_catalogo_alfombra': 0.23,
-        'objeto_catalogo_bicicleta': 0.37,
-        'objeto_catalogo_planta_grande': 0.51,
-        'objeto_catalogo_maleta': 0.34,
+    _LEGACY_XMLID_MAP = {
+        'objeto_catalogo_alacena': 'objeto_catalogo_alacena_despensa',
+        'objeto_catalogo_alfombra': 'objeto_catalogo_alfombra_enrollada',
+        'objeto_catalogo_aparador': 'objeto_catalogo_aparador_vitrina',
+        'objeto_catalogo_armario_2': 'objeto_catalogo_armario_ropero_2_cuerpos',
+        'objeto_catalogo_armario_4': 'objeto_catalogo_armario_ropero_4_cuerpos',
+        'objeto_catalogo_caja_grande': 'objeto_catalogo_caja_carton_grande',
+        'objeto_catalogo_caja_pequena': 'objeto_catalogo_caja_carton_pequena',
+        'objeto_catalogo_cama_individual': 'objeto_catalogo_cama_individual_arcon',
+        'objeto_catalogo_comoda': 'objeto_catalogo_comoda_cajonera',
+        'objeto_catalogo_cuadro': 'objeto_catalogo_cuadro_pintura',
+        'objeto_catalogo_cuna': 'objeto_catalogo_cuna_camita_nino',
+        'objeto_catalogo_escritorio': 'objeto_catalogo_escritorio_oficina',
+        'objeto_catalogo_frigorifico': 'objeto_catalogo_frigorifico_nevera',
+        'objeto_catalogo_librero': 'objeto_catalogo_estanteria_libros_librero',
+        'objeto_catalogo_maleta': 'objeto_catalogo_maleta_viaje',
+        'objeto_catalogo_mesa_comedor_grande': 'objeto_catalogo_mesa_comedor_6_8',
+        'objeto_catalogo_mesa_comedor_pequena': 'objeto_catalogo_mesa_comedor_2_4',
+        'objeto_catalogo_monitor_pc': 'objeto_catalogo_monitor_pc_escritorio',
+        'objeto_catalogo_planta_grande': 'objeto_catalogo_planta_interior_maceta_grande',
+        'objeto_catalogo_sillon': 'objeto_catalogo_sillon_individual_reclinable',
+        'objeto_catalogo_sofa_2': 'objeto_catalogo_sofa_2_plazas',
+        'objeto_catalogo_sofa_3': 'objeto_catalogo_sofa_3_plazas',
+        'objeto_catalogo_tocador': 'objeto_catalogo_tocador_espejo',
     }
 
     name = fields.Char(string='Objeto', required=True, translate=False)
@@ -82,11 +79,85 @@ class MudanzasObjectCatalog(models.Model):
     is_other = fields.Boolean(string='Es opcion manual', default=False)
 
     @api.model
+    def _get_catalog_xml_path(self):
+        return os.path.normpath(
+            os.path.join(os.path.dirname(__file__), '..', 'data', 'object_catalog.xml')
+        )
+
+    @api.model
+    def _parse_catalog_xml_values(self):
+        tree = ET.parse(self._get_catalog_xml_path())
+        root = tree.getroot()
+        boolean_fields = {'embalaje_recomendado', 'desmontaje_recomendado', 'is_other'}
+        integer_fields = {'sequence'}
+        float_fields = {'volumen_referencia', 'peso_referencia'}
+        allowed_fields = boolean_fields | integer_fields | float_fields | {'name', 'category'}
+        values_by_xmlid = {}
+
+        for record_node in root.findall(".//record[@model='mudanzas.object.catalog']"):
+            xmlid_suffix = record_node.get('id')
+            if not xmlid_suffix:
+                continue
+            vals = {}
+            for field_node in record_node.findall('field'):
+                field_name = field_node.get('name')
+                if field_name not in allowed_fields:
+                    continue
+                raw_value = (field_node.text or '').strip()
+                if field_name in boolean_fields:
+                    vals[field_name] = raw_value.lower() in {'1', 'true'}
+                elif field_name in integer_fields:
+                    vals[field_name] = int(raw_value or 0)
+                elif field_name in float_fields:
+                    vals[field_name] = float(raw_value or 0.0)
+                else:
+                    vals[field_name] = raw_value
+            values_by_xmlid[xmlid_suffix] = vals
+
+        return values_by_xmlid
+
+    @api.model
+    def _migrate_legacy_catalog_xmlids(self):
+        imd_model = self.env['ir.model.data'].sudo()
+        line_model = self.env['mudanzas.lead.object.line'].sudo()
+        lead_model = self.env['crm.lead'].sudo()
+
+        for legacy_xmlid, current_xmlid in self._LEGACY_XMLID_MAP.items():
+            legacy_imd = imd_model.search(
+                [
+                    ('module', '=', 'mudanzas_crm'),
+                    ('name', '=', legacy_xmlid),
+                    ('model', '=', 'mudanzas.object.catalog'),
+                ],
+                limit=1,
+            )
+            current_record = self.env.ref(f'mudanzas_crm.{current_xmlid}', raise_if_not_found=False)
+            if not legacy_imd or not current_record:
+                continue
+
+            legacy_record = self.browse(legacy_imd.res_id).exists()
+            if not legacy_record or legacy_record.id == current_record.id:
+                legacy_imd.unlink()
+                continue
+
+            line_model.search([('objeto_catalogo_id', '=', legacy_record.id)]).write(
+                {'objeto_catalogo_id': current_record.id}
+            )
+            if 'objeto_catalogo_id' in lead_model._fields:
+                lead_model.search([('objeto_catalogo_id', '=', legacy_record.id)]).write(
+                    {'objeto_catalogo_id': current_record.id}
+                )
+
+            legacy_imd.unlink()
+            legacy_record.unlink()
+
+    @api.model
     def sync_reference_volumes(self):
-        for xmlid_suffix, volume in self._REFERENCE_VOLUME_BY_XMLID.items():
+        for xmlid_suffix, vals in self._parse_catalog_xml_values().items():
             record = self.env.ref(f'mudanzas_crm.{xmlid_suffix}', raise_if_not_found=False)
             if record:
-                record.write({'volumen_referencia': volume})
+                record.write(vals)
+        self._migrate_legacy_catalog_xmlids()
 
 
 HABITACION_SELECTION = [
@@ -104,6 +175,8 @@ ELEVATOR_SELECTION = [
     ('tiene', 'Tiene'),
     ('no_tiene', 'NO Tiene'),
 ]
+
+OPERARIOS_SELECTION = [(str(i), str(i)) for i in range(1, 11)]
 
 
 class MudanzasLeadObjectLine(models.Model):
@@ -126,10 +199,152 @@ class MudanzasLeadObjectLine(models.Model):
     )
     objeto_manual = fields.Char(string='Otro objeto')
     peso = fields.Float(string='Kg')
+    horas_referencia = fields.Float(string='Horas aprox', digits=(16, 2))
+    horas_referencia_manual = fields.Float(
+        string='Horas aprox manual',
+        digits=(16, 2),
+        copy=False,
+    )
+    horas_referencia_manual_override = fields.Boolean(
+        string='Horas aprox manual override',
+        default=False,
+        copy=False,
+    )
     volumen = fields.Float(string='M³')
     embalaje = fields.Boolean(string='Embalaje')
     desmontaje = fields.Boolean(string='Desmontaje')
     habitacion = fields.Selection(selection=HABITACION_SELECTION, string='Habitación')
+
+    @api.onchange(
+        'cantidad',
+        'volumen',
+        'embalaje',
+        'desmontaje',
+        'objeto_catalogo_id',
+        'lead_id.floorup',
+        'lead_id.floordown',
+        'lead_id.elevatorup',
+        'lead_id.elevatordown',
+        'lead_id.elevador',
+        'lead_id.horas_elevador',
+    )
+    def _onchange_estimation_inputs(self):
+        for line in self:
+            if not line.horas_referencia_manual_override:
+                line.horas_referencia = line._get_estimated_horas_referencia()
+
+    @api.onchange('horas_referencia')
+    def _onchange_horas_referencia(self):
+        for line in self:
+            estimated = line._get_estimated_horas_referencia()
+            current = round(line.horas_referencia or 0.0, 2)
+            if abs(current - estimated) > 0.0001:
+                line.horas_referencia_manual_override = True
+                line.horas_referencia_manual = current
+            elif line.horas_referencia_manual_override:
+                line.horas_referencia_manual = current
+
+    def _estimate_reference_hours(self):
+        self.ensure_one()
+
+        quantity = max(self.cantidad or 1, 1)
+        volume = max(self.volumen or self.objeto_catalogo_id.volumen_referencia or 0.0, 0.0)
+        unit_hours = self._get_hours_base_per_item() + (volume * self._get_hours_volume_factor())
+
+        if volume >= self._get_hours_volume_surcharge_1_threshold():
+            unit_hours += self._get_hours_volume_surcharge_1()
+        if volume >= self._get_hours_volume_surcharge_2_threshold():
+            unit_hours += self._get_hours_volume_surcharge_2()
+        if self.embalaje:
+            unit_hours += self._get_hours_packing()
+        if self.desmontaje:
+            unit_hours += self._get_hours_disassembly()
+
+        total_hours = quantity * unit_hours
+        total_hours += quantity * self._get_access_hours_per_unit()
+        total_hours += self._get_elevador_hours_share()
+        return max(total_hours, 0.0)
+
+    def _get_estimated_horas_referencia(self):
+        self.ensure_one()
+        return round(self._estimate_reference_hours(), 2)
+
+    def _get_effective_horas_referencia(self):
+        self.ensure_one()
+        if self.horas_referencia_manual_override:
+            return round(self.horas_referencia_manual or self.horas_referencia or 0.0, 2)
+        return self._get_estimated_horas_referencia()
+
+    def _get_access_hours_per_unit(self):
+        self.ensure_one()
+        lead = self.lead_id
+        if not lead:
+            return 0.0
+        return (
+            self._get_side_access_hours(lead.floorup, lead.elevatorup)
+            + self._get_side_access_hours(lead.floordown, lead.elevatordown)
+        )
+
+    @staticmethod
+    def _get_side_access_hours(floor, elevator):
+        floor = max(int(floor or 0), 0)
+        if floor <= 1:
+            return 0.0
+        if elevator == 'tiene':
+            return floor * _env_float('MUDANZAS_HOURS_FLOOR_WITH_ELEVATOR', 0.03)
+        if elevator == 'no_tiene':
+            return floor * _env_float('MUDANZAS_HOURS_FLOOR_NO_ELEVATOR', 0.08)
+        return floor * _env_float('MUDANZAS_HOURS_FLOOR_DEFAULT', 0.05)
+
+    def _get_elevador_hours_share(self):
+        self.ensure_one()
+        lead = self.lead_id
+        if not lead or not lead.elevador or not lead.horas_elevador:
+            return 0.0
+
+        lines = lead.mudanza_line_ids
+        own_weight = self._get_estimation_weight()
+        total_weight = sum(line._get_estimation_weight() for line in lines) or own_weight or 1.0
+        return lead.horas_elevador * (own_weight / total_weight)
+
+    def _get_estimation_weight(self):
+        self.ensure_one()
+        quantity = max(self.cantidad or 1, 1)
+        minimum_volume = _env_float('MUDANZAS_ESTIMATION_MIN_VOLUME_WEIGHT', 0.5)
+        volume = max(self.volumen or self.objeto_catalogo_id.volumen_referencia or minimum_volume, minimum_volume)
+        return quantity * volume
+
+    @staticmethod
+    def _get_hours_base_per_item():
+        return _env_float('MUDANZAS_HOURS_BASE_PER_ITEM', 0.18)
+
+    @staticmethod
+    def _get_hours_volume_factor():
+        return _env_float('MUDANZAS_HOURS_VOLUME_FACTOR', 0.22)
+
+    @staticmethod
+    def _get_hours_volume_surcharge_1_threshold():
+        return _env_float('MUDANZAS_HOURS_VOLUME_SURCHARGE_1_THRESHOLD', 1.5)
+
+    @staticmethod
+    def _get_hours_volume_surcharge_1():
+        return _env_float('MUDANZAS_HOURS_VOLUME_SURCHARGE_1', 0.10)
+
+    @staticmethod
+    def _get_hours_volume_surcharge_2_threshold():
+        return _env_float('MUDANZAS_HOURS_VOLUME_SURCHARGE_2_THRESHOLD', 2.5)
+
+    @staticmethod
+    def _get_hours_volume_surcharge_2():
+        return _env_float('MUDANZAS_HOURS_VOLUME_SURCHARGE_2', 0.14)
+
+    @staticmethod
+    def _get_hours_packing():
+        return _env_float('MUDANZAS_HOURS_PACKING', 0.20)
+
+    @staticmethod
+    def _get_hours_disassembly():
+        return _env_float('MUDANZAS_HOURS_DISASSEMBLY', 0.35)
 
     @api.onchange('objeto_catalogo_id')
     def _onchange_objeto_catalogo_id(self):
@@ -149,12 +364,75 @@ class MudanzasLeadObjectLine(models.Model):
                 line.embalaje = True
             if catalog.desmontaje_recomendado:
                 line.desmontaje = True
+            if not line.horas_referencia_manual_override:
+                line.horas_referencia = line._get_estimated_horas_referencia()
 
     @api.onchange('objeto_manual')
     def _onchange_objeto_manual(self):
         for line in self:
             if line.objeto_catalogo_id and line.objeto_catalogo_id.is_other:
                 line.objeto = line.objeto_manual
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        records = super().create(vals_list)
+        for record, vals in zip(records, vals_list):
+            if 'horas_referencia' in vals:
+                provided_hours = round(vals.get('horas_referencia') or 0.0, 2)
+                estimated_hours = record._get_estimated_horas_referencia()
+                if abs(provided_hours - estimated_hours) > 0.0001:
+                    super(MudanzasLeadObjectLine, record).write({
+                        'horas_referencia_manual_override': True,
+                        'horas_referencia_manual': provided_hours,
+                    })
+                else:
+                    record._write_estimated_horas_referencia(estimated_hours)
+                continue
+            if not record.horas_referencia_manual_override:
+                record._write_estimated_horas_referencia(record._get_estimated_horas_referencia())
+        return records
+
+    def write(self, vals):
+        if self.env.context.get('skip_horas_manual_tracking'):
+            return super().write(vals)
+
+        manual_hours_provided = 'horas_referencia' in vals
+        res = super().write(vals)
+        if manual_hours_provided:
+            for line in self:
+                current = round(line.horas_referencia or 0.0, 2)
+                estimated = line._get_estimated_horas_referencia()
+                if abs(current - estimated) > 0.0001:
+                    super(MudanzasLeadObjectLine, line).write({
+                        'horas_referencia_manual_override': True,
+                        'horas_referencia_manual': current,
+                    })
+                else:
+                    line._write_estimated_horas_referencia(estimated)
+            return res
+
+        recalc_fields = {
+            'cantidad',
+            'volumen',
+            'embalaje',
+            'desmontaje',
+            'objeto_catalogo_id',
+            'lead_id',
+        }
+        if recalc_fields.intersection(vals):
+            for line in self.filtered(lambda l: not l.horas_referencia_manual_override):
+                line._write_estimated_horas_referencia(line._get_estimated_horas_referencia())
+        return res
+
+    def _write_estimated_horas_referencia(self, estimated_hours=None):
+        self.ensure_one()
+        if estimated_hours is None:
+            estimated_hours = self._get_estimated_horas_referencia()
+        return super(MudanzasLeadObjectLine, self.with_context(skip_horas_manual_tracking=True)).write({
+            'horas_referencia_manual_override': False,
+            'horas_referencia_manual': 0.0,
+            'horas_referencia': round(estimated_hours or 0.0, 2),
+        })
 
     @api.constrains('objeto_catalogo_id', 'objeto_manual')
     def _check_objeto_manual_required(self):
@@ -254,6 +532,26 @@ class CrmLead(models.Model):
     observaciones_mudanza = fields.Char(string='Observaciones')
     fecha_mudanza = fields.Date(string='Fecha de mudanza')
     horas = fields.Integer(string='Horas estimadas')
+    horas_viaje = fields.Integer(string='Horas de viaje', default=0)
+    num_operarios_select = fields.Selection(
+        selection=OPERARIOS_SELECTION,
+        string='Operarios',
+        compute='_compute_num_operarios_select',
+        inverse='_inverse_num_operarios_select',
+    )
+    num_operarios = fields.Integer(string='Nº operarios')
+    horas_totales_aprox = fields.Float(
+        string='Horas totales aprox.',
+        compute='_compute_offer_estimations',
+        store=True,
+        digits=(16, 2),
+    )
+    precio_sugerido = fields.Float(
+        string='Precio sugerido',
+        compute='_compute_offer_estimations',
+        store=True,
+        digits=(16, 2),
+    )
     ascensor = fields.Boolean(string='Ascensor')
     mas_de_dos_dias = fields.Boolean(string='Más de 1 Día')
     elevador = fields.Boolean(string='Elevador')
@@ -452,6 +750,80 @@ class CrmLead(models.Model):
             lead.offer_include_furniture_handling = bool(lead.desmontaje or line_has_disassembly)
             lead.offer_include_packing_material = bool(lead.embalaje or line_has_packing)
 
+    @api.depends(
+        'cantidad',
+        'volumen',
+        'embalaje',
+        'desmontaje',
+        'num_operarios',
+        'num_operarios_select',
+        'objeto_catalogo_id.volumen_referencia',
+        'mudanza_line_ids.horas_referencia',
+        'mudanza_line_ids.horas_referencia_manual',
+        'mudanza_line_ids.horas_referencia_manual_override',
+        'mudanza_line_ids.cantidad',
+        'mudanza_line_ids.volumen',
+        'horas_viaje',
+        'floorup',
+        'floordown',
+        'elevatorup',
+        'elevatordown',
+        'elevador',
+        'horas_elevador',
+    )
+    def _compute_offer_estimations(self):
+        for lead in self:
+            reference_hours = lead._get_reference_hours_total()
+            inferred_operarios = lead._infer_num_operarios(reference_hours, lead._get_reference_volume_total())
+            num_operarios = lead._get_effective_num_operarios(inferred_operarios=inferred_operarios)
+            operative_hours = reference_hours / num_operarios if num_operarios else reference_hours
+            total_hours = operative_hours + max(lead.horas_viaje or 0, 0)
+            lead.horas_totales_aprox = round(total_hours, 2)
+            lead.precio_sugerido = round(
+                total_hours * lead._get_suggested_hourly_rate(num_operarios),
+                2,
+            )
+            lead.tipo_oferta = lead._get_tipo_oferta_by_amount(lead.precio_sugerido)
+
+    @api.depends(
+        'num_operarios',
+        'cantidad',
+        'volumen',
+        'embalaje',
+        'desmontaje',
+        'objeto_catalogo_id.volumen_referencia',
+        'mudanza_line_ids.horas_referencia',
+        'mudanza_line_ids.horas_referencia_manual',
+        'mudanza_line_ids.horas_referencia_manual_override',
+        'mudanza_line_ids.cantidad',
+        'mudanza_line_ids.volumen',
+        'horas_viaje',
+        'floorup',
+        'floordown',
+        'elevatorup',
+        'elevatordown',
+        'elevador',
+        'horas_elevador',
+    )
+    def _compute_num_operarios_select(self):
+        for lead in self:
+            inferred_operarios = lead._infer_num_operarios(
+                lead._get_reference_hours_total(),
+                lead._get_reference_volume_total(),
+            )
+            effective_operarios = lead._get_effective_num_operarios(inferred_operarios=inferred_operarios)
+            lead.num_operarios_select = str(effective_operarios)
+
+    def _inverse_num_operarios_select(self):
+        for lead in self:
+            lead.num_operarios = lead._sanitize_num_operarios(lead.num_operarios_select)
+
+    @api.onchange('num_operarios_select')
+    def _onchange_num_operarios_select(self):
+        for lead in self:
+            lead.num_operarios = lead._sanitize_num_operarios(lead.num_operarios_select)
+        self._refresh_offer_estimation_preview()
+
     @api.depends_context('uid')
     def _compute_offer_email_settings(self):
         user_email = self.env.user.email or False
@@ -492,6 +864,11 @@ class CrmLead(models.Model):
                     limit=1,
                 )
 
+    @api.onchange('floorup', 'floordown', 'elevatorup', 'elevatordown', 'elevador', 'horas_elevador')
+    def _onchange_access_estimation_inputs(self):
+        self._refresh_non_manual_line_hours()
+        self._refresh_offer_estimation_preview()
+
     @api.onchange('precio_oferta')
     def _onchange_precio_oferta(self):
         self.expected_revenue = self.precio_oferta or 0.0
@@ -522,11 +899,19 @@ class CrmLead(models.Model):
             if lead.objeto_catalogo_id and lead.objeto_catalogo_id.is_other and not lead.objeto_manual:
                 raise ValidationError(_("Debes indicar el nombre en 'Otro objeto'."))
 
-    @api.model
-    def create(self, vals):
-        vals = self._prepare_offer_vals(vals)
-        vals = self._prepare_objeto_vals(vals)
-        return super().create(vals)
+    @api.model_create_multi
+    def create(self, vals_list):
+        prepared_vals_list = []
+        for vals in vals_list:
+            prepared_vals = self._prepare_offer_vals(dict(vals))
+            prepared_vals = self._prepare_objeto_vals(prepared_vals)
+            prepared_vals_list.append(prepared_vals)
+
+        leads = super().create(prepared_vals_list)
+        for lead, vals in zip(leads, prepared_vals_list):
+            if lead._access_estimation_fields().intersection(vals):
+                lead._refresh_non_manual_line_hours()
+        return leads
 
     def write(self, vals):
         if 'objeto_catalogo_id' in vals or 'objeto_manual' in vals:
@@ -534,11 +919,16 @@ class CrmLead(models.Model):
                 lead_vals = lead._prepare_offer_vals(dict(vals))
                 lead_vals = lead._prepare_objeto_vals(lead_vals)
                 super(CrmLead, lead).write(lead_vals)
+                if lead._access_estimation_fields().intersection(lead_vals):
+                    lead._refresh_non_manual_line_hours()
             return True
 
         vals = self._prepare_offer_vals(vals)
         vals = self._prepare_objeto_vals(vals)
-        return super().write(vals)
+        res = super().write(vals)
+        if self._access_estimation_fields().intersection(vals):
+            self._refresh_non_manual_line_hours()
+        return res
 
     def _apply_objeto_catalogo_defaults(self):
         for lead in self:
@@ -601,15 +991,135 @@ class CrmLead(models.Model):
         vals['precio_oferta'] = source_value
         return vals
 
-    def _normalize_offer_report_text(self, value):
-        if not isinstance(value, str):
-            return value
-        if 'Ã' not in value and 'Â' not in value:
-            return value
+    @staticmethod
+    def _access_estimation_fields():
+        return {'floorup', 'floordown', 'elevatorup', 'elevatordown', 'elevador', 'horas_elevador'}
+
+    def _refresh_non_manual_line_hours(self):
+        for lead in self:
+            for line in lead.mudanza_line_ids.filtered(lambda l: not l.horas_referencia_manual_override):
+                estimated_hours = line._get_estimated_horas_referencia()
+                if line._origin and line._origin.id:
+                    line._write_estimated_horas_referencia(estimated_hours)
+                else:
+                    line.horas_referencia = estimated_hours
+
+    def _refresh_offer_estimation_preview(self):
+        self._compute_num_operarios_select()
+        self._compute_offer_estimations()
+
+    def _get_reference_hours_total(self):
+        self.ensure_one()
+        if self.mudanza_line_ids:
+            return sum(line._get_effective_horas_referencia() for line in self.mudanza_line_ids)
+        return self._estimate_legacy_reference_hours()
+
+    def _get_reference_volume_total(self):
+        self.ensure_one()
+        if self.mudanza_line_ids:
+            return sum(
+                max(line.cantidad or 1, 1) * max(line.volumen or line.objeto_catalogo_id.volumen_referencia or 0.0, 0.0)
+                for line in self.mudanza_line_ids
+            )
+        return max(self.cantidad or 1, 1) * max(self.volumen or self.objeto_catalogo_id.volumen_referencia or 0.0, 0.0)
+
+    def _estimate_legacy_reference_hours(self):
+        self.ensure_one()
+
+        quantity = max(self.cantidad or 1, 1)
+        volume = max(self.volumen or self.objeto_catalogo_id.volumen_referencia or 0.0, 0.0)
+        unit_hours = (
+            MudanzasLeadObjectLine._get_hours_base_per_item()
+            + (volume * MudanzasLeadObjectLine._get_hours_volume_factor())
+        )
+
+        if volume >= MudanzasLeadObjectLine._get_hours_volume_surcharge_1_threshold():
+            unit_hours += MudanzasLeadObjectLine._get_hours_volume_surcharge_1()
+        if volume >= MudanzasLeadObjectLine._get_hours_volume_surcharge_2_threshold():
+            unit_hours += MudanzasLeadObjectLine._get_hours_volume_surcharge_2()
+        if self.embalaje:
+            unit_hours += MudanzasLeadObjectLine._get_hours_packing()
+        if self.desmontaje:
+            unit_hours += MudanzasLeadObjectLine._get_hours_disassembly()
+
+        total_hours = quantity * unit_hours
+        total_hours += quantity * self._get_access_hours_per_unit()
+        total_hours += self.horas_elevador if self.elevador and self.horas_elevador else 0.0
+        return max(total_hours, 0.0)
+
+    def _get_access_hours_per_unit(self):
+        self.ensure_one()
+        return (
+            self._get_side_access_hours(self.floorup, self.elevatorup)
+            + self._get_side_access_hours(self.floordown, self.elevatordown)
+        )
+
+    @staticmethod
+    def _get_side_access_hours(floor, elevator):
+        floor = max(int(floor or 0), 0)
+        if floor <= 1:
+            return 0.0
+        if elevator == 'tiene':
+            return floor * 0.03
+        if elevator == 'no_tiene':
+            return floor * 0.08
+        return floor * 0.05
+
+    @staticmethod
+    def _get_suggested_hourly_rate(num_operarios):
+        num_operarios = CrmLead._sanitize_num_operarios(num_operarios) or 2
+        base_rate = _env_float('MUDANZAS_RATE_2_OPERARIOS', 75.0)
+        per_operario_increment = _env_float('MUDANZAS_RATE_OPERARIO_INCREMENT', 20.0)
+        return base_rate + max(num_operarios - 2, 0) * per_operario_increment
+
+    @staticmethod
+    def _get_tipo_oferta_by_amount(amount):
+        amount = amount or 0.0
+        if amount > _env_float('MUDANZAS_TIPO_OFERTA_ALTA_MIN', 700.0):
+            return 'alta'
+        if amount > _env_float('MUDANZAS_TIPO_OFERTA_MEDIA_MIN', 500.0):
+            return 'media'
+        return 'baja'
+
+    @staticmethod
+    def _sanitize_num_operarios(value):
         try:
-            return value.encode('latin1').decode('utf-8')
-        except (UnicodeEncodeError, UnicodeDecodeError):
-            return value
+            value = int(value or 0)
+        except (TypeError, ValueError):
+            return 0
+        return max(1, min(value, 10)) if value else 0
+
+    @staticmethod
+    def _infer_num_operarios(reference_hours, total_volume):
+        if (
+            reference_hours >= _env_float('MUDANZAS_OPERARIOS_HOURS_5_MIN', 24.0)
+            or total_volume >= _env_float('MUDANZAS_OPERARIOS_VOLUME_5_MIN', 38.0)
+        ):
+            return 5
+        if (
+            reference_hours >= _env_float('MUDANZAS_OPERARIOS_HOURS_4_MIN', 16.0)
+            or total_volume >= _env_float('MUDANZAS_OPERARIOS_VOLUME_4_MIN', 24.0)
+        ):
+            return 4
+        if (
+            reference_hours >= _env_float('MUDANZAS_OPERARIOS_HOURS_3_MIN', 8.0)
+            or total_volume >= _env_float('MUDANZAS_OPERARIOS_VOLUME_3_MIN', 12.0)
+        ):
+            return 3
+        return _env_int('MUDANZAS_OPERARIOS_DEFAULT', 2)
+
+    def _get_effective_num_operarios(self, inferred_operarios=None):
+        self.ensure_one()
+        if inferred_operarios is None:
+            inferred_operarios = self._infer_num_operarios(
+                self._get_reference_hours_total(),
+                self._get_reference_volume_total(),
+            )
+        return (
+            self._sanitize_num_operarios(self.num_operarios_select)
+            or self._sanitize_num_operarios(self.num_operarios)
+            or inferred_operarios
+        )
 
     def _get_offer_client_name(self):
         self.ensure_one()
@@ -620,19 +1130,6 @@ class CrmLead(models.Model):
         if not isinstance(value, str):
             return value
         if '\u00c3' not in value and '\u00c2' not in value:
-            repaired = value
-        else:
-            try:
-                repaired = value.encode('latin1').decode('utf-8')
-            except (UnicodeEncodeError, UnicodeDecodeError):
-                repaired = value
-        normalized = unicodedata.normalize('NFKD', repaired)
-        return normalized.encode('ascii', 'ignore').decode('ascii')
-
-    def _normalize_report_text(self, value):
-        if not isinstance(value, str):
-            return value
-        if 'Ã' not in value and 'Â' not in value:
             return value
         try:
             return value.encode('latin1').decode('utf-8')
@@ -816,3 +1313,4 @@ class ResPartner(models.Model):
         for partner in self:
             if partner.medio_contacto == 'llamada_otros' and not partner.medio_contacto_otro:
                 raise ValidationError(_("Debes indicar el valor de 'Otros'."))
+
