@@ -4,283 +4,902 @@
       <field name="name">Cama Matrimonial (King/Queen)</field>
       <field name="sequence">10</field>
       <field name="category">objeto</field>
-      <field name="volumen_referencia">1.71</field>
+      <field name="volumen_referencia">1.5</field>
       <field name="desmontaje_recomendado">1</field>
     </record>
-    <record id="objeto_catalogo_cama_individual" model="mudanzas.object.catalog">
-      <field name="name">Cama Individual</field>
+
+    <record id="objeto_catalogo_cama_individual_arcon" model="mudanzas.object.catalog">
+      <field name="name">Cama Individual Arcón</field>
       <field name="sequence">20</field>
       <field name="category">objeto</field>
-      <field name="volumen_referencia">1</field>
+      <field name="volumen_referencia">1.2</field>
       <field name="desmontaje_recomendado">1</field>
     </record>
-    <record id="objeto_catalogo_cuna" model="mudanzas.object.catalog">
+
+    <record id="objeto_catalogo_cuna_camita_nino" model="mudanzas.object.catalog">
       <field name="name">Cuna / Camita de niño</field>
       <field name="sequence">30</field>
       <field name="category">objeto</field>
-      <field name="volumen_referencia">0.57</field>
+      <field name="volumen_referencia">0.6</field>
       <field name="desmontaje_recomendado">1</field>
     </record>
+
     <record id="objeto_catalogo_colchon" model="mudanzas.object.catalog">
       <field name="name">Colchón</field>
       <field name="sequence">40</field>
       <field name="category">objeto</field>
-      <field name="volumen_referencia">0.71</field>
-      <field name="embalaje_recomendado">1</field>
+      <field name="volumen_referencia">0.4</field>
+      <field name="desmontaje_recomendado">0</field>
     </record>
-    <record id="objeto_catalogo_armario_2" model="mudanzas.object.catalog">
+
+    <record id="objeto_catalogo_armario_ropero_2_cuerpos" model="mudanzas.object.catalog">
       <field name="name">Armario / Ropero (2 cuerpos)</field>
       <field name="sequence">50</field>
       <field name="category">objeto</field>
-      <field name="volumen_referencia">2.57</field>
+      <field name="volumen_referencia">1.8</field>
       <field name="desmontaje_recomendado">1</field>
     </record>
-    <record id="objeto_catalogo_armario_4" model="mudanzas.object.catalog">
+
+    <record id="objeto_catalogo_armario_ropero_4_cuerpos" model="mudanzas.object.catalog">
       <field name="name">Armario / Ropero (4 cuerpos)</field>
       <field name="sequence">60</field>
       <field name="category">objeto</field>
-      <field name="volumen_referencia">4.86</field>
+      <field name="volumen_referencia">3.5</field>
       <field name="desmontaje_recomendado">1</field>
     </record>
+
     <record id="objeto_catalogo_mesita_noche" model="mudanzas.object.catalog">
       <field name="name">Mesita de noche</field>
       <field name="sequence">70</field>
       <field name="category">objeto</field>
-      <field name="volumen_referencia">0.34</field>
+      <field name="volumen_referencia">0.2</field>
+      <field name="desmontaje_recomendado">0</field>
     </record>
-    <record id="objeto_catalogo_comoda" model="mudanzas.object.catalog">
+
+    <record id="objeto_catalogo_comoda_cajonera" model="mudanzas.object.catalog">
       <field name="name">Cómoda / Cajonera</field>
       <field name="sequence">80</field>
       <field name="category">objeto</field>
-      <field name="volumen_referencia">1.14</field>
+      <field name="volumen_referencia">0.75</field>
+      <field name="desmontaje_recomendado">0</field>
     </record>
-    <record id="objeto_catalogo_tocador" model="mudanzas.object.catalog">
+
+    <record id="objeto_catalogo_tocador_espejo" model="mudanzas.object.catalog">
       <field name="name">Tocador con espejo</field>
       <field name="sequence">90</field>
       <field name="category">objeto</field>
-      <field name="volumen_referencia">1</field>
-      <field name="embalaje_recomendado">1</field>
+      <field name="volumen_referencia">0.9</field>
+      <field name="desmontaje_recomendado">1</field>
     </record>
+
     <record id="objeto_catalogo_zapatero" model="mudanzas.object.catalog">
       <field name="name">Zapatero</field>
       <field name="sequence">100</field>
       <field name="category">objeto</field>
-      <field name="volumen_referencia">0.71</field>
+      <field name="volumen_referencia">0.4</field>
+      <field name="desmontaje_recomendado">0</field>
     </record>
-    <record id="objeto_catalogo_sofa_3" model="mudanzas.object.catalog">
+
+    <record id="objeto_catalogo_sofa_3_plazas" model="mudanzas.object.catalog">
       <field name="name">Sofá de 3 plazas</field>
       <field name="sequence">110</field>
       <field name="category">objeto</field>
-      <field name="volumen_referencia">2.14</field>
-      <field name="embalaje_recomendado">1</field>
+      <field name="volumen_referencia">1.7</field>
+      <field name="desmontaje_recomendado">0</field>
     </record>
-    <record id="objeto_catalogo_sofa_2" model="mudanzas.object.catalog">
+
+    <record id="objeto_catalogo_sofa_2_plazas" model="mudanzas.object.catalog">
       <field name="name">Sofá de 2 plazas</field>
       <field name="sequence">120</field>
       <field name="category">objeto</field>
-      <field name="volumen_referencia">1.57</field>
-      <field name="embalaje_recomendado">1</field>
+      <field name="volumen_referencia">1.2</field>
+      <field name="desmontaje_recomendado">0</field>
     </record>
-    <record id="objeto_catalogo_sillon" model="mudanzas.object.catalog">
+
+    <record id="objeto_catalogo_sillon_individual_reclinable" model="mudanzas.object.catalog">
       <field name="name">Sillón individual / Reclinable</field>
       <field name="sequence">130</field>
       <field name="category">objeto</field>
-      <field name="volumen_referencia">1</field>
-      <field name="embalaje_recomendado">1</field>
+      <field name="volumen_referencia">0.9</field>
+      <field name="desmontaje_recomendado">0</field>
     </record>
+
     <record id="objeto_catalogo_mueble_tv" model="mudanzas.object.catalog">
       <field name="name">Mueble de TV</field>
       <field name="sequence">140</field>
       <field name="category">objeto</field>
-      <field name="volumen_referencia">1</field>
+      <field name="volumen_referencia">0.6</field>
+      <field name="desmontaje_recomendado">0</field>
     </record>
+
     <record id="objeto_catalogo_mesa_centro" model="mudanzas.object.catalog">
       <field name="name">Mesa de centro</field>
       <field name="sequence">150</field>
       <field name="category">objeto</field>
-      <field name="volumen_referencia">0.57</field>
+      <field name="volumen_referencia">0.3</field>
+      <field name="desmontaje_recomendado">0</field>
     </record>
-    <record id="objeto_catalogo_librero" model="mudanzas.object.catalog">
+
+    <record id="objeto_catalogo_estanteria_libros_librero" model="mudanzas.object.catalog">
       <field name="name">Estantería de libros / Librero</field>
       <field name="sequence">160</field>
       <field name="category">objeto</field>
-      <field name="volumen_referencia">1.29</field>
+      <field name="volumen_referencia">0.9</field>
+      <field name="desmontaje_recomendado">1</field>
     </record>
-    <record id="objeto_catalogo_aparador" model="mudanzas.object.catalog">
+
+    <record id="objeto_catalogo_aparador_vitrina" model="mudanzas.object.catalog">
       <field name="name">Aparador / Vitrina</field>
       <field name="sequence">170</field>
       <field name="category">objeto</field>
-      <field name="volumen_referencia">1.43</field>
-      <field name="embalaje_recomendado">1</field>
+      <field name="volumen_referencia">1.4</field>
+      <field name="desmontaje_recomendado">0</field>
     </record>
+
     <record id="objeto_catalogo_puff" model="mudanzas.object.catalog">
       <field name="name">Puff</field>
       <field name="sequence">180</field>
       <field name="category">objeto</field>
-      <field name="volumen_referencia">0.23</field>
+      <field name="volumen_referencia">0.25</field>
+      <field name="desmontaje_recomendado">0</field>
     </record>
+
     <record id="objeto_catalogo_lampara_pie" model="mudanzas.object.catalog">
       <field name="name">Lámpara de pie</field>
       <field name="sequence">190</field>
       <field name="category">objeto</field>
-      <field name="volumen_referencia">0.2</field>
-      <field name="embalaje_recomendado">1</field>
+      <field name="volumen_referencia">0.15</field>
+      <field name="desmontaje_recomendado">1</field>
     </record>
-    <record id="objeto_catalogo_mesa_comedor_grande" model="mudanzas.object.catalog">
+
+    <record id="objeto_catalogo_mesa_comedor_6_8" model="mudanzas.object.catalog">
       <field name="name">Mesa de comedor (6-8 personas)</field>
       <field name="sequence">200</field>
       <field name="category">objeto</field>
-      <field name="volumen_referencia">1.71</field>
+      <field name="volumen_referencia">1.3</field>
       <field name="desmontaje_recomendado">1</field>
     </record>
-    <record id="objeto_catalogo_mesa_comedor_pequena" model="mudanzas.object.catalog">
+
+    <record id="objeto_catalogo_mesa_comedor_2_4" model="mudanzas.object.catalog">
       <field name="name">Mesa de comedor pequeña (2-4 personas)</field>
       <field name="sequence">210</field>
       <field name="category">objeto</field>
-      <field name="volumen_referencia">1</field>
+      <field name="volumen_referencia">0.7</field>
       <field name="desmontaje_recomendado">1</field>
     </record>
+
     <record id="objeto_catalogo_silla_comedor" model="mudanzas.object.catalog">
       <field name="name">Silla de comedor</field>
       <field name="sequence">220</field>
       <field name="category">objeto</field>
-      <field name="volumen_referencia">0.2</field>
+      <field name="volumen_referencia">0.18</field>
+      <field name="desmontaje_recomendado">0</field>
     </record>
-    <record id="objeto_catalogo_frigorifico" model="mudanzas.object.catalog">
+
+    <record id="objeto_catalogo_frigorifico_nevera" model="mudanzas.object.catalog">
       <field name="name">Frigorífico / Nevera</field>
       <field name="sequence">230</field>
       <field name="category">objeto</field>
-      <field name="volumen_referencia">2.43</field>
-      <field name="embalaje_recomendado">1</field>
+      <field name="volumen_referencia">1.0</field>
+      <field name="desmontaje_recomendado">0</field>
     </record>
+
     <record id="objeto_catalogo_lavadora_secadora" model="mudanzas.object.catalog">
       <field name="name">Lavadora / Secadora</field>
       <field name="sequence">240</field>
       <field name="category">objeto</field>
-      <field name="volumen_referencia">2</field>
-      <field name="embalaje_recomendado">1</field>
+      <field name="volumen_referencia">0.55</field>
+      <field name="desmontaje_recomendado">0</field>
     </record>
+
     <record id="objeto_catalogo_lavavajillas" model="mudanzas.object.catalog">
       <field name="name">Lavavajillas</field>
       <field name="sequence">250</field>
       <field name="category">objeto</field>
-      <field name="volumen_referencia">1.43</field>
-      <field name="embalaje_recomendado">1</field>
+      <field name="volumen_referencia">0.5</field>
+      <field name="desmontaje_recomendado">0</field>
     </record>
+
     <record id="objeto_catalogo_microondas" model="mudanzas.object.catalog">
       <field name="name">Microondas</field>
       <field name="sequence">260</field>
       <field name="category">objeto</field>
-      <field name="volumen_referencia">0.43</field>
-      <field name="embalaje_recomendado">1</field>
+      <field name="volumen_referencia">0.12</field>
+      <field name="desmontaje_recomendado">0</field>
     </record>
+
     <record id="objeto_catalogo_horno_cocina" model="mudanzas.object.catalog">
       <field name="name">Horno / Cocina de gas o eléctrica</field>
       <field name="sequence">270</field>
       <field name="category">objeto</field>
-      <field name="volumen_referencia">1.86</field>
-      <field name="embalaje_recomendado">1</field>
+      <field name="volumen_referencia">0.8</field>
+      <field name="desmontaje_recomendado">1</field>
     </record>
-    <record id="objeto_catalogo_alacena" model="mudanzas.object.catalog">
+
+    <record id="objeto_catalogo_alacena_despensa" model="mudanzas.object.catalog">
       <field name="name">Alacena / Despensa</field>
       <field name="sequence">280</field>
       <field name="category">objeto</field>
-      <field name="volumen_referencia">1.29</field>
+      <field name="volumen_referencia">0.95</field>
+      <field name="desmontaje_recomendado">1</field>
     </record>
-    <record id="objeto_catalogo_escritorio" model="mudanzas.object.catalog">
+
+    <record id="objeto_catalogo_escritorio_oficina" model="mudanzas.object.catalog">
       <field name="name">Escritorio de oficina</field>
       <field name="sequence">290</field>
       <field name="category">objeto</field>
-      <field name="volumen_referencia">1</field>
+      <field name="volumen_referencia">1.0</field>
       <field name="desmontaje_recomendado">1</field>
     </record>
+
     <record id="objeto_catalogo_silla_ergonomica" model="mudanzas.object.catalog">
       <field name="name">Silla ergonómica</field>
       <field name="sequence">300</field>
       <field name="category">objeto</field>
       <field name="volumen_referencia">0.4</field>
+      <field name="desmontaje_recomendado">0</field>
     </record>
+
     <record id="objeto_catalogo_archivador" model="mudanzas.object.catalog">
       <field name="name">Archivador</field>
       <field name="sequence">310</field>
       <field name="category">objeto</field>
-      <field name="volumen_referencia">0.86</field>
+      <field name="volumen_referencia">0.5</field>
+      <field name="desmontaje_recomendado">0</field>
     </record>
+
     <record id="objeto_catalogo_estanteria_metalica" model="mudanzas.object.catalog">
       <field name="name">Estantería metálica</field>
       <field name="sequence">320</field>
       <field name="category">objeto</field>
-      <field name="volumen_referencia">1.14</field>
+      <field name="volumen_referencia">0.9</field>
       <field name="desmontaje_recomendado">1</field>
     </record>
-    <record id="objeto_catalogo_monitor_pc" model="mudanzas.object.catalog">
+
+    <record id="objeto_catalogo_monitor_pc_escritorio" model="mudanzas.object.catalog">
       <field name="name">Monitor / PC de escritorio</field>
       <field name="sequence">330</field>
       <field name="category">objeto</field>
-      <field name="volumen_referencia">0.34</field>
-      <field name="embalaje_recomendado">1</field>
+      <field name="volumen_referencia">0.15</field>
+      <field name="desmontaje_recomendado">1</field>
     </record>
+
     <record id="objeto_catalogo_impresora_grande" model="mudanzas.object.catalog">
       <field name="name">Impresora grande</field>
       <field name="sequence">340</field>
       <field name="category">objeto</field>
-      <field name="volumen_referencia">0.71</field>
-      <field name="embalaje_recomendado">1</field>
+      <field name="volumen_referencia">0.4</field>
+      <field name="desmontaje_recomendado">0</field>
     </record>
-    <record id="objeto_catalogo_caja_pequena" model="mudanzas.object.catalog">
+
+    <record id="objeto_catalogo_caja_carton_pequena" model="mudanzas.object.catalog">
       <field name="name">Caja de cartón pequeña (Libros, vajilla)</field>
       <field name="sequence">350</field>
       <field name="category">objeto</field>
-      <field name="volumen_referencia">0.43</field>
-      <field name="embalaje_recomendado">1</field>
+      <field name="volumen_referencia">0.125</field>
+      <field name="desmontaje_recomendado">0</field>
     </record>
-    <record id="objeto_catalogo_caja_grande" model="mudanzas.object.catalog">
+
+    <record id="objeto_catalogo_caja_carton_grande" model="mudanzas.object.catalog">
       <field name="name">Caja de cartón grande (Ropa, juguetes)</field>
       <field name="sequence">360</field>
       <field name="category">objeto</field>
-      <field name="volumen_referencia">0.29</field>
-      <field name="embalaje_recomendado">1</field>
+      <field name="volumen_referencia">0.15</field>
+      <field name="desmontaje_recomendado">0</field>
     </record>
+
     <record id="objeto_catalogo_espejo_grande" model="mudanzas.object.catalog">
       <field name="name">Espejo grande</field>
       <field name="sequence">370</field>
       <field name="category">objeto</field>
-      <field name="volumen_referencia">0.34</field>
-      <field name="embalaje_recomendado">1</field>
+      <field name="volumen_referencia">0.3</field>
+      <field name="desmontaje_recomendado">0</field>
     </record>
-    <record id="objeto_catalogo_cuadro" model="mudanzas.object.catalog">
+
+    <record id="objeto_catalogo_cuadro_pintura" model="mudanzas.object.catalog">
       <field name="name">Cuadro / Pintura</field>
       <field name="sequence">380</field>
       <field name="category">objeto</field>
-      <field name="volumen_referencia">0.11</field>
-      <field name="embalaje_recomendado">1</field>
+      <field name="volumen_referencia">0.15</field>
+      <field name="desmontaje_recomendado">0</field>
     </record>
-    <record id="objeto_catalogo_alfombra" model="mudanzas.object.catalog">
+
+    <record id="objeto_catalogo_alfombra_enrollada" model="mudanzas.object.catalog">
       <field name="name">Alfombra enrollada</field>
       <field name="sequence">390</field>
       <field name="category">objeto</field>
-      <field name="volumen_referencia">0.23</field>
+      <field name="volumen_referencia">0.35</field>
+      <field name="desmontaje_recomendado">0</field>
     </record>
+
     <record id="objeto_catalogo_bicicleta" model="mudanzas.object.catalog">
       <field name="name">Bicicleta</field>
       <field name="sequence">400</field>
       <field name="category">objeto</field>
-      <field name="volumen_referencia">0.37</field>
+      <field name="volumen_referencia">0.8</field>
+      <field name="desmontaje_recomendado">1</field>
     </record>
-    <record id="objeto_catalogo_planta_grande" model="mudanzas.object.catalog">
+
+    <record id="objeto_catalogo_planta_interior_maceta_grande" model="mudanzas.object.catalog">
       <field name="name">Planta de interior (Maceta grande)</field>
       <field name="sequence">410</field>
       <field name="category">objeto</field>
-      <field name="volumen_referencia">0.51</field>
-      <field name="embalaje_recomendado">1</field>
+      <field name="volumen_referencia">0.5</field>
+      <field name="desmontaje_recomendado">0</field>
     </record>
-    <record id="objeto_catalogo_maleta" model="mudanzas.object.catalog">
+
+    <record id="objeto_catalogo_maleta_viaje" model="mudanzas.object.catalog">
       <field name="name">Maleta de viaje</field>
       <field name="sequence">420</field>
       <field name="category">objeto</field>
-      <field name="volumen_referencia">0.34</field>
+      <field name="volumen_referencia">0.25</field>
+      <field name="desmontaje_recomendado">0</field>
     </record>
 
+    <!-- Nuevos objetos propuestos -->
+
+    <record id="objeto_catalogo_cama_nido" model="mudanzas.object.catalog">
+      <field name="name">Cama nido</field>
+      <field name="sequence">430</field>
+      <field name="category">objeto</field>
+      <field name="volumen_referencia">1.1</field>
+      <field name="desmontaje_recomendado">1</field>
+    </record>
+
+    <record id="objeto_catalogo_canape_abatible" model="mudanzas.object.catalog">
+      <field name="name">Canapé abatible</field>
+      <field name="sequence">440</field>
+      <field name="category">objeto</field>
+      <field name="volumen_referencia">1.4</field>
+      <field name="desmontaje_recomendado">1</field>
+    </record>
+
+    <record id="objeto_catalogo_litera" model="mudanzas.object.catalog">
+      <field name="name">Litera</field>
+      <field name="sequence">450</field>
+      <field name="category">objeto</field>
+      <field name="volumen_referencia">1.6</field>
+      <field name="desmontaje_recomendado">1</field>
+    </record>
+
+    <record id="objeto_catalogo_baul" model="mudanzas.object.catalog">
+      <field name="name">Baúl</field>
+      <field name="sequence">460</field>
+      <field name="category">objeto</field>
+      <field name="volumen_referencia">0.55</field>
+      <field name="desmontaje_recomendado">0</field>
+    </record>
+
+    <record id="objeto_catalogo_perchero" model="mudanzas.object.catalog">
+      <field name="name">Perchero</field>
+      <field name="sequence">470</field>
+      <field name="category">objeto</field>
+      <field name="volumen_referencia">0.25</field>
+      <field name="desmontaje_recomendado">1</field>
+    </record>
+
+    <record id="objeto_catalogo_sofa_chaiselongue" model="mudanzas.object.catalog">
+      <field name="name">Sofá chaise longue</field>
+      <field name="sequence">480</field>
+      <field name="category">objeto</field>
+      <field name="volumen_referencia">2.1</field>
+      <field name="desmontaje_recomendado">1</field>
+    </record>
+
+    <record id="objeto_catalogo_mueble_auxiliar" model="mudanzas.object.catalog">
+      <field name="name">Mueble auxiliar</field>
+      <field name="sequence">490</field>
+      <field name="category">objeto</field>
+      <field name="volumen_referencia">0.45</field>
+      <field name="desmontaje_recomendado">0</field>
+    </record>
+
+    <record id="objeto_catalogo_mesa_lateral" model="mudanzas.object.catalog">
+      <field name="name">Mesa lateral</field>
+      <field name="sequence">500</field>
+      <field name="category">objeto</field>
+      <field name="volumen_referencia">0.2</field>
+      <field name="desmontaje_recomendado">0</field>
+    </record>
+
+    <record id="objeto_catalogo_vitrina_alta" model="mudanzas.object.catalog">
+      <field name="name">Vitrina alta</field>
+      <field name="sequence">510</field>
+      <field name="category">objeto</field>
+      <field name="volumen_referencia">1.2</field>
+      <field name="desmontaje_recomendado">1</field>
+    </record>
+
+    <record id="objeto_catalogo_barra_desayunador" model="mudanzas.object.catalog">
+      <field name="name">Barra / Desayunador</field>
+      <field name="sequence">520</field>
+      <field name="category">objeto</field>
+      <field name="volumen_referencia">0.8</field>
+      <field name="desmontaje_recomendado">1</field>
+    </record>
+
+    <record id="objeto_catalogo_banco_alto" model="mudanzas.object.catalog">
+      <field name="name">Banco alto</field>
+      <field name="sequence">530</field>
+      <field name="category">objeto</field>
+      <field name="volumen_referencia">0.22</field>
+      <field name="desmontaje_recomendado">0</field>
+    </record>
+
+    <record id="objeto_catalogo_congelador_horizontal" model="mudanzas.object.catalog">
+      <field name="name">Congelador horizontal</field>
+      <field name="sequence">540</field>
+      <field name="category">objeto</field>
+      <field name="volumen_referencia">1.1</field>
+      <field name="desmontaje_recomendado">0</field>
+    </record>
+
+    <record id="objeto_catalogo_termo_calentador" model="mudanzas.object.catalog">
+      <field name="name">Termo / Calentador</field>
+      <field name="sequence">550</field>
+      <field name="category">objeto</field>
+      <field name="volumen_referencia">0.35</field>
+      <field name="desmontaje_recomendado">1</field>
+    </record>
+
+    <record id="objeto_catalogo_mueble_bano" model="mudanzas.object.catalog">
+      <field name="name">Mueble de baño</field>
+      <field name="sequence">560</field>
+      <field name="category">objeto</field>
+      <field name="volumen_referencia">0.4</field>
+      <field name="desmontaje_recomendado">1</field>
+    </record>
+
+    <record id="objeto_catalogo_escritorio_gamer" model="mudanzas.object.catalog">
+      <field name="name">Escritorio gamer</field>
+      <field name="sequence">570</field>
+      <field name="category">objeto</field>
+      <field name="volumen_referencia">0.95</field>
+      <field name="desmontaje_recomendado">1</field>
+    </record>
+
+    <record id="objeto_catalogo_portatil" model="mudanzas.object.catalog">
+      <field name="name">Portátil / Laptop</field>
+      <field name="sequence">580</field>
+      <field name="category">objeto</field>
+      <field name="volumen_referencia">0.03</field>
+      <field name="desmontaje_recomendado">0</field>
+    </record>
+
+    <record id="objeto_catalogo_tv_32_55" model="mudanzas.object.catalog">
+      <field name="name">TV 32-55 pulgadas</field>
+      <field name="sequence">590</field>
+      <field name="category">objeto</field>
+      <field name="volumen_referencia">0.2</field>
+      <field name="desmontaje_recomendado">0</field>
+    </record>
+
+    <record id="objeto_catalogo_tv_mas_55" model="mudanzas.object.catalog">
+      <field name="name">TV mayor a 55 pulgadas</field>
+      <field name="sequence">600</field>
+      <field name="category">objeto</field>
+      <field name="volumen_referencia">0.35</field>
+      <field name="desmontaje_recomendado">0</field>
+    </record>
+
+    <record id="objeto_catalogo_consola_videojuegos" model="mudanzas.object.catalog">
+      <field name="name">Consola de videojuegos</field>
+      <field name="sequence">610</field>
+      <field name="category">objeto</field>
+      <field name="volumen_referencia">0.05</field>
+      <field name="desmontaje_recomendado">0</field>
+    </record>
+
+    <record id="objeto_catalogo_impresora_pequena" model="mudanzas.object.catalog">
+      <field name="name">Impresora pequeña</field>
+      <field name="sequence">620</field>
+      <field name="category">objeto</field>
+      <field name="volumen_referencia">0.18</field>
+      <field name="desmontaje_recomendado">0</field>
+    </record>
+
+    <record id="objeto_catalogo_caja_plastica_mediana" model="mudanzas.object.catalog">
+      <field name="name">Caja plástica mediana</field>
+      <field name="sequence">630</field>
+      <field name="category">objeto</field>
+      <field name="volumen_referencia">0.1</field>
+      <field name="desmontaje_recomendado">0</field>
+    </record>
+
+    <record id="objeto_catalogo_bolsa_ropa" model="mudanzas.object.catalog">
+      <field name="name">Bolsa de ropa</field>
+      <field name="sequence">640</field>
+      <field name="category">objeto</field>
+      <field name="volumen_referencia">0.08</field>
+      <field name="desmontaje_recomendado">0</field>
+    </record>
+
+    <record id="objeto_catalogo_lampara_techo" model="mudanzas.object.catalog">
+      <field name="name">Lámpara de techo</field>
+      <field name="sequence">650</field>
+      <field name="category">objeto</field>
+      <field name="volumen_referencia">0.1</field>
+      <field name="desmontaje_recomendado">1</field>
+    </record>
+
+    <record id="objeto_catalogo_cortinas" model="mudanzas.object.catalog">
+      <field name="name">Cortinas</field>
+      <field name="sequence">660</field>
+      <field name="category">objeto</field>
+      <field name="volumen_referencia">0.06</field>
+      <field name="desmontaje_recomendado">0</field>
+    </record>
+
+    <record id="objeto_catalogo_tabla_planchar" model="mudanzas.object.catalog">
+      <field name="name">Tabla de planchar</field>
+      <field name="sequence">670</field>
+      <field name="category">objeto</field>
+      <field name="volumen_referencia">0.12</field>
+      <field name="desmontaje_recomendado">1</field>
+    </record>
+
+    <record id="objeto_catalogo_aspiradora" model="mudanzas.object.catalog">
+      <field name="name">Aspiradora</field>
+      <field name="sequence">680</field>
+      <field name="category">objeto</field>
+      <field name="volumen_referencia">0.18</field>
+      <field name="desmontaje_recomendado">0</field>
+    </record>
+
+    <record id="objeto_catalogo_patinete" model="mudanzas.object.catalog">
+      <field name="name">Patinete</field>
+      <field name="sequence">690</field>
+      <field name="category">objeto</field>
+      <field name="volumen_referencia">0.25</field>
+      <field name="desmontaje_recomendado">1</field>
+    </record>
+
+    <record id="objeto_catalogo_silla_oficina_simple" model="mudanzas.object.catalog">
+      <field name="name">Silla de oficina simple</field>
+      <field name="sequence">700</field>
+      <field name="category">objeto</field>
+      <field name="volumen_referencia">0.3</field>
+      <field name="desmontaje_recomendado">0</field>
+    </record>
+
+    <record id="objeto_catalogo_fichero_cajonero_pequeno" model="mudanzas.object.catalog">
+      <field name="name">Fichero / Cajonero pequeño</field>
+      <field name="sequence">710</field>
+      <field name="category">objeto</field>
+      <field name="volumen_referencia">0.28</field>
+      <field name="desmontaje_recomendado">0</field>
+    </record>
+
+    <record id="objeto_catalogo_banco_pie_cama" model="mudanzas.object.catalog">
+      <field name="name">Banco pie de cama</field>
+      <field name="sequence">720</field>
+      <field name="category">objeto</field>
+      <field name="volumen_referencia">0.35</field>
+      <field name="desmontaje_recomendado">0</field>
+    </record>
+
+    <!-- OBJETOS ADICIONALES PARA LLEGAR A 150 -->
+
+    <record id="objeto_catalogo_somier" model="mudanzas.object.catalog">
+      <field name="name">Somier</field>
+      <field name="sequence">730</field>
+      <field name="category">objeto</field>
+      <field name="volumen_referencia">0.45</field>
+      <field name="desmontaje_recomendado">0</field>
+    </record>
+
+    <record id="objeto_catalogo_cabecero_cama" model="mudanzas.object.catalog">
+      <field name="name">Cabecero de cama</field>
+      <field name="sequence">740</field>
+      <field name="category">objeto</field>
+      <field name="volumen_referencia">0.35</field>
+      <field name="desmontaje_recomendado">0</field>
+    </record>
+
+    <record id="objeto_catalogo_sinfonier" model="mudanzas.object.catalog">
+      <field name="name">Sinfonier</field>
+      <field name="sequence">750</field>
+      <field name="category">objeto</field>
+      <field name="volumen_referencia">0.65</field>
+      <field name="desmontaje_recomendado">0</field>
+    </record>
+
+    <record id="objeto_catalogo_armario_empotrado_modulo" model="mudanzas.object.catalog">
+      <field name="name">Módulo de armario empotrado</field>
+      <field name="sequence">760</field>
+      <field name="category">objeto</field>
+      <field name="volumen_referencia">1.1</field>
+      <field name="desmontaje_recomendado">1</field>
+    </record>
+
+    <record id="objeto_catalogo_perchero_burro" model="mudanzas.object.catalog">
+      <field name="name">Perchero tipo burro</field>
+      <field name="sequence">770</field>
+      <field name="category">objeto</field>
+      <field name="volumen_referencia">0.3</field>
+      <field name="desmontaje_recomendado">1</field>
+    </record>
+
+    <record id="objeto_catalogo_butaca" model="mudanzas.object.catalog">
+      <field name="name">Butaca</field>
+      <field name="sequence">780</field>
+      <field name="category">objeto</field>
+      <field name="volumen_referencia">0.75</field>
+      <field name="desmontaje_recomendado">0</field>
+    </record>
+
+    <record id="objeto_catalogo_sofa_cama" model="mudanzas.object.catalog">
+      <field name="name">Sofá cama</field>
+      <field name="sequence">790</field>
+      <field name="category">objeto</field>
+      <field name="volumen_referencia">1.9</field>
+      <field name="desmontaje_recomendado">1</field>
+    </record>
+
+    <record id="objeto_catalogo_mesa_camilla" model="mudanzas.object.catalog">
+      <field name="name">Mesa camilla</field>
+      <field name="sequence">800</field>
+      <field name="category">objeto</field>
+      <field name="volumen_referencia">0.4</field>
+      <field name="desmontaje_recomendado">0</field>
+    </record>
+
+    <record id="objeto_catalogo_mueble_bar" model="mudanzas.object.catalog">
+      <field name="name">Mueble bar</field>
+      <field name="sequence">810</field>
+      <field name="category">objeto</field>
+      <field name="volumen_referencia">0.9</field>
+      <field name="desmontaje_recomendado">0</field>
+    </record>
+
+    <record id="objeto_catalogo_vitrina_cristal" model="mudanzas.object.catalog">
+      <field name="name">Vitrina de cristal</field>
+      <field name="sequence">820</field>
+      <field name="category">objeto</field>
+      <field name="volumen_referencia">1.3</field>
+      <field name="desmontaje_recomendado">1</field>
+    </record>
+
+    <record id="objeto_catalogo_mueble_auxiliar_salon" model="mudanzas.object.catalog">
+      <field name="name">Mueble auxiliar de salón</field>
+      <field name="sequence">830</field>
+      <field name="category">objeto</field>
+      <field name="volumen_referencia">0.6</field>
+      <field name="desmontaje_recomendado">0</field>
+    </record>
+
+    <record id="objeto_catalogo_estanteria_kallax" model="mudanzas.object.catalog">
+      <field name="name">Estantería tipo Kallax</field>
+      <field name="sequence">840</field>
+      <field name="category">objeto</field>
+      <field name="volumen_referencia">0.85</field>
+      <field name="desmontaje_recomendado">1</field>
+    </record>
+
+    <record id="objeto_catalogo_modulo_tv" model="mudanzas.object.catalog">
+      <field name="name">Módulo de TV</field>
+      <field name="sequence">850</field>
+      <field name="category">objeto</field>
+      <field name="volumen_referencia">0.7</field>
+      <field name="desmontaje_recomendado">1</field>
+    </record>
+
+    <record id="objeto_catalogo_mesa_extensible" model="mudanzas.object.catalog">
+      <field name="name">Mesa extensible</field>
+      <field name="sequence">860</field>
+      <field name="category">objeto</field>
+      <field name="volumen_referencia">1.4</field>
+      <field name="desmontaje_recomendado">1</field>
+    </record>
+
+    <record id="objeto_catalogo_trona_bebe" model="mudanzas.object.catalog">
+      <field name="name">Trona de bebé</field>
+      <field name="sequence">870</field>
+      <field name="category">objeto</field>
+      <field name="volumen_referencia">0.25</field>
+      <field name="desmontaje_recomendado">0</field>
+    </record>
+
+    <record id="objeto_catalogo_carrito_bebe" model="mudanzas.object.catalog">
+      <field name="name">Carrito de bebé</field>
+      <field name="sequence">880</field>
+      <field name="category">objeto</field>
+      <field name="volumen_referencia">0.35</field>
+      <field name="desmontaje_recomendado">1</field>
+    </record>
+
+    <record id="objeto_catalogo_silla_paseo" model="mudanzas.object.catalog">
+      <field name="name">Silla de paseo</field>
+      <field name="sequence">890</field>
+      <field name="category">objeto</field>
+      <field name="volumen_referencia">0.28</field>
+      <field name="desmontaje_recomendado">1</field>
+    </record>
+
+    <record id="objeto_catalogo_cambiador_bebe" model="mudanzas.object.catalog">
+      <field name="name">Cambiador de bebé</field>
+      <field name="sequence">900</field>
+      <field name="category">objeto</field>
+      <field name="volumen_referencia">0.32</field>
+      <field name="desmontaje_recomendado">0</field>
+    </record>
+
+    <record id="objeto_catalogo_bicicleta_estatica" model="mudanzas.object.catalog">
+      <field name="name">Bicicleta estática</field>
+      <field name="sequence">910</field>
+      <field name="category">objeto</field>
+      <field name="volumen_referencia">0.9</field>
+      <field name="desmontaje_recomendado">1</field>
+    </record>
+
+    <record id="objeto_catalogo_cinta_correr" model="mudanzas.object.catalog">
+      <field name="name">Cinta de correr</field>
+      <field name="sequence">920</field>
+      <field name="category">objeto</field>
+      <field name="volumen_referencia">1.3</field>
+      <field name="desmontaje_recomendado">1</field>
+    </record>
+
+    <record id="objeto_catalogo_banco_musculacion" model="mudanzas.object.catalog">
+      <field name="name">Banco de musculación</field>
+      <field name="sequence">930</field>
+      <field name="category">objeto</field>
+      <field name="volumen_referencia">0.7</field>
+      <field name="desmontaje_recomendado">1</field>
+    </record>
+
+    <record id="objeto_catalogo_rack_pesas" model="mudanzas.object.catalog">
+      <field name="name">Rack de pesas</field>
+      <field name="sequence">940</field>
+      <field name="category">objeto</field>
+      <field name="volumen_referencia">0.8</field>
+      <field name="desmontaje_recomendado">1</field>
+    </record>
+
+    <record id="objeto_catalogo_tendedero_ropa" model="mudanzas.object.catalog">
+      <field name="name">Tendedero de ropa</field>
+      <field name="sequence">950</field>
+      <field name="category">objeto</field>
+      <field name="volumen_referencia">0.22</field>
+      <field name="desmontaje_recomendado">1</field>
+    </record>
+
+    <record id="objeto_catalogo_cesto_ropa" model="mudanzas.object.catalog">
+      <field name="name">Cesto de ropa</field>
+      <field name="sequence">960</field>
+      <field name="category">objeto</field>
+      <field name="volumen_referencia">0.18</field>
+      <field name="desmontaje_recomendado">0</field>
+    </record>
+
+    <record id="objeto_catalogo_carro_compra" model="mudanzas.object.catalog">
+      <field name="name">Carro de la compra</field>
+      <field name="sequence">970</field>
+      <field name="category">objeto</field>
+      <field name="volumen_referencia">0.2</field>
+      <field name="desmontaje_recomendado">0</field>
+    </record>
+
+    <record id="objeto_catalogo_estufa_electrica" model="mudanzas.object.catalog">
+      <field name="name">Estufa eléctrica</field>
+      <field name="sequence">980</field>
+      <field name="category">objeto</field>
+      <field name="volumen_referencia">0.35</field>
+      <field name="desmontaje_recomendado">0</field>
+    </record>
+
+    <record id="objeto_catalogo_radiador_portatil" model="mudanzas.object.catalog">
+      <field name="name">Radiador portátil</field>
+      <field name="sequence">990</field>
+      <field name="category">objeto</field>
+      <field name="volumen_referencia">0.4</field>
+      <field name="desmontaje_recomendado">0</field>
+    </record>
+
+    <record id="objeto_catalogo_ventilador_pie" model="mudanzas.object.catalog">
+      <field name="name">Ventilador de pie</field>
+      <field name="sequence">1000</field>
+      <field name="category">objeto</field>
+      <field name="volumen_referencia">0.22</field>
+      <field name="desmontaje_recomendado">1</field>
+    </record>
+
+    <record id="objeto_catalogo_aire_portatil" model="mudanzas.object.catalog">
+      <field name="name">Aire acondicionado portátil</field>
+      <field name="sequence">1010</field>
+      <field name="category">objeto</field>
+      <field name="volumen_referencia">0.55</field>
+      <field name="desmontaje_recomendado">0</field>
+    </record>
+
+    <record id="objeto_catalogo_barbacoa" model="mudanzas.object.catalog">
+      <field name="name">Barbacoa</field>
+      <field name="sequence">1020</field>
+      <field name="category">objeto</field>
+      <field name="volumen_referencia">0.75</field>
+      <field name="desmontaje_recomendado">1</field>
+    </record>
+
+    <record id="objeto_catalogo_mesa_terraza" model="mudanzas.object.catalog">
+      <field name="name">Mesa de terraza</field>
+      <field name="sequence">1030</field>
+      <field name="category">objeto</field>
+      <field name="volumen_referencia">0.8</field>
+      <field name="desmontaje_recomendado">1</field>
+    </record>
+
+    <record id="objeto_catalogo_silla_terraza" model="mudanzas.object.catalog">
+      <field name="name">Silla de terraza</field>
+      <field name="sequence">1040</field>
+      <field name="category">objeto</field>
+      <field name="volumen_referencia">0.18</field>
+      <field name="desmontaje_recomendado">0</field>
+    </record>
+
+    <record id="objeto_catalogo_sombrilla" model="mudanzas.object.catalog">
+      <field name="name">Sombrilla</field>
+      <field name="sequence">1050</field>
+      <field name="category">objeto</field>
+      <field name="volumen_referencia">0.25</field>
+      <field name="desmontaje_recomendado">1</field>
+    </record>
+
+    <record id="objeto_catalogo_tumbona" model="mudanzas.object.catalog">
+      <field name="name">Tumbona</field>
+      <field name="sequence">1060</field>
+      <field name="category">objeto</field>
+      <field name="volumen_referencia">0.7</field>
+      <field name="desmontaje_recomendado">0</field>
+    </record>
+
+    <record id="objeto_catalogo_mueble_trastero" model="mudanzas.object.catalog">
+      <field name="name">Mueble de trastero</field>
+      <field name="sequence">1070</field>
+      <field name="category">objeto</field>
+      <field name="volumen_referencia">0.9</field>
+      <field name="desmontaje_recomendado">1</field>
+    </record>
+
+    <record id="objeto_catalogo_caja_herramientas" model="mudanzas.object.catalog">
+      <field name="name">Caja de herramientas</field>
+      <field name="sequence">1080</field>
+      <field name="category">objeto</field>
+      <field name="volumen_referencia">0.12</field>
+      <field name="desmontaje_recomendado">0</field>
+    </record>
+
+    <record id="objeto_catalogo_escalera_plegable" model="mudanzas.object.catalog">
+      <field name="name">Escalera plegable</field>
+      <field name="sequence">1090</field>
+      <field name="category">objeto</field>
+      <field name="volumen_referencia">0.25</field>
+      <field name="desmontaje_recomendado">0</field>
+    </record>
+
+    <record id="objeto_catalogo_tabla_surf" model="mudanzas.object.catalog">
+      <field name="name">Tabla de surf</field>
+      <field name="sequence">1100</field>
+      <field name="category">objeto</field>
+      <field name="volumen_referencia">0.9</field>
+      <field name="desmontaje_recomendado">0</field>
+    </record>
+
+    <record id="objeto_catalogo_tabla_paddle" model="mudanzas.object.catalog">
+      <field name="name">Tabla de paddle surf</field>
+      <field name="sequence">1110</field>
+      <field name="category">objeto</field>
+      <field name="volumen_referencia">1.0</field>
+      <field name="desmontaje_recomendado">0</field>
+    </record>
+
+    <record id="objeto_catalogo_armario_willy" model="mudanzas.object.catalog">
+      <field name="name">Armario/Ropero Willy</field>
+      <field name="sequence">1120</field>
+      <field name="category">objeto</field>
+      <field name="volumen_referencia">0.34</field>
+      <field name="desmontaje_recomendado">0</field>
+    </record>
+    
     <record id="objeto_catalogo_otro" model="mudanzas.object.catalog">
       <field name="name">Otro objeto...</field>
       <field name="sequence">9999</field>

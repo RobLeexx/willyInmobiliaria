@@ -29,6 +29,8 @@ ENV/
 docker-compose.yml
 
 __pycache__/
+controllers/__pycache__/
+models/__pycache__/
 *.pyc
 *.pyo
 *.py[cod]
@@ -36,3 +38,7 @@ __pycache__/
 
 filestore/
 sessions/
+
+## Prettier
+.prettier*
+package.json

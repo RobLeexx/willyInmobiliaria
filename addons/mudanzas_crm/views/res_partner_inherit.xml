@@ -15,7 +15,7 @@
         <xpath expr="//sheet" position="inside">
           <group string="Medio de contacto">
             <field name="medio_contacto"/>
-            <field name="medio_contacto_otro" invisible="medio_contacto != 'llamada_otros'" required="medio_contacto == 'llamada_otros'"/>
+            <field name="medio_contacto_otro" invisible="medio_contacto != 'llamada_otros'" required="medio_contacto == 'llamada_otros'" force_save="1"/>
           </group>
         </xpath>
       </field>

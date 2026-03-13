@@ -1,6 +1,26 @@
+﻿
+import os
+import unicodedata
+import xml.etree.ElementTree as ET
+import re
+
 from odoo import api, fields, models, _
 from odoo.exceptions import UserError, ValidationError
 from markupsafe import Markup
+
+
+def _env_float(name, default):
+    try:
+        return float(os.getenv(name, default))
+    except (TypeError, ValueError):
+        return float(default)
+
+
+def _env_int(name, default):
+    try:
+        return int(float(os.getenv(name, default)))
+    except (TypeError, ValueError):
+        return int(default)
 
 
 class MudanzasProvince(models.Model):
@@ -8,7 +28,7 @@ class MudanzasProvince(models.Model):
     _description = 'Province for Mudanzas'
 
     name = fields.Char(string='Provincia', required=True)
-    state = fields.Char(string='Estado')
+    state = fields.Char(string='Comunidad')
 
 
 class MudanzasObjectCatalog(models.Model):
@@ -16,49 +36,30 @@ class MudanzasObjectCatalog(models.Model):
     _description = 'Catalogo de objetos para mudanza'
     _order = 'sequence, name'
 
-    _REFERENCE_VOLUME_BY_XMLID = {
-        'objeto_catalogo_cama_matrimonial': 1.71,
-        'objeto_catalogo_cama_individual': 1.0,
-        'objeto_catalogo_cuna': 0.57,
-        'objeto_catalogo_colchon': 0.71,
-        'objeto_catalogo_armario_2': 2.57,
-        'objeto_catalogo_armario_4': 4.86,
-        'objeto_catalogo_mesita_noche': 0.34,
-        'objeto_catalogo_comoda': 1.14,
-        'objeto_catalogo_tocador': 1.0,
-        'objeto_catalogo_zapatero': 0.71,
-        'objeto_catalogo_sofa_3': 2.14,
-        'objeto_catalogo_sofa_2': 1.57,
-        'objeto_catalogo_sillon': 1.0,
-        'objeto_catalogo_mueble_tv': 1.0,
-        'objeto_catalogo_mesa_centro': 0.57,
-        'objeto_catalogo_librero': 1.29,
-        'objeto_catalogo_aparador': 1.43,
-        'objeto_catalogo_puff': 0.23,
-        'objeto_catalogo_lampara_pie': 0.2,
-        'objeto_catalogo_mesa_comedor_grande': 1.71,
-        'objeto_catalogo_mesa_comedor_pequena': 1.0,
-        'objeto_catalogo_silla_comedor': 0.2,
-        'objeto_catalogo_frigorifico': 2.43,
-        'objeto_catalogo_lavadora_secadora': 2.0,
-        'objeto_catalogo_lavavajillas': 1.43,
-        'objeto_catalogo_microondas': 0.43,
-        'objeto_catalogo_horno_cocina': 1.86,
-        'objeto_catalogo_alacena': 1.29,
-        'objeto_catalogo_escritorio': 1.0,
-        'objeto_catalogo_silla_ergonomica': 0.4,
-        'objeto_catalogo_archivador': 0.86,
-        'objeto_catalogo_estanteria_metalica': 1.14,
-        'objeto_catalogo_monitor_pc': 0.34,
-        'objeto_catalogo_impresora_grande': 0.71,
-        'objeto_catalogo_caja_pequena': 0.43,
-        'objeto_catalogo_caja_grande': 0.29,
-        'objeto_catalogo_espejo_grande': 0.34,
-        'objeto_catalogo_cuadro': 0.11,
-        'objeto_catalogo_alfombra': 0.23,
-        'objeto_catalogo_bicicleta': 0.37,
-        'objeto_catalogo_planta_grande': 0.51,
-        'objeto_catalogo_maleta': 0.34,
+    _LEGACY_XMLID_MAP = {
+        'objeto_catalogo_alacena': 'objeto_catalogo_alacena_despensa',
+        'objeto_catalogo_alfombra': 'objeto_catalogo_alfombra_enrollada',
+        'objeto_catalogo_aparador': 'objeto_catalogo_aparador_vitrina',
+        'objeto_catalogo_armario_2': 'objeto_catalogo_armario_ropero_2_cuerpos',
+        'objeto_catalogo_armario_4': 'objeto_catalogo_armario_ropero_4_cuerpos',
+        'objeto_catalogo_caja_grande': 'objeto_catalogo_caja_carton_grande',
+        'objeto_catalogo_caja_pequena': 'objeto_catalogo_caja_carton_pequena',
+        'objeto_catalogo_cama_individual': 'objeto_catalogo_cama_individual_arcon',
+        'objeto_catalogo_comoda': 'objeto_catalogo_comoda_cajonera',
+        'objeto_catalogo_cuadro': 'objeto_catalogo_cuadro_pintura',
+        'objeto_catalogo_cuna': 'objeto_catalogo_cuna_camita_nino',
+        'objeto_catalogo_escritorio': 'objeto_catalogo_escritorio_oficina',
+        'objeto_catalogo_frigorifico': 'objeto_catalogo_frigorifico_nevera',
+        'objeto_catalogo_librero': 'objeto_catalogo_estanteria_libros_librero',
+        'objeto_catalogo_maleta': 'objeto_catalogo_maleta_viaje',
+        'objeto_catalogo_mesa_comedor_grande': 'objeto_catalogo_mesa_comedor_6_8',
+        'objeto_catalogo_mesa_comedor_pequena': 'objeto_catalogo_mesa_comedor_2_4',
+        'objeto_catalogo_monitor_pc': 'objeto_catalogo_monitor_pc_escritorio',
+        'objeto_catalogo_planta_grande': 'objeto_catalogo_planta_interior_maceta_grande',
+        'objeto_catalogo_sillon': 'objeto_catalogo_sillon_individual_reclinable',
+        'objeto_catalogo_sofa_2': 'objeto_catalogo_sofa_2_plazas',
+        'objeto_catalogo_sofa_3': 'objeto_catalogo_sofa_3_plazas',
+        'objeto_catalogo_tocador': 'objeto_catalogo_tocador_espejo',
     }
 
     name = fields.Char(string='Objeto', required=True, translate=False)
@@ -80,11 +81,85 @@ class MudanzasObjectCatalog(models.Model):
     is_other = fields.Boolean(string='Es opcion manual', default=False)
 
     @api.model
+    def _get_catalog_xml_path(self):
+        return os.path.normpath(
+            os.path.join(os.path.dirname(__file__), '..', 'data', 'object_catalog.xml')
+        )
+
+    @api.model
+    def _parse_catalog_xml_values(self):
+        tree = ET.parse(self._get_catalog_xml_path())
+        root = tree.getroot()
+        boolean_fields = {'embalaje_recomendado', 'desmontaje_recomendado', 'is_other'}
+        integer_fields = {'sequence'}
+        float_fields = {'volumen_referencia', 'peso_referencia'}
+        allowed_fields = boolean_fields | integer_fields | float_fields | {'name', 'category'}
+        values_by_xmlid = {}
+
+        for record_node in root.findall(".//record[@model='mudanzas.object.catalog']"):
+            xmlid_suffix = record_node.get('id')
+            if not xmlid_suffix:
+                continue
+            vals = {}
+            for field_node in record_node.findall('field'):
+                field_name = field_node.get('name')
+                if field_name not in allowed_fields:
+                    continue
+                raw_value = (field_node.text or '').strip()
+                if field_name in boolean_fields:
+                    vals[field_name] = raw_value.lower() in {'1', 'true'}
+                elif field_name in integer_fields:
+                    vals[field_name] = int(raw_value or 0)
+                elif field_name in float_fields:
+                    vals[field_name] = float(raw_value or 0.0)
+                else:
+                    vals[field_name] = raw_value
+            values_by_xmlid[xmlid_suffix] = vals
+
+        return values_by_xmlid
+
+    @api.model
+    def _migrate_legacy_catalog_xmlids(self):
+        imd_model = self.env['ir.model.data'].sudo()
+        line_model = self.env['mudanzas.lead.object.line'].sudo()
+        lead_model = self.env['crm.lead'].sudo()
+
+        for legacy_xmlid, current_xmlid in self._LEGACY_XMLID_MAP.items():
+            legacy_imd = imd_model.search(
+                [
+                    ('module', '=', 'mudanzas_crm'),
+                    ('name', '=', legacy_xmlid),
+                    ('model', '=', 'mudanzas.object.catalog'),
+                ],
+                limit=1,
+            )
+            current_record = self.env.ref(f'mudanzas_crm.{current_xmlid}', raise_if_not_found=False)
+            if not legacy_imd or not current_record:
+                continue
+
+            legacy_record = self.browse(legacy_imd.res_id).exists()
+            if not legacy_record or legacy_record.id == current_record.id:
+                legacy_imd.unlink()
+                continue
+
+            line_model.search([('objeto_catalogo_id', '=', legacy_record.id)]).write(
+                {'objeto_catalogo_id': current_record.id}
+            )
+            if 'objeto_catalogo_id' in lead_model._fields:
+                lead_model.search([('objeto_catalogo_id', '=', legacy_record.id)]).write(
+                    {'objeto_catalogo_id': current_record.id}
+                )
+
+            legacy_imd.unlink()
+            legacy_record.unlink()
+
+    @api.model
     def sync_reference_volumes(self):
-        for xmlid_suffix, volume in self._REFERENCE_VOLUME_BY_XMLID.items():
+        for xmlid_suffix, vals in self._parse_catalog_xml_values().items():
             record = self.env.ref(f'mudanzas_crm.{xmlid_suffix}', raise_if_not_found=False)
             if record:
-                record.write({'volumen_referencia': volume})
+                record.write(vals)
+        self._migrate_legacy_catalog_xmlids()
 
 
 HABITACION_SELECTION = [
@@ -97,6 +172,13 @@ HABITACION_SELECTION = [
     ('terraza_trastero', 'Terraza/Trastero'),
     ('otros', 'Otros'),
 ]
+
+ELEVATOR_SELECTION = [
+    ('tiene', 'Tiene'),
+    ('no_tiene', 'NO Tiene'),
+]
+
+OPERARIOS_SELECTION = [(str(i), str(i)) for i in range(1, 11)]
 
 
 class MudanzasLeadObjectLine(models.Model):
@@ -119,10 +201,152 @@ class MudanzasLeadObjectLine(models.Model):
     )
     objeto_manual = fields.Char(string='Otro objeto')
     peso = fields.Float(string='Kg')
+    horas_referencia = fields.Float(string='Horas aprox', digits=(16, 2))
+    horas_referencia_manual = fields.Float(
+        string='Horas aprox manual',
+        digits=(16, 2),
+        copy=False,
+    )
+    horas_referencia_manual_override = fields.Boolean(
+        string='Horas aprox manual override',
+        default=False,
+        copy=False,
+    )
     volumen = fields.Float(string='M³')
     embalaje = fields.Boolean(string='Embalaje')
     desmontaje = fields.Boolean(string='Desmontaje')
     habitacion = fields.Selection(selection=HABITACION_SELECTION, string='Habitación')
+
+    @api.onchange(
+        'cantidad',
+        'volumen',
+        'embalaje',
+        'desmontaje',
+        'objeto_catalogo_id',
+        'lead_id.floorup',
+        'lead_id.floordown',
+        'lead_id.elevatorup',
+        'lead_id.elevatordown',
+        'lead_id.elevador',
+        'lead_id.horas_elevador',
+    )
+    def _onchange_estimation_inputs(self):
+        for line in self:
+            if not line.horas_referencia_manual_override:
+                line.horas_referencia = line._get_estimated_horas_referencia()
+
+    @api.onchange('horas_referencia')
+    def _onchange_horas_referencia(self):
+        for line in self:
+            estimated = line._get_estimated_horas_referencia()
+            current = round(line.horas_referencia or 0.0, 2)
+            if abs(current - estimated) > 0.0001:
+                line.horas_referencia_manual_override = True
+                line.horas_referencia_manual = current
+            elif line.horas_referencia_manual_override:
+                line.horas_referencia_manual = current
+
+    def _estimate_reference_hours(self):
+        self.ensure_one()
+
+        quantity = max(self.cantidad or 1, 1)
+        volume = max(self.volumen or self.objeto_catalogo_id.volumen_referencia or 0.0, 0.0)
+        unit_hours = self._get_hours_base_per_item() + (volume * self._get_hours_volume_factor())
+
+        if volume >= self._get_hours_volume_surcharge_1_threshold():
+            unit_hours += self._get_hours_volume_surcharge_1()
+        if volume >= self._get_hours_volume_surcharge_2_threshold():
+            unit_hours += self._get_hours_volume_surcharge_2()
+        if self.embalaje:
+            unit_hours += self._get_hours_packing()
+        if self.desmontaje:
+            unit_hours += self._get_hours_disassembly()
+
+        total_hours = quantity * unit_hours
+        total_hours += quantity * self._get_access_hours_per_unit()
+        total_hours += self._get_elevador_hours_share()
+        return max(total_hours, 0.0)
+
+    def _get_estimated_horas_referencia(self):
+        self.ensure_one()
+        return round(self._estimate_reference_hours(), 2)
+
+    def _get_effective_horas_referencia(self):
+        self.ensure_one()
+        if self.horas_referencia_manual_override:
+            return round(self.horas_referencia_manual or self.horas_referencia or 0.0, 2)
+        return self._get_estimated_horas_referencia()
+
+    def _get_access_hours_per_unit(self):
+        self.ensure_one()
+        lead = self.lead_id
+        if not lead:
+            return 0.0
+        return (
+            self._get_side_access_hours(lead.floorup, lead.elevatorup)
+            + self._get_side_access_hours(lead.floordown, lead.elevatordown)
+        )
+
+    @staticmethod
+    def _get_side_access_hours(floor, elevator):
+        floor = max(int(floor or 0), 0)
+        if floor <= 1:
+            return 0.0
+        if elevator == 'tiene':
+            return floor * _env_float('MUDANZAS_HOURS_FLOOR_WITH_ELEVATOR', 0.03)
+        if elevator == 'no_tiene':
+            return floor * _env_float('MUDANZAS_HOURS_FLOOR_NO_ELEVATOR', 0.08)
+        return floor * _env_float('MUDANZAS_HOURS_FLOOR_DEFAULT', 0.05)
+
+    def _get_elevador_hours_share(self):
+        self.ensure_one()
+        lead = self.lead_id
+        if not lead or not lead.elevador or not lead.horas_elevador:
+            return 0.0
+
+        lines = lead.mudanza_line_ids
+        own_weight = self._get_estimation_weight()
+        total_weight = sum(line._get_estimation_weight() for line in lines) or own_weight or 1.0
+        return lead.horas_elevador * (own_weight / total_weight)
+
+    def _get_estimation_weight(self):
+        self.ensure_one()
+        quantity = max(self.cantidad or 1, 1)
+        minimum_volume = _env_float('MUDANZAS_ESTIMATION_MIN_VOLUME_WEIGHT', 0.5)
+        volume = max(self.volumen or self.objeto_catalogo_id.volumen_referencia or minimum_volume, minimum_volume)
+        return quantity * volume
+
+    @staticmethod
+    def _get_hours_base_per_item():
+        return _env_float('MUDANZAS_HOURS_BASE_PER_ITEM', 0.18)
+
+    @staticmethod
+    def _get_hours_volume_factor():
+        return _env_float('MUDANZAS_HOURS_VOLUME_FACTOR', 0.22)
+
+    @staticmethod
+    def _get_hours_volume_surcharge_1_threshold():
+        return _env_float('MUDANZAS_HOURS_VOLUME_SURCHARGE_1_THRESHOLD', 1.5)
+
+    @staticmethod
+    def _get_hours_volume_surcharge_1():
+        return _env_float('MUDANZAS_HOURS_VOLUME_SURCHARGE_1', 0.10)
+
+    @staticmethod
+    def _get_hours_volume_surcharge_2_threshold():
+        return _env_float('MUDANZAS_HOURS_VOLUME_SURCHARGE_2_THRESHOLD', 2.5)
+
+    @staticmethod
+    def _get_hours_volume_surcharge_2():
+        return _env_float('MUDANZAS_HOURS_VOLUME_SURCHARGE_2', 0.14)
+
+    @staticmethod
+    def _get_hours_packing():
+        return _env_float('MUDANZAS_HOURS_PACKING', 0.20)
+
+    @staticmethod
+    def _get_hours_disassembly():
+        return _env_float('MUDANZAS_HOURS_DISASSEMBLY', 0.35)
 
     @api.onchange('objeto_catalogo_id')
     def _onchange_objeto_catalogo_id(self):
@@ -142,12 +366,75 @@ class MudanzasLeadObjectLine(models.Model):
                 line.embalaje = True
             if catalog.desmontaje_recomendado:
                 line.desmontaje = True
+            if not line.horas_referencia_manual_override:
+                line.horas_referencia = line._get_estimated_horas_referencia()
 
     @api.onchange('objeto_manual')
     def _onchange_objeto_manual(self):
         for line in self:
             if line.objeto_catalogo_id and line.objeto_catalogo_id.is_other:
                 line.objeto = line.objeto_manual
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        records = super().create(vals_list)
+        for record, vals in zip(records, vals_list):
+            if 'horas_referencia' in vals:
+                provided_hours = round(vals.get('horas_referencia') or 0.0, 2)
+                estimated_hours = record._get_estimated_horas_referencia()
+                if abs(provided_hours - estimated_hours) > 0.0001:
+                    super(MudanzasLeadObjectLine, record).write({
+                        'horas_referencia_manual_override': True,
+                        'horas_referencia_manual': provided_hours,
+                    })
+                else:
+                    record._write_estimated_horas_referencia(estimated_hours)
+                continue
+            if not record.horas_referencia_manual_override:
+                record._write_estimated_horas_referencia(record._get_estimated_horas_referencia())
+        return records
+
+    def write(self, vals):
+        if self.env.context.get('skip_horas_manual_tracking'):
+            return super().write(vals)
+
+        manual_hours_provided = 'horas_referencia' in vals
+        res = super().write(vals)
+        if manual_hours_provided:
+            for line in self:
+                current = round(line.horas_referencia or 0.0, 2)
+                estimated = line._get_estimated_horas_referencia()
+                if abs(current - estimated) > 0.0001:
+                    super(MudanzasLeadObjectLine, line).write({
+                        'horas_referencia_manual_override': True,
+                        'horas_referencia_manual': current,
+                    })
+                else:
+                    line._write_estimated_horas_referencia(estimated)
+            return res
+
+        recalc_fields = {
+            'cantidad',
+            'volumen',
+            'embalaje',
+            'desmontaje',
+            'objeto_catalogo_id',
+            'lead_id',
+        }
+        if recalc_fields.intersection(vals):
+            for line in self.filtered(lambda l: not l.horas_referencia_manual_override):
+                line._write_estimated_horas_referencia(line._get_estimated_horas_referencia())
+        return res
+
+    def _write_estimated_horas_referencia(self, estimated_hours=None):
+        self.ensure_one()
+        if estimated_hours is None:
+            estimated_hours = self._get_estimated_horas_referencia()
+        return super(MudanzasLeadObjectLine, self.with_context(skip_horas_manual_tracking=True)).write({
+            'horas_referencia_manual_override': False,
+            'horas_referencia_manual': 0.0,
+            'horas_referencia': round(estimated_hours or 0.0, 2),
+        })
 
     @api.constrains('objeto_catalogo_id', 'objeto_manual')
     def _check_objeto_manual_required(self):
@@ -180,6 +467,24 @@ class CrmLead(models.Model):
     _inherit = 'crm.lead'
 
     test_debug_field = fields.Char(string='Test Debug Field')
+    duplicate_phone_lead_id = fields.Many2one(
+        'crm.lead',
+        string='Lead duplicado por teléfono',
+        compute='_compute_duplicate_phone_warning',
+    )
+    duplicate_phone_lead_name = fields.Char(
+        string='Nombre lead duplicado',
+        compute='_compute_duplicate_phone_warning',
+    )
+    duplicate_vat_lead_id = fields.Many2one(
+        'crm.lead',
+        string='Lead duplicado por NIF',
+        compute='_compute_duplicate_vat_warning',
+    )
+    duplicate_vat_lead_name = fields.Char(
+        string='Nombre lead duplicado por NIF',
+        compute='_compute_duplicate_vat_warning',
+    )
 
     # Personal information
     contact_name = fields.Char(string='Contacto')
@@ -247,8 +552,28 @@ class CrmLead(models.Model):
     observaciones_mudanza = fields.Char(string='Observaciones')
     fecha_mudanza = fields.Date(string='Fecha de mudanza')
     horas = fields.Integer(string='Horas estimadas')
+    horas_viaje = fields.Integer(string='Horas de viaje', default=0)
+    num_operarios_select = fields.Selection(
+        selection=OPERARIOS_SELECTION,
+        string='Operarios',
+        compute='_compute_num_operarios_select',
+        inverse='_inverse_num_operarios_select',
+    )
+    num_operarios = fields.Integer(string='Nº operarios')
+    horas_totales_aprox = fields.Float(
+        string='Horas totales aprox.',
+        compute='_compute_offer_estimations',
+        store=True,
+        digits=(16, 2),
+    )
+    precio_sugerido = fields.Float(
+        string='Precio sugerido',
+        compute='_compute_offer_estimations',
+        store=True,
+        digits=(16, 2),
+    )
     ascensor = fields.Boolean(string='Ascensor')
-    mas_de_dos_dias = fields.Boolean(string='Más de 2 Días')
+    mas_de_dos_dias = fields.Boolean(string='Más de 1 Día')
     elevador = fields.Boolean(string='Elevador')
     horas_elevador = fields.Integer(string='Horas de elevador')
 
@@ -263,6 +588,30 @@ class CrmLead(models.Model):
         string='Tipo Oferta',
         default='baja',
     )
+    offer_include_furniture_handling = fields.Boolean(
+        string='Incluir desmontaje/montaje',
+        compute='_compute_offer_service_flags',
+    )
+    offer_include_client_boxes_transport = fields.Boolean(string='Incluir bultos y cajas')
+    offer_client_boxes_quantity = fields.Integer(string='Cantidad aprox. bultos/cajas', default=2)
+    offer_include_packing_material = fields.Boolean(
+        string='Incluir material de embalaje',
+        compute='_compute_offer_service_flags',
+    )
+    offer_include_storage = fields.Boolean(string='Incluir guardamuebles')
+    offer_storage_months = fields.Integer(string='Meses de guardamuebles', default=5)
+    offer_email_cc = fields.Char(
+        string='CC oferta',
+        compute='_compute_offer_email_settings',
+    )
+    offer_email_from = fields.Char(
+        string='Remitente oferta',
+        compute='_compute_offer_email_settings',
+    )
+    offer_report_filename = fields.Char(
+        string='Nombre PDF oferta',
+        compute='_compute_offer_report_filename',
+    )
 
     # carga (pickup) address fields (manual select)
     streetup = fields.Char(string='Calle')
@@ -270,7 +619,7 @@ class CrmLead(models.Model):
     floorup = fields.Integer(string='Piso')
     zipup = fields.Char(string='Código Postal')
     doorup = fields.Char(string='Puerta')
-    elevatorup = fields.Char(string='Ascensor')
+    elevatorup = fields.Selection(selection=ELEVATOR_SELECTION, string='Ascensor')
 
     # map of Spanish comunidades to their provincias; used for both pickup and delivery
     STATE_PROVINCE_MAP = {
@@ -298,7 +647,7 @@ class CrmLead(models.Model):
         _ALL_PROVINCES.extend(_lst)
     PROVINCE_SELECTION = sorted([(p, p) for p in set(_ALL_PROVINCES)], key=lambda x: x[0])
 
-    state_up = fields.Selection(selection=STATE_SELECTION, string='Estado', default='Comunidad Valenciana')
+    state_up = fields.Selection(selection=STATE_SELECTION, string='Comunidad', default='Comunidad Valenciana')
     province_up = fields.Selection(selection=PROVINCE_SELECTION, string='Provincia', default='Valencia')
     province_up_id = fields.Many2one('mudanzas.province', string='Provincia')
     poblation_up = fields.Char(string='Población')
@@ -309,11 +658,131 @@ class CrmLead(models.Model):
     floordown = fields.Integer(string='Piso')
     zipdown = fields.Char(string='Código Postal')
     doordown = fields.Char(string='Puerta')
-    elevatordown = fields.Char(string='Ascensor')
-    state_down = fields.Selection(selection=STATE_SELECTION, string='Estado', default='Comunidad Valenciana')
+    elevatordown = fields.Selection(selection=ELEVATOR_SELECTION, string='Ascensor')
+    state_down = fields.Selection(selection=STATE_SELECTION, string='Comunidad', default='Comunidad Valenciana')
     province_down = fields.Selection(selection=PROVINCE_SELECTION, string='Provincia', default='Valencia')
     province_down_id = fields.Many2one('mudanzas.province', string='Provincia')
     poblation_down = fields.Char(string='Población')
+
+    @api.depends('phone')
+    def _compute_duplicate_phone_warning(self):
+        for lead in self:
+            duplicate = lead._find_duplicate_phone_lead()
+            lead.duplicate_phone_lead_id = duplicate
+            lead.duplicate_phone_lead_name = duplicate.name if duplicate else False
+
+    @api.depends('partner_vat')
+    def _compute_duplicate_vat_warning(self):
+        for lead in self:
+            duplicate = lead._find_duplicate_vat_lead()
+            lead.duplicate_vat_lead_id = duplicate
+            lead.duplicate_vat_lead_name = duplicate.name if duplicate else False
+
+    @api.onchange('phone')
+    def _onchange_phone_duplicate_warning(self):
+        self._compute_duplicate_phone_warning()
+        if self.duplicate_phone_lead_id:
+            return {
+                'warning': {
+                    'title': _('Teléfono duplicado'),
+                    'message': _(
+                        "Ya existe un lead con este teléfono: %(lead_name)s."
+                    ) % {
+                        'lead_name': self.duplicate_phone_lead_name or _('Sin nombre'),
+                    },
+                }
+            }
+        return {}
+
+    @api.onchange('partner_vat')
+    def _onchange_vat_duplicate_warning(self):
+        self._compute_duplicate_vat_warning()
+        if self.duplicate_vat_lead_id:
+            return {
+                'warning': {
+                    'title': _('NIF duplicado'),
+                    'message': _(
+                        "Ya existe un lead con este NIF: %(lead_name)s."
+                    ) % {
+                        'lead_name': self.duplicate_vat_lead_name or _('Sin nombre'),
+                    },
+                }
+            }
+        return {}
+
+    @staticmethod
+    def _normalize_phone_for_duplicate(phone_value):
+        phone_value = phone_value or ''
+        return re.sub(r'\D+', '', phone_value)
+
+    @staticmethod
+    def _normalize_vat_for_duplicate(vat_value):
+        vat_value = (vat_value or '').upper().strip()
+        return re.sub(r'[^A-Z0-9]', '', vat_value)
+
+    def _find_duplicate_phone_lead(self):
+        self.ensure_one()
+        normalized_phone = self._normalize_phone_for_duplicate(self.phone)
+        if not normalized_phone:
+            return self.env['crm.lead']
+
+        candidate_domain = [('phone', '!=', False)]
+        if self.id:
+            candidate_domain.append(('id', '!=', self.id))
+        if self._origin and self._origin.id:
+            candidate_domain.append(('id', '!=', self._origin.id))
+
+        candidates = self.search(candidate_domain, order='id desc')
+        for candidate in candidates:
+            if self._normalize_phone_for_duplicate(candidate.phone) == normalized_phone:
+                return candidate
+        return self.env['crm.lead']
+
+    def _find_duplicate_vat_lead(self):
+        self.ensure_one()
+        normalized_vat = self._normalize_vat_for_duplicate(self.partner_vat)
+        if not normalized_vat:
+            return self.env['crm.lead']
+
+        candidate_domain = [('partner_id.vat', '!=', False)]
+        if self.id:
+            candidate_domain.append(('id', '!=', self.id))
+        if self._origin and self._origin.id:
+            candidate_domain.append(('id', '!=', self._origin.id))
+
+        candidates = self.search(candidate_domain, order='id desc')
+        for candidate in candidates:
+            if self._normalize_vat_for_duplicate(candidate.partner_id.vat) == normalized_vat:
+                return candidate
+        return self.env['crm.lead']
+
+    def action_open_duplicate_phone_lead(self):
+        self.ensure_one()
+        duplicate = self.duplicate_phone_lead_id
+        if not duplicate:
+            return False
+        return {
+            'type': 'ir.actions.act_window',
+            'name': _('Lead existente'),
+            'res_model': 'crm.lead',
+            'view_mode': 'form',
+            'res_id': duplicate.id,
+            'target': 'current',
+        }
+
+    def action_open_duplicate_vat_lead(self):
+        self.ensure_one()
+        duplicate = self.duplicate_vat_lead_id
+        if not duplicate:
+            return False
+        return {
+            'type': 'ir.actions.act_window',
+            'name': _('Lead existente'),
+            'res_model': 'crm.lead',
+            'view_mode': 'form',
+            'res_id': duplicate.id,
+            'target': 'current',
+        }
 
     @api.depends('mudanza_media_ids', 'mudanza_media_ids.mimetype', 'mudanza_media_ids.name')
     def _compute_mudanza_media_preview(self):
@@ -408,6 +877,105 @@ class CrmLead(models.Model):
             else:
                 lead.mudanza_media_preview = False
 
+    @api.depends(
+        'embalaje',
+        'desmontaje',
+        'mudanza_line_ids.embalaje',
+        'mudanza_line_ids.desmontaje',
+    )
+    def _compute_offer_service_flags(self):
+        for lead in self:
+            line_has_disassembly = any(line.desmontaje for line in lead.mudanza_line_ids)
+            line_has_packing = any(line.embalaje for line in lead.mudanza_line_ids)
+            lead.offer_include_furniture_handling = bool(lead.desmontaje or line_has_disassembly)
+            lead.offer_include_packing_material = bool(lead.embalaje or line_has_packing)
+
+    @api.depends(
+        'cantidad',
+        'volumen',
+        'embalaje',
+        'desmontaje',
+        'num_operarios',
+        'num_operarios_select',
+        'objeto_catalogo_id.volumen_referencia',
+        'mudanza_line_ids.horas_referencia',
+        'mudanza_line_ids.horas_referencia_manual',
+        'mudanza_line_ids.horas_referencia_manual_override',
+        'mudanza_line_ids.cantidad',
+        'mudanza_line_ids.volumen',
+        'horas_viaje',
+        'floorup',
+        'floordown',
+        'elevatorup',
+        'elevatordown',
+        'elevador',
+        'horas_elevador',
+    )
+    def _compute_offer_estimations(self):
+        for lead in self:
+            reference_hours = lead._get_reference_hours_total()
+            inferred_operarios = lead._infer_num_operarios(reference_hours, lead._get_reference_volume_total())
+            num_operarios = lead._get_effective_num_operarios(inferred_operarios=inferred_operarios)
+            operative_hours = reference_hours / num_operarios if num_operarios else reference_hours
+            total_hours = operative_hours + max(lead.horas_viaje or 0, 0)
+            lead.horas_totales_aprox = round(total_hours, 2)
+            lead.precio_sugerido = round(
+                total_hours * lead._get_suggested_hourly_rate(num_operarios),
+                2,
+            )
+            lead.tipo_oferta = lead._get_tipo_oferta_by_amount(lead.precio_sugerido)
+
+    @api.depends(
+        'num_operarios',
+        'cantidad',
+        'volumen',
+        'embalaje',
+        'desmontaje',
+        'objeto_catalogo_id.volumen_referencia',
+        'mudanza_line_ids.horas_referencia',
+        'mudanza_line_ids.horas_referencia_manual',
+        'mudanza_line_ids.horas_referencia_manual_override',
+        'mudanza_line_ids.cantidad',
+        'mudanza_line_ids.volumen',
+        'horas_viaje',
+        'floorup',
+        'floordown',
+        'elevatorup',
+        'elevatordown',
+        'elevador',
+        'horas_elevador',
+    )
+    def _compute_num_operarios_select(self):
+        for lead in self:
+            inferred_operarios = lead._infer_num_operarios(
+                lead._get_reference_hours_total(),
+                lead._get_reference_volume_total(),
+            )
+            effective_operarios = lead._get_effective_num_operarios(inferred_operarios=inferred_operarios)
+            lead.num_operarios_select = str(effective_operarios)
+
+    def _inverse_num_operarios_select(self):
+        for lead in self:
+            lead.num_operarios = lead._sanitize_num_operarios(lead.num_operarios_select)
+
+    @api.onchange('num_operarios_select')
+    def _onchange_num_operarios_select(self):
+        for lead in self:
+            lead.num_operarios = lead._sanitize_num_operarios(lead.num_operarios_select)
+        self._refresh_offer_estimation_preview()
+
+    @api.depends_context('uid')
+    def _compute_offer_email_settings(self):
+        user_email = self.env.user.email or False
+        for lead in self:
+            lead.offer_email_cc = user_email
+            lead.offer_email_from = False
+
+    @api.depends('partner_id.name', 'contact_name', 'name', 'create_date')
+    def _compute_offer_report_filename(self):
+        for lead in self:
+            lead.offer_report_filename = lead._get_offer_report_filename()
+
     @api.onchange('state_up')
     def _onchange_state_up(self):
         if self.state_up:
@@ -435,6 +1003,11 @@ class CrmLead(models.Model):
                     [('state', '=', self.state_down), ('name', 'in', provinces)],
                     limit=1,
                 )
+
+    @api.onchange('floorup', 'floordown', 'elevatorup', 'elevatordown', 'elevador', 'horas_elevador')
+    def _onchange_access_estimation_inputs(self):
+        self._refresh_non_manual_line_hours()
+        self._refresh_offer_estimation_preview()
 
     @api.onchange('precio_oferta')
     def _onchange_precio_oferta(self):
@@ -466,23 +1039,70 @@ class CrmLead(models.Model):
             if lead.objeto_catalogo_id and lead.objeto_catalogo_id.is_other and not lead.objeto_manual:
                 raise ValidationError(_("Debes indicar el nombre en 'Otro objeto'."))
 
-    @api.model
-    def create(self, vals):
-        vals = self._prepare_offer_vals(vals)
-        vals = self._prepare_objeto_vals(vals)
-        return super().create(vals)
+    @api.model_create_multi
+    def create(self, vals_list):
+        prepared_vals_list = []
+        partner_vals_list = []
+        for vals in vals_list:
+            prepared_vals = dict(vals)
+            partner_vals = self._extract_partner_contact_vals(prepared_vals)
+            prepared_vals = self._prepare_offer_vals(prepared_vals)
+            prepared_vals = self._prepare_objeto_vals(prepared_vals)
+            prepared_vals_list.append(prepared_vals)
+            partner_vals_list.append(partner_vals)
+
+        leads = super().create(prepared_vals_list)
+        for lead, vals, partner_vals in zip(leads, prepared_vals_list, partner_vals_list):
+            lead._write_partner_contact_vals(partner_vals, lead_vals=vals)
+            if lead._access_estimation_fields().intersection(vals):
+                lead._refresh_non_manual_line_hours()
+        return leads
 
     def write(self, vals):
+        vals = dict(vals)
+        partner_vals = self._extract_partner_contact_vals(vals)
         if 'objeto_catalogo_id' in vals or 'objeto_manual' in vals:
             for lead in self:
                 lead_vals = lead._prepare_offer_vals(dict(vals))
                 lead_vals = lead._prepare_objeto_vals(lead_vals)
                 super(CrmLead, lead).write(lead_vals)
+                lead._write_partner_contact_vals(partner_vals, lead_vals=lead_vals)
+                if lead._access_estimation_fields().intersection(lead_vals):
+                    lead._refresh_non_manual_line_hours()
             return True
 
         vals = self._prepare_offer_vals(vals)
         vals = self._prepare_objeto_vals(vals)
-        return super().write(vals)
+        res = super().write(vals)
+        self._write_partner_contact_vals(partner_vals, lead_vals=vals)
+        if self._access_estimation_fields().intersection(vals):
+            self._refresh_non_manual_line_hours()
+        return res
+
+    @staticmethod
+    def _extract_partner_contact_vals(vals):
+        partner_field_map = {
+            'partner_medio_contacto': 'medio_contacto',
+            'partner_medio_contacto_otro': 'medio_contacto_otro',
+        }
+        partner_vals = {}
+        for lead_field, partner_field in partner_field_map.items():
+            if lead_field in vals:
+                partner_vals[partner_field] = vals.pop(lead_field)
+        return partner_vals
+
+    def _write_partner_contact_vals(self, partner_vals, lead_vals=None):
+        if not partner_vals:
+            return
+
+        lead_vals = lead_vals or {}
+        for lead in self:
+            partner = lead.partner_id
+            if not partner and lead_vals.get('partner_id'):
+                partner = self.env['res.partner'].browse(lead_vals['partner_id']).exists()
+            if not partner:
+                continue
+            partner.write(partner_vals)
 
     def _apply_objeto_catalogo_defaults(self):
         for lead in self:
@@ -545,6 +1165,277 @@ class CrmLead(models.Model):
         vals['precio_oferta'] = source_value
         return vals
 
+    @staticmethod
+    def _access_estimation_fields():
+        return {'floorup', 'floordown', 'elevatorup', 'elevatordown', 'elevador', 'horas_elevador'}
+
+    def _refresh_non_manual_line_hours(self):
+        for lead in self:
+            for line in lead.mudanza_line_ids.filtered(lambda l: not l.horas_referencia_manual_override):
+                estimated_hours = line._get_estimated_horas_referencia()
+                if line._origin and line._origin.id:
+                    line._write_estimated_horas_referencia(estimated_hours)
+                else:
+                    line.horas_referencia = estimated_hours
+
+    def _refresh_offer_estimation_preview(self):
+        self._compute_num_operarios_select()
+        self._compute_offer_estimations()
+
+    def _get_reference_hours_total(self):
+        self.ensure_one()
+        if self.mudanza_line_ids:
+            return sum(line._get_effective_horas_referencia() for line in self.mudanza_line_ids)
+        return self._estimate_legacy_reference_hours()
+
+    def _get_reference_volume_total(self):
+        self.ensure_one()
+        if self.mudanza_line_ids:
+            return sum(
+                max(line.cantidad or 1, 1) * max(line.volumen or line.objeto_catalogo_id.volumen_referencia or 0.0, 0.0)
+                for line in self.mudanza_line_ids
+            )
+        return max(self.cantidad or 1, 1) * max(self.volumen or self.objeto_catalogo_id.volumen_referencia or 0.0, 0.0)
+
+    def _estimate_legacy_reference_hours(self):
+        self.ensure_one()
+
+        quantity = max(self.cantidad or 1, 1)
+        volume = max(self.volumen or self.objeto_catalogo_id.volumen_referencia or 0.0, 0.0)
+        unit_hours = (
+            MudanzasLeadObjectLine._get_hours_base_per_item()
+            + (volume * MudanzasLeadObjectLine._get_hours_volume_factor())
+        )
+
+        if volume >= MudanzasLeadObjectLine._get_hours_volume_surcharge_1_threshold():
+            unit_hours += MudanzasLeadObjectLine._get_hours_volume_surcharge_1()
+        if volume >= MudanzasLeadObjectLine._get_hours_volume_surcharge_2_threshold():
+            unit_hours += MudanzasLeadObjectLine._get_hours_volume_surcharge_2()
+        if self.embalaje:
+            unit_hours += MudanzasLeadObjectLine._get_hours_packing()
+        if self.desmontaje:
+            unit_hours += MudanzasLeadObjectLine._get_hours_disassembly()
+
+        total_hours = quantity * unit_hours
+        total_hours += quantity * self._get_access_hours_per_unit()
+        total_hours += self.horas_elevador if self.elevador and self.horas_elevador else 0.0
+        return max(total_hours, 0.0)
+
+    def _get_access_hours_per_unit(self):
+        self.ensure_one()
+        return (
+            self._get_side_access_hours(self.floorup, self.elevatorup)
+            + self._get_side_access_hours(self.floordown, self.elevatordown)
+        )
+
+    @staticmethod
+    def _get_side_access_hours(floor, elevator):
+        floor = max(int(floor or 0), 0)
+        if floor <= 1:
+            return 0.0
+        if elevator == 'tiene':
+            return floor * 0.03
+        if elevator == 'no_tiene':
+            return floor * 0.08
+        return floor * 0.05
+
+    @staticmethod
+    def _get_suggested_hourly_rate(num_operarios):
+        num_operarios = CrmLead._sanitize_num_operarios(num_operarios) or 2
+        base_rate = _env_float('MUDANZAS_RATE_2_OPERARIOS', 75.0)
+        per_operario_increment = _env_float('MUDANZAS_RATE_OPERARIO_INCREMENT', 20.0)
+        return base_rate + max(num_operarios - 2, 0) * per_operario_increment
+
+    @staticmethod
+    def _get_tipo_oferta_by_amount(amount):
+        amount = amount or 0.0
+        if amount > _env_float('MUDANZAS_TIPO_OFERTA_ALTA_MIN', 700.0):
+            return 'alta'
+        if amount > _env_float('MUDANZAS_TIPO_OFERTA_MEDIA_MIN', 500.0):
+            return 'media'
+        return 'baja'
+
+    @staticmethod
+    def _sanitize_num_operarios(value):
+        try:
+            value = int(value or 0)
+        except (TypeError, ValueError):
+            return 0
+        return max(1, min(value, 10)) if value else 0
+
+    @staticmethod
+    def _infer_num_operarios(reference_hours, total_volume):
+        if (
+            reference_hours >= _env_float('MUDANZAS_OPERARIOS_HOURS_5_MIN', 24.0)
+            or total_volume >= _env_float('MUDANZAS_OPERARIOS_VOLUME_5_MIN', 38.0)
+        ):
+            return 5
+        if (
+            reference_hours >= _env_float('MUDANZAS_OPERARIOS_HOURS_4_MIN', 16.0)
+            or total_volume >= _env_float('MUDANZAS_OPERARIOS_VOLUME_4_MIN', 24.0)
+        ):
+            return 4
+        if (
+            reference_hours >= _env_float('MUDANZAS_OPERARIOS_HOURS_3_MIN', 8.0)
+            or total_volume >= _env_float('MUDANZAS_OPERARIOS_VOLUME_3_MIN', 12.0)
+        ):
+            return 3
+        return _env_int('MUDANZAS_OPERARIOS_DEFAULT', 2)
+
+    def _get_effective_num_operarios(self, inferred_operarios=None):
+        self.ensure_one()
+        if inferred_operarios is None:
+            inferred_operarios = self._infer_num_operarios(
+                self._get_reference_hours_total(),
+                self._get_reference_volume_total(),
+            )
+        return (
+            self._sanitize_num_operarios(self.num_operarios_select)
+            or self._sanitize_num_operarios(self.num_operarios)
+            or inferred_operarios
+        )
+
+    def _get_offer_client_name(self):
+        self.ensure_one()
+        value = self.partner_id.name or self.contact_name or self.name or _('Cliente')
+        return self._repair_report_text(value)
+
+    def _repair_report_text(self, value):
+        if not isinstance(value, str):
+            return value
+        repaired = value
+        mojibake_markers = ('Ã', 'Â', 'â', '€', '™', '�')
+        if any(marker in repaired for marker in mojibake_markers):
+            for _ in range(2):
+                updated = repaired
+                for source_encoding in ('latin1', 'cp1252'):
+                    try:
+                        candidate = updated.encode(source_encoding).decode('utf-8')
+                    except (UnicodeEncodeError, UnicodeDecodeError):
+                        continue
+                    if candidate != updated:
+                        updated = candidate
+                        break
+                if updated == repaired:
+                    break
+                repaired = updated
+                if not any(marker in repaired for marker in mojibake_markers):
+                    break
+
+        normalized = unicodedata.normalize('NFKD', repaired)
+        ascii_text = normalized.encode('ascii', 'ignore').decode('ascii')
+        return ascii_text or repaired
+
+    def _get_offer_report_date(self):
+        self.ensure_one()
+        return fields.Date.to_string(self.create_date.date()) if self.create_date else fields.Date.to_string(fields.Date.context_today(self))
+
+    def _get_offer_current_date(self):
+        self.ensure_one()
+        return fields.Date.to_string(fields.Date.context_today(self))
+
+    def _get_offer_report_filename(self):
+        self.ensure_one()
+        client_name = ' '.join((self._get_offer_client_name() or '').split()) or 'Cliente'
+        safe_client_name = client_name.replace('/', '-').replace('\\', '-')
+        return f"Presupuesto {safe_client_name} {self._get_offer_report_date()}"
+
+    def _get_offer_lines_for_report(self):
+        self.ensure_one()
+        if self.mudanza_line_ids:
+            return [
+                {
+                    'cantidad': line.cantidad or 1,
+                    'nombre': self._repair_report_text(line.objeto_manual or line.objeto_catalogo_id.name or line.objeto or _('Objeto sin nombre')),
+                    'volumen': line.volumen or 0.0,
+                    'embalaje': line.embalaje,
+                    'desmontaje': line.desmontaje,
+                    'habitacion': self._repair_report_text(dict(line._fields['habitacion'].selection).get(line.habitacion, '')),
+                }
+                for line in self.mudanza_line_ids
+            ]
+        return [{
+            'cantidad': self.cantidad or 1,
+            'nombre': self._repair_report_text(self.objeto_manual or self.objeto_catalogo_id.name or self.objeto or _('Objeto sin nombre')),
+            'volumen': self.volumen or 0.0,
+            'embalaje': self.embalaje,
+            'desmontaje': self.desmontaje,
+            'habitacion': self._repair_report_text(dict(self._fields['habitacion'].selection).get(self.habitacion, '')),
+        }]
+
+    def _get_offer_address_lines(self, move_type):
+        self.ensure_one()
+        if move_type == 'pickup':
+            values = [
+                self.streetup,
+                self.streetup2,
+                self.zipup,
+                self.doorup,
+                self.elevatorup,
+                self.floorup and _('Piso %s') % self.floorup,
+                self.state_up,
+                self.province_up_id.name if self.province_up_id else self.province_up,
+                self.poblation_up,
+            ]
+        else:
+            values = [
+                self.streetdown,
+                self.streetdown2,
+                self.zipdown,
+                self.doordown,
+                self.elevatordown,
+                self.floordown and _('Piso %s') % self.floordown,
+                self.state_down,
+                self.province_down_id.name if self.province_down_id else self.province_down,
+                self.poblation_down,
+            ]
+        return [self._repair_report_text(value) for value in values if value]
+
+    def _get_offer_address_entries(self, move_type):
+        self.ensure_one()
+
+        def _label(field_name):
+            return self._repair_report_text(self._fields[field_name].string or field_name)
+
+        def _selection_value(field_name, value):
+            if not value:
+                return value
+            selection = dict(self._fields[field_name].selection or [])
+            return selection.get(value, value)
+
+        if move_type == 'pickup':
+            entries = [
+                (_label('streetup'), self.streetup),
+                (_label('streetup2'), self.streetup2),
+                (_label('zipup'), self.zipup),
+                (_label('doorup'), self.doorup),
+                (_label('elevatorup'), _selection_value('elevatorup', self.elevatorup)),
+                (_label('floorup'), self.floorup),
+                (_label('state_up'), self.state_up),
+                (_label('province_up_id'), self.province_up_id.name if self.province_up_id else self.province_up),
+                (_label('poblation_up'), self.poblation_up),
+            ]
+        else:
+            entries = [
+                (_label('streetdown'), self.streetdown),
+                (_label('streetdown2'), self.streetdown2),
+                (_label('zipdown'), self.zipdown),
+                (_label('doordown'), self.doordown),
+                (_label('elevatordown'), _selection_value('elevatordown', self.elevatordown)),
+                (_label('floordown'), self.floordown),
+                (_label('state_down'), self.state_down),
+                (_label('province_down_id'), self.province_down_id.name if self.province_down_id else self.province_down),
+                (_label('poblation_down'), self.poblation_down),
+            ]
+
+        return [
+            {
+                'label': label,
+                'value': self._repair_report_text(value),
+            }
+            for label, value in entries if value not in (False, None, '')
+        ]
+
     def action_send_offer_email(self):
         self.ensure_one()
         if not self.email_from:
@@ -600,7 +1491,7 @@ class ResPartner(models.Model):
         [
             ('whatsapp', 'WhatsApp'),
             ('formulario_web', 'Formulario Web'),
-            ('visita', 'Visita'),
+            ('visita', 'Cliente Recurrente'),
             ('llamada_otros', 'Otros (indicar en campo "Otros")'),
         ],
         string='Medio de contacto',
@@ -610,5 +1501,6 @@ class ResPartner(models.Model):
     @api.constrains('medio_contacto', 'medio_contacto_otro')
     def _check_medio_contacto_otro(self):
         for partner in self:
-            if partner.medio_contacto == 'llamada_otros' and not partner.medio_contacto_otro:
+            if partner.medio_contacto == 'llamada_otros' and not (partner.medio_contacto_otro or '').strip():
                 raise ValidationError(_("Debes indicar el valor de 'Otros'."))
+

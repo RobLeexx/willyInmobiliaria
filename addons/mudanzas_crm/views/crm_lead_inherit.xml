@@ -1,4 +1,4 @@
-<odoo>
+﻿<odoo>
   <data>
     <record id="crm.crm_lead_action_pipeline" model="ir.actions.act_window">
       <field name="context">{
@@ -26,13 +26,87 @@
         <xpath expr="//field[@name='date_deadline']" position="attributes">
           <attribute name="invisible">1</attribute>
         </xpath>
+        <xpath expr="//div[contains(@class, 'oe_title')]/h2" position="replace">
+          <div class="d-flex flex-wrap align-items-end pb-2 pb-sm-3" style="column-gap: 18px; row-gap: 10px;" invisible="type == 'lead'">
+            <div class="d-flex flex-wrap align-items-end" style="column-gap: 15px; row-gap: 6px;">
+              <div class="d-flex flex-column">
+                <span class="text-uppercase fw-semibold" style="font-size: 12px; opacity: 0.72;">Oferta Final</span>
+                <div class="d-flex align-items-baseline" style="margin-top: 2px;">
+                  <field name="company_currency" invisible="1"/>
+                  <field name="expected_revenue" class="o_input_13ch fw-bold" style="font-size: 31px;" widget="monetary" options="{'currency_field': 'company_currency'}"/>
+                </div>
+              </div>
+              <div class="d-flex flex-column">
+                <div class="d-flex align-items-center" style="margin-bottom: 2px;">
+                  <label for="probability" string="Probabilidad" class="mb-0 text-uppercase fw-semibold" style="font-size: 12px; opacity: 0.72;"/>
+                  <a class="border-0 mx-1 p-0 mb-1 mb-md-0 btn btn-light"
+                    name="action_set_automated_probability"
+                    role="button" type="object"
+                    invisible="is_automated_probability or won_status == 'lost'">
+                      <img class="m-1 o_lead_opportunity_form_AI_switch_img"
+                        title="Switch to AI-computed probabilities"
+                        aria-label="Switch to AI-computed probabilities"
+                        src="/crm/static/src/img/pls-tooltip-ai-icon.png"
+                        alt="AI"/>
+                  </a>
+                  <widget name="pls_tooltip_button" class="d-inline-block"
+                    invisible="won_status != 'pending' or not is_automated_probability"/>
+                  <small class="d-inline-block opacity-50 h6 mb-0" invisible="is_automated_probability or won_status == 'lost'">
+                    ~<field class="mb-0" name="automated_probability" force_save="1"/> %
+                  </small>
+                </div>
+                <div id="probability" class="d-flex align-items-baseline">
+                  <field name="is_automated_probability" invisible="1"/>
+                  <field name="probability" widget="float" class="oe_inline o_input_6ch fw-bold" style="font-size: 31px;" readonly="won_status != 'pending'"/>
+                  <span class="opacity-50 ps-2" style="font-size: 24px;">%</span>
+                </div>
+              </div>
+            </div>
+            <div class="d-flex flex-column" style="margin-left: 50px;">
+              <span class="text-uppercase fw-semibold" style="font-size: 12px; opacity: 0.72;">Oferta sugerida</span>
+              <div class="d-flex align-items-baseline" style="margin-top: 2px;">
+                <field name="precio_sugerido" class="o_input_13ch fw-bold" style="font-size: 25px;" widget="monetary" options="{'currency_field': 'company_currency'}" readonly="1"/>
+              </div>
+            </div>
+            <div class="d-flex flex-column">
+              <span class="text-uppercase fw-semibold" style="font-size: 12px; opacity: 0.72;">Horas en total aprox</span>
+              <field name="horas_totales_aprox" class="oe_inline o_input_8ch fw-bold" style="font-size: 25px; margin-top: 2px;" readonly="1"/>
+            </div>
+            <div class="d-flex flex-column" style="width: 160px;">
+              <span class="text-uppercase fw-semibold" style="font-size: 12px; opacity: 0.72;">Tipo oferta</span>
+              <div style="display: inline-flex; align-items: center; width: 100%; min-height: 20px; margin-top: 2px; padding: 0 14px; border: 1px solid #8ecae6; border-radius: 999px; background: #e8f7ff; box-sizing: border-box;">
+                <field name="tipo_oferta" nolabel="1" class="fw-semibold oe_inline" style="width: 100%; color: #0b5f7a; padding-block: 5px;"/>
+              </div>
+            </div>
+            <div class="d-flex flex-column" style="width: 160px;">
+              <span class="text-uppercase fw-semibold" style="font-size: 12px; opacity: 0.72;">Operarios</span>
+              <div style="display: inline-flex; align-items: center; width: 100%; min-height: 20px; margin-top: 2px; padding: 0 14px; border: 1px solid #b6d7ea; border-radius: 999px; background: #f3fbff; box-sizing: border-box;">
+                <field name="num_operarios_select" nolabel="1" class="fw-semibold oe_inline" style="width: 100%; color: #164c68; padding-block: 5px;"/>
+              </div>
+            </div>
+          </div>
+        </xpath>
+        <xpath expr="//div[contains(@class, 'oe_title') and contains(@class, 'mw-100')]" position="attributes">
+          <attribute name="class" add=" mudanzas-sticky-header" separator=" "/>
+        </xpath>
         <xpath expr="//group[@name='lead_info']" position="replace"/>
         <xpath expr="//group[@name='lead_priority']" position="replace"/>
         <xpath expr="//group[@name='opportunity_partner']" position="replace"/>
         <xpath expr="//label[@for='date_deadline']" position="replace"/>
         <xpath expr="//group[@name='lead_partner']" position="replace">
-          <group col="16" class="col-lg-9" style="padding-right: 0;">
+          <group col="16" class="col-lg-9" style="padding-right: 0; width: 100%;">
             <group col="2" colspan="16">
+              <group col="1">
+                <field name="duplicate_phone_lead_id" invisible="1"/>
+                <field name="duplicate_phone_lead_name" invisible="1"/>
+                <field name="duplicate_vat_lead_id" invisible="1"/>
+                <field name="duplicate_vat_lead_name" invisible="1"/>
+                <separator string="Duplicados detectados" colspan="2" invisible="not duplicate_phone_lead_id and not duplicate_vat_lead_id"/>
+                <div class="d-flex flex-wrap gap-2 mb-2" colspan="2" invisible="not duplicate_phone_lead_id and not duplicate_vat_lead_id">
+                  <button name="action_open_duplicate_phone_lead" type="object" string="Abrir lead existente (Móvil)" class="btn btn-outline-warning btn-sm" invisible="not duplicate_phone_lead_id"/>
+                  <button name="action_open_duplicate_vat_lead" type="object" string="Abrir lead existente (NIF)" class="btn btn-outline-warning btn-sm" invisible="not duplicate_vat_lead_id"/>
+                </div>
+              </group>
               <separator string="Cliente y Lead" colspan="2"/>
               <group col="1">
                 <field
@@ -54,15 +128,64 @@
                 <field name="user_id" context="{'default_sales_team_id': team_id}" widget="many2one_avatar_leader_user" teamField="team_id"/>
               </group>
               <group col="1">
-                <field name="partner_medio_contacto" invisible="partner_medio_contacto" style="font-weight: 700; color: #8a1c1c; background-color: #fde8e8; border: 1px solid #e5a3a3; padding: 4px;"/>
+                <field name="partner_medio_contacto" invisible="partner_medio_contacto" class="mudanzas-alert-field"/>
                 <field name="partner_medio_contacto" invisible="not partner_medio_contacto"/>
-                <field name="partner_medio_contacto_otro" invisible="partner_medio_contacto != 'llamada_otros'" required="partner_medio_contacto == 'llamada_otros'"/>
+                <field name="partner_medio_contacto_otro" invisible="partner_medio_contacto != 'llamada_otros'" required="partner_medio_contacto == 'llamada_otros'" force_save="1"/>
                 <field name="partner_vat"/>
                 <field name="priority" widget="priority"/>
                 <field name="tag_ids" widget="many2many_tags" options="{'color_field': 'color', 'no_create_edit': True}"/>
               </group>
             </group>
-            <separator string="Mudanza" colspan="16" invisible="not partner_medio_contacto"/>
+
+          <div class="row mudanzas-full-row" invisible="not partner_medio_contacto">
+            <div class="col-6 mr-0 pr-0 w-50">
+              <group string="Carga" col="4">
+                <field name="streetup" placeholder="Calle..." class="o_address_street mudanzas-soft-field" colspan="3"/>
+                <i class="fa fa-arrow-right" role="img" aria-label="De carga a descarga" colspan="1"/>
+                <field name="streetup2" placeholder="Calle 2..." class="o_address_street mudanzas-soft-field" colspan="3"/>
+                <i class="fa fa-arrow-right" role="img" aria-label="De carga a descarga" colspan="1"/>
+                <field name="doorup" placeholder="Puerta" class="o_address_zip mudanzas-soft-field" colspan="3"/>
+                <i class="fa fa-arrow-right" role="img" aria-label="De carga a descarga" colspan="1"/>
+                <field name="state_up" class="o_address_state mudanzas-soft-field" placeholder="Estado" options="{'no_open': True}" colspan="3"/>
+                <i class="fa fa-arrow-right" role="img" aria-label="De carga a descarga" colspan="1"/>
+                <field name="province_up_id" class="o_address_state mudanzas-soft-field" placeholder="Provincia" options="{'no_open': True, 'no_create': True, 'no_create_edit': True}" domain="[('state', '=', state_up)]" colspan="3"/>
+                <i class="fa fa-arrow-right" role="img" aria-label="De carga a descarga" colspan="1"/>
+                <field name="poblation_up" placeholder="PoblaciÃ³n" class="o_address_city mudanzas-soft-field" colspan="3"/>
+                <i class="fa fa-arrow-right" role="img" aria-label="De carga a descarga" colspan="1"/>
+                <field name="elevatorup" placeholder="Ascensor" class="o_address_zip mudanzas-soft-field" invisible="elevatorup" colspan="3"/>
+                <field name="elevatorup" class="o_address_zip" invisible="elevatorup != 'tiene'" style="border: 1px solid #8ecae6; background-color: #e8f7ff; color: #0b5f7a; padding: 4px;" colspan="3"/>
+                <field name="elevatorup" class="o_address_zip" invisible="elevatorup != 'no_tiene'" style="border: 1px solid #e7b26a; background-color: #fff2e2; color: #9a4d00; padding: 4px;" colspan="3"/>
+                <i class="fa fa-arrow-right" role="img" aria-label="De carga a descarga" colspan="1"/>
+                <field name="floorup" placeholder="Piso" class="o_address_city" invisible="floorup &gt;= 2" style="border: 1px solid #8ecae6; background-color: #e8f7ff; color: #0b5f7a; padding: 4px;" colspan="3"/>
+                <field name="floorup" class="o_address_city" invisible="floorup &lt; 2 or floorup &gt;= 4" style="border: 1px solid #d8c27a; background-color: #fff7da; color: #8a6a00; padding: 4px;" colspan="3"/>
+                <field name="floorup" class="o_address_city" invisible="floorup &lt; 4 or floorup &gt;= 6" style="border: 1px solid #e7b26a; background-color: #fff0d9; color: #9a4d00; padding: 4px;" colspan="3"/>
+                <field name="floorup" class="o_address_city" invisible="floorup &lt; 6 or floorup &gt;= 8" style="border: 1px solid #d98a8a; background-color: #ffe3e3; color: #a12626; padding: 4px;" colspan="3"/>
+                <field name="floorup" class="o_address_city" invisible="floorup &lt; 8" style="border: 1px solid #d98a8a; background-color: #ffe3e3; color: #a12626; padding: 4px;" colspan="4"/>
+                <i class="fa fa-arrow-right" role="img" aria-label="De carga a descarga" colspan="1"/>
+              </group>
+            </div>
+
+            <div class="col-6 w-50">
+              <group string="Descarga" col="4">
+                <field name="streetdown" placeholder="Calle..." class="o_address_street mudanzas-soft-field" colspan="4"/>
+                <field name="streetdown2" placeholder="Calle 2..." class="o_address_street mudanzas-soft-field" colspan="4"/>
+                <field name="doordown" placeholder="Puerta" class="o_address_zip mudanzas-soft-field" colspan="4"/>
+                <field name="state_down" class="o_address_state mudanzas-soft-field" placeholder="Estado" options="{'no_open': True}" colspan="4"/>
+                <field name="province_down_id" class="o_address_state mudanzas-soft-field" placeholder="Provincia" options="{'no_open': True, 'no_create': True, 'no_create_edit': True}" domain="[('state', '=', state_down)]" colspan="4"/>
+                <field name="poblation_down" placeholder="PoblaciÃ³n" class="o_address_city mudanzas-soft-field" colspan="4"/>
+                <field name="elevatordown" placeholder="Ascensor" class="o_address_zip mudanzas-soft-field" invisible="elevatordown" colspan="4"/>
+                <field name="elevatordown" class="o_address_zip" invisible="elevatordown != 'tiene'" style="border: 1px solid #8ecae6; background-color: #e8f7ff; color: #0b5f7a; padding: 4px;" colspan="4"/>
+                <field name="elevatordown" class="o_address_zip" invisible="elevatordown != 'no_tiene'" style="border: 1px solid #e7b26a; background-color: #fff2e2; color: #9a4d00; padding: 4px;" colspan="4"/>
+                <field name="floordown" placeholder="Piso" class="o_address_city" invisible="floordown &gt;= 2" style="border: 1px solid #8ecae6; background-color: #e8f7ff; color: #0b5f7a; padding: 4px;" colspan="4"/>
+                <field name="floordown" class="o_address_city" invisible="floordown &lt; 2 or floordown &gt;= 4" style="border: 1px solid #d8c27a; background-color: #fff7da; color: #8a6a00; padding: 4px;" colspan="4"/>
+                <field name="floordown" class="o_address_city" invisible="floordown &lt; 4 or floordown &gt;= 6" style="border: 1px solid #e7b26a; background-color: #fff0d9; color: #9a4d00; padding: 4px;" colspan="4"/>
+                <field name="floordown" class="o_address_city" invisible="floordown &lt; 6 or floordown &gt;= 8" style="border: 1px solid #d98a8a; background-color: #ffe3e3; color: #a12626; padding: 4px;" colspan="3"/>
+                <field name="floordown" class="o_address_city" invisible="floordown &lt; 8" style="border: 1px solid #d98a8a; background-color: #ffe3e3; color: #a12626; padding: 4px;" colspan="4"/>
+              </group>
+            </div>
+          </div>
+
+          <separator string="Mudanza" colspan="16" invisible="not partner_medio_contacto"/>
             <group col="6" colspan="9" class="w-100" invisible="not partner_medio_contacto">
               <field name="mudanza_line_ids" colspan="6">
                 <list editable="bottom">
@@ -71,6 +194,7 @@
                   <field name="objeto_es_otro" column_invisible="True"/>
                   <field name="objeto_manual" invisible="not objeto_es_otro" required="objeto_es_otro"/>
                   <field name="volumen"/>
+                  <field name="horas_referencia"/>
                   <field name="embalaje"/>
                   <field name="desmontaje"/>
                   <field name="habitacion"/>
@@ -82,28 +206,24 @@
                     <field name="objeto_es_otro" invisible="1"/>
                     <field name="objeto_manual" invisible="not objeto_es_otro" required="objeto_es_otro"/>
                     <field name="peso"/>
-                    <field name="embalaje" style="margin-right: 8px;"/>
+                    <field name="embalaje" class="me-2"/>
                     <field name="desmontaje"/>
                     <field name="habitacion"/>
+                    <field name="horas_referencia"/>
                   </group>
                 </form>
               </field>
             </group>
-            <div colspan="14" invisible="not partner_medio_contacto">
-              <label for="observaciones_mudanza" style="font-weight: bold; margin-bottom: 4px;">Observaciones</label>
-              <field name="observaciones_mudanza" style="border: 1px solid #999; background-color: rgba(0, 0, 0, 0.08)"/>
-            </div>
             <group string="Programacion de mudanzas" colspan="14" invisible="not partner_medio_contacto">
               <field name="fecha_mudanza" widget="date" options="{'datepicker': {'firstDay': 1}}" class="oe_inline" placeholder="Fecha de mudanza"/>
-              <field name="horas"/>
-              <field name="ascensor"/>
+              <field name="horas_viaje"/>
               <field name="mas_de_dos_dias"/>
               <field name="elevador"/>
               <field name="horas_elevador" invisible="not elevador"/>
             </group>
           </group>
 
-          <group string="Fotos y Videos" col="1" colspan="16" class="col-12 w-100" style="flex: 0 0 100%; max-width: 100%; width: 100%; border-top: 1px solid #ddd; padding-top: 16px; margin-top: 12px;" invisible="not partner_medio_contacto">
+          <group col="1" colspan="16" class="col-12 w-100 mudanzas-media-section" invisible="not partner_medio_contacto">
             <field
               name="mudanza_media_ids"
               colspan="16"
@@ -111,54 +231,18 @@
               options="{'no_create': True, 'no_open': True}"
               context="{'default_res_model': 'crm.lead', 'default_res_id': id}"
               domain="[('res_model', '=', 'crm.lead'), ('res_id', '=', id)]"
-              style="width: 100%; border: 1px solid #999; background-color: rgba(0, 0, 0, 0.08); padding: 8px;"
+              class="mudanzas-media-upload"
             />
-            <field name="mudanza_media_preview" colspan="16" widget="html" nolabel="1" readonly="1" style="width: 100%;"/>
+            <field name="mudanza_media_preview" colspan="16" widget="html" nolabel="1" readonly="1" class="mudanzas-media-preview"/>
           </group>
 
-          <div class="col-lg-5" style="flex: 0 0 33%; max-width: 33%;" invisible="not partner_medio_contacto">
-            <div class="row">
-              <div class="w-100">
-                <group string="Oferta">
-                  <field name="precio_oferta" style="border: 1px solid #999; background-color: rgba(0, 0, 0, 0.08); margin-right: 4px;"/>
-                  <field name="tipo_oferta" style="border: 1px solid #999; background-color: rgba(0, 0, 0, 0.08); margin-right: 4px;"/>
-                </group>
-              </div>
-            </div>
-          </div>
-
-          <div class="row" style="flex: 0 0 100%; max-width: 100%;" invisible="not partner_medio_contacto">
-            <div class="col-6 mr-0 pr-0 w-50">
-              <group string="Carga" col="4">
-                <field name="streetup" placeholder="Calle..." class="o_address_street" style="border: 1px solid #999; background-color: rgba(0, 0, 0, 0.08); padding: 4px;" colspan="3"/>
-                <i class="fa fa-arrow-right" role="img" aria-label="De carga a descarga" colspan="1"/>
-                <field name="streetup2" placeholder="Calle 2..." class="o_address_street" style="border: 1px solid #999; background-color: rgba(0, 0, 0, 0.08); padding: 4px;" colspan="3"/>
-                <i class="fa fa-arrow-right" role="img" aria-label="De carga a descarga" colspan="1"/>
-                <field name="doorup" placeholder="Puerta" class="o_address_zip" style="border: 1px solid #999; background-color: rgba(0, 0, 0, 0.08); padding: 4px;" colspan="3"/>
-                <i class="fa fa-arrow-right" role="img" aria-label="De carga a descarga" colspan="1"/>
-                <field name="elevatorup" placeholder="Ascensor" class="o_address_zip" style="border: 1px solid #999; background-color: rgba(0, 0, 0, 0.08); padding: 4px;" colspan="3"/>
-                <i class="fa fa-arrow-right" role="img" aria-label="De carga a descarga" colspan="1"/>
-                <field name="floorup" placeholder="Piso" class="o_address_city" style="border: 1px solid #999; background-color: rgba(0, 0, 0, 0.08); padding: 4px;" colspan="3"/>
-                <i class="fa fa-arrow-right" role="img" aria-label="De carga a descarga" colspan="1"/>
-                <field name="state_up" class="o_address_state" placeholder="Estado" style="border: 1px solid #999; background-color: rgba(0, 0, 0, 0.08); padding: 4px;" options="{'no_open': True}" colspan="3"/>
-                <i class="fa fa-arrow-right" role="img" aria-label="De carga a descarga" colspan="1"/>
-                <field name="province_up_id" class="o_address_state" placeholder="Provincia" style="border: 1px solid #999; background-color: rgba(0, 0, 0, 0.08); padding: 4px;" options="{'no_open': True, 'no_create': True, 'no_create_edit': True}" domain="[('state', '=', state_up)]" colspan="3"/>
-                <i class="fa fa-arrow-right" role="img" aria-label="De carga a descarga" colspan="1"/>
-                <field name="poblation_up" placeholder="Población" class="o_address_city" style="border: 1px solid #999; background-color: rgba(0, 0, 0, 0.08); padding: 4px;" colspan="3"/>
-                <i class="fa fa-arrow-right" role="img" aria-label="De carga a descarga" colspan="1"/>
-              </group>
-            </div>
-
-            <div class="col-6 w-50">
-              <group string="Descarga" col="4">
-                <field name="streetdown" placeholder="Calle..." class="o_address_street" style="border: 1px solid #999; background-color: rgba(0, 0, 0, 0.08); padding: 4px;" colspan="4"/>
-                <field name="streetdown2" placeholder="Calle 2..." class="o_address_street" style="border: 1px solid #999; background-color: rgba(0, 0, 0, 0.08); padding: 4px;" colspan="4"/>
-                <field name="doordown" placeholder="Puerta" class="o_address_zip" style="border: 1px solid #999; background-color: rgba(0, 0, 0, 0.08); padding: 4px;" colspan="4"/>
-                <field name="elevatordown" placeholder="Ascensor" class="o_address_zip" style="border: 1px solid #999; background-color: rgba(0, 0, 0, 0.08); padding: 4px;" colspan="4"/>
-                <field name="floordown" placeholder="Piso" class="o_address_city" style="border: 1px solid #999; background-color: rgba(0, 0, 0, 0.08); padding: 4px;" colspan="4"/>
-                <field name="state_down" class="o_address_state" placeholder="Estado" style="border: 1px solid #999; background-color: rgba(0, 0, 0, 0.08); padding: 4px;" options="{'no_open': True}" colspan="4"/>
-                <field name="province_down_id" class="o_address_state" placeholder="Provincia" style="border: 1px solid #999; background-color: rgba(0, 0, 0, 0.08); padding: 4px;" options="{'no_open': True, 'no_create': True, 'no_create_edit': True}" domain="[('state', '=', state_down)]" colspan="4"/>
-                <field name="poblation_down" placeholder="Población" class="o_address_city" style="border: 1px solid #999; background-color: rgba(0, 0, 0, 0.08); padding: 4px;" colspan="4"/>
+          <div class="row mudanzas-full-row" invisible="not partner_medio_contacto">
+            <div class="col-6 mr-0 pr-0 w-100">
+              <group string="Servicios adicionales">
+                <field name="offer_include_client_boxes_transport"/>
+                <field name="offer_client_boxes_quantity" invisible="not offer_include_client_boxes_transport"/>
+                <field name="offer_include_storage"/>
+                <field name="offer_storage_months" invisible="not offer_include_storage"/>
               </group>
             </div>
           </div>
