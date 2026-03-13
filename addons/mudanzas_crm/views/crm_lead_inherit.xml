@@ -119,7 +119,7 @@
               <group col="1">
                 <field name="partner_medio_contacto" invisible="partner_medio_contacto" class="mudanzas-alert-field"/>
                 <field name="partner_medio_contacto" invisible="not partner_medio_contacto"/>
-                <field name="partner_medio_contacto_otro" invisible="partner_medio_contacto != 'llamada_otros'" required="partner_medio_contacto == 'llamada_otros'"/>
+                <field name="partner_medio_contacto_otro" invisible="partner_medio_contacto != 'llamada_otros'" required="partner_medio_contacto == 'llamada_otros'" force_save="1"/>
                 <field name="partner_vat"/>
                 <field name="priority" widget="priority"/>
                 <field name="tag_ids" widget="many2many_tags" options="{'color_field': 'color', 'no_create_edit': True}"/>
@@ -205,7 +205,6 @@
             </group>
             <group string="Programacion de mudanzas" colspan="14" invisible="not partner_medio_contacto">
               <field name="fecha_mudanza" widget="date" options="{'datepicker': {'firstDay': 1}}" class="oe_inline" placeholder="Fecha de mudanza"/>
-              <field name="horas"/>
               <field name="horas_viaje"/>
               <field name="mas_de_dos_dias"/>
               <field name="elevador"/>

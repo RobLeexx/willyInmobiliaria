@@ -903,23 +903,31 @@ class CrmLead(models.Model):
     @api.model_create_multi
     def create(self, vals_list):
         prepared_vals_list = []
+        partner_vals_list = []
         for vals in vals_list:
-            prepared_vals = self._prepare_offer_vals(dict(vals))
+            prepared_vals = dict(vals)
+            partner_vals = self._extract_partner_contact_vals(prepared_vals)
+            prepared_vals = self._prepare_offer_vals(prepared_vals)
             prepared_vals = self._prepare_objeto_vals(prepared_vals)
             prepared_vals_list.append(prepared_vals)
+            partner_vals_list.append(partner_vals)
 
         leads = super().create(prepared_vals_list)
-        for lead, vals in zip(leads, prepared_vals_list):
+        for lead, vals, partner_vals in zip(leads, prepared_vals_list, partner_vals_list):
+            lead._write_partner_contact_vals(partner_vals, lead_vals=vals)
             if lead._access_estimation_fields().intersection(vals):
                 lead._refresh_non_manual_line_hours()
         return leads
 
     def write(self, vals):
+        vals = dict(vals)
+        partner_vals = self._extract_partner_contact_vals(vals)
         if 'objeto_catalogo_id' in vals or 'objeto_manual' in vals:
             for lead in self:
                 lead_vals = lead._prepare_offer_vals(dict(vals))
                 lead_vals = lead._prepare_objeto_vals(lead_vals)
                 super(CrmLead, lead).write(lead_vals)
+                lead._write_partner_contact_vals(partner_vals, lead_vals=lead_vals)
                 if lead._access_estimation_fields().intersection(lead_vals):
                     lead._refresh_non_manual_line_hours()
             return True
@@ -927,9 +935,35 @@ class CrmLead(models.Model):
         vals = self._prepare_offer_vals(vals)
         vals = self._prepare_objeto_vals(vals)
         res = super().write(vals)
+        self._write_partner_contact_vals(partner_vals, lead_vals=vals)
         if self._access_estimation_fields().intersection(vals):
             self._refresh_non_manual_line_hours()
         return res
+
+    @staticmethod
+    def _extract_partner_contact_vals(vals):
+        partner_field_map = {
+            'partner_medio_contacto': 'medio_contacto',
+            'partner_medio_contacto_otro': 'medio_contacto_otro',
+        }
+        partner_vals = {}
+        for lead_field, partner_field in partner_field_map.items():
+            if lead_field in vals:
+                partner_vals[partner_field] = vals.pop(lead_field)
+        return partner_vals
+
+    def _write_partner_contact_vals(self, partner_vals, lead_vals=None):
+        if not partner_vals:
+            return
+
+        lead_vals = lead_vals or {}
+        for lead in self:
+            partner = lead.partner_id
+            if not partner and lead_vals.get('partner_id'):
+                partner = self.env['res.partner'].browse(lead_vals['partner_id']).exists()
+            if not partner:
+                continue
+            partner.write(partner_vals)
 
     def _apply_objeto_catalogo_defaults(self):
         for lead in self:
@@ -1318,7 +1352,7 @@ class ResPartner(models.Model):
         [
             ('whatsapp', 'WhatsApp'),
             ('formulario_web', 'Formulario Web'),
-            ('visita', 'Visita'),
+            ('visita', 'Cliente Recurrente'),
             ('llamada_otros', 'Otros (indicar en campo "Otros")'),
         ],
         string='Medio de contacto',
@@ -1328,6 +1362,6 @@ class ResPartner(models.Model):
     @api.constrains('medio_contacto', 'medio_contacto_otro')
     def _check_medio_contacto_otro(self):
         for partner in self:
-            if partner.medio_contacto == 'llamada_otros' and not partner.medio_contacto_otro:
+            if partner.medio_contacto == 'llamada_otros' and not (partner.medio_contacto_otro or '').strip():
                 raise ValidationError(_("Debes indicar el valor de 'Otros'."))
 

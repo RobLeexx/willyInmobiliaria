@@ -289,7 +289,7 @@
                 <li t-if="o.offer_include_packing_material" style="margin-bottom: 6px;">Material de embalaje (precintos, papel Kraft)</li>
                 <li style="margin-bottom: 6px;">Enmantado de muebles por nuestro personal para su transporte con precinto</li>
                 <li style="margin-bottom: 6px;">Transporte de muebles y enseres</li>
-                <li style="margin-bottom: 6px;">Seguro responsabilidad civil hasta 1.000.000 de euros con seguro de carga y descarga</li>
+                <li style="margin-bottom: 6px;">Seguro responsabilidad civil de hasta 1.000.000 de euros con seguro de carga y descarga</li>
                 <li style="margin-bottom: 6px;">Solicitud de permisos y colocacion de indicaciones en Valencia capital</li>
                 <li t-if="o.offer_include_client_boxes_transport" style="margin-bottom: 6px;">Transporte de bultos y cajas embaladas por el cliente, hasta <span t-out="o.offer_client_boxes_quantity"/> aproximadamente</li>
                 <li t-if="o.offer_include_storage" style="margin-bottom: 6px;"><span t-out="o.offer_storage_months"/> meses de guardamuebles.</li>
