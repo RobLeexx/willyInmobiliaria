@@ -96,6 +96,17 @@
         <xpath expr="//group[@name='lead_partner']" position="replace">
           <group col="16" class="col-lg-9" style="padding-right: 0; width: 100%;">
             <group col="2" colspan="16">
+              <group col="1">
+                <field name="duplicate_phone_lead_id" invisible="1"/>
+                <field name="duplicate_phone_lead_name" invisible="1"/>
+                <field name="duplicate_vat_lead_id" invisible="1"/>
+                <field name="duplicate_vat_lead_name" invisible="1"/>
+                <separator string="Duplicados detectados" colspan="2" invisible="not duplicate_phone_lead_id and not duplicate_vat_lead_id"/>
+                <div class="d-flex flex-wrap gap-2 mb-2" colspan="2" invisible="not duplicate_phone_lead_id and not duplicate_vat_lead_id">
+                  <button name="action_open_duplicate_phone_lead" type="object" string="Abrir lead existente (Móvil)" class="btn btn-outline-warning btn-sm" invisible="not duplicate_phone_lead_id"/>
+                  <button name="action_open_duplicate_vat_lead" type="object" string="Abrir lead existente (NIF)" class="btn btn-outline-warning btn-sm" invisible="not duplicate_vat_lead_id"/>
+                </div>
+              </group>
               <separator string="Cliente y Lead" colspan="2"/>
               <group col="1">
                 <field
