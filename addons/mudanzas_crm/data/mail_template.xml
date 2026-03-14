@@ -14,6 +14,7 @@
   <p>Hola <t t-out="object.contact_name or object.partner_id.name or 'cliente'"/>,</p>
   <p>Adjuntamos el presupuesto de tu mudanza en formato PDF.</p>
   <p>Si estas de acuerdo, responde a este correo y coordinamos fecha, horario y detalles de ejecucion.</p>
+  <p>El envío de presupuesto esta en pruebas, si detecta alguna anomalía o error, por favor indícanosla.</p>
   <p>Un saludo,<br/><t t-out="object.company_id.name"/></p>
 </div>
     ]]></field>

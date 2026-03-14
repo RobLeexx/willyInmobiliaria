@@ -327,47 +327,79 @@
               </div>
             </div>
 
-            <div style="margin-top: -30px; margin-bottom: 15px; border-radius: 16px; background: linear-gradient(135deg, #f4fbff 0%, #e8f5ff 100%); border: 1px solid #c8e6fb; padding: 16px 18px 18px 18px; text-align: center;">
-              <table style="width: 100%; border-collapse: separate; border-spacing: 10px 0; margin: 0 0 14px 0;">
+            <div style="page-break-before: always; border-radius: 16px; background: #ffffff; padding: 24px 26px; color: #ffffff;">
+              <table style="width: 100%; table-layout: fixed; border-collapse: collapse; margin-bottom: 35px;">
                 <tr>
-                  <td style="width: 31%; text-align: center; vertical-align: middle; padding: 0;">
-                    <div style="width: 220px; height: 220px; margin: 0 auto; overflow: hidden; border-radius: 18px; border: 1px solid #b9dbf4; background: #dfeffc;">
-                      <img
-                        t-att-src="'%s/mudanzas_crm/static/src/img/main_photo_email.JPEG' % web_base_url"
-                        alt="Mudanzas Willy"
-                        style="display: block; width: 220px; height: 220px; object-fit: cover; object-position: center center;"
-                      />
+                  <td style="width: 75%; vertical-align: top; padding: 0 18px 0 0;">
+                    <div style="font-size: 28px; font-weight: 800; line-height: 1.15; color: #15507E; margin-bottom: 16px;">
+                      Quienes somos
+                    </div>
+                    <div style="font-size: 15px; line-height: 1.8; margin-block: 12px;">
+                      Mudanzas Willy es una empresa dedicada a las mudanzas desde 1987. Ayudamos a familias y empresas a trasladar su casa o su negocio de forma segura y organizada. Sabemos que una mudanza no es solo mover muebles, tambien implica cuidar objetos importantes y recuerdos. Por eso trabajamos con atencion y experiencia para que todo llegue en buen estado. Siguenos en nuestras redes sociales, para ver nuestro trabajo y consejos para tu mudanza.
                     </div>
                   </td>
-                  <td style="width: 38%; text-align: center; vertical-align: middle; padding: 0;">
-                    <div style="width: 264px; height: 264px; margin: 0 auto; overflow: hidden; border-radius: 22px; border: 1px solid #9ecdec; background: #dfeffc;">
-                      <img
-                        t-att-src="'%s/mudanzas_crm/static/src/img/img3.JPEG' % web_base_url"
-                        alt="Mudanzas Willy centro"
-                        style="display: block; width: 264px; height: 264px; object-fit: cover; object-position: center center;"
-                      />
-                    </div>
+                  <td style="width: 25%; vertical-align: top; padding: 0;">
+                    <img
+                      t-att-src="'%s/mudanzas_crm/static/src/img/img1.JPG' % web_base_url"
+                      alt="Mudanzas Willy desde 1987"
+                      style="display: block; width: 100%; height: auto; border-radius: 16px; border: 1px solid #ffffff;"
+                    />
                   </td>
-                  <td style="width: 31%; text-align: center; vertical-align: middle; padding: 0;">
-                    <div style="width: 220px; height: 220px; margin: 0 auto; overflow: hidden; border-radius: 18px; border: 1px solid #b9dbf4; background: #dfeffc;">
-                      <img
-                        t-att-src="'%s/mudanzas_crm/static/src/img/img2.JPEG' % web_base_url"
-                        alt="Mudanzas Willy derecha"
-                        style="display: block; width: 220px; height: 220px; object-fit: cover; object-position: center center;"
-                      />
+                </tr>
+              </table>
+
+              <table style="width: 100%; table-layout: fixed; border-collapse: collapse; margin-bottom: 35px;">
+                <tr>
+                  <td style="width: 25%; vertical-align: top; padding: 0 18px 0 0;">
+                    <img
+                      t-att-src="'%s/mudanzas_crm/static/src/img/img2.jpg' % web_base_url"
+                      alt="Equipo Mudanzas Willy"
+                      style="display: block; width: 100%; height: auto; border-radius: 50%; border: 1px solid #b9dbf4;"
+                    />
+                  </td>
+                  <td style="width: 70%; vertical-align: top; padding: 5px;">
+                    <div style="font-size: 28px; font-weight: 800; line-height: 1.2; color: #15507E; margin-bottom: 12px;">
+                      Nuestro equipo
+                    </div>
+                    <div style="font-size: 15px; line-height: 1.8; margin-block: 12px;">
+                      Contamos con equipo propio, camiones propios y material profesional para realizar mudanzas. Nuestro personal tiene experiencia en desmontar, proteger, cargar y transportar muebles de forma segura. Trabajamos juntos desde hace tiempo y sabemos como organizar cada traslado de forma rapida y eficiente.
                     </div>
                   </td>
                 </tr>
               </table>
-              <div style="font-size: 22px; font-weight: 800; line-height: 1.15; color: #15507E; margin-bottom: 10px;">
-                Mudanzas en Valencia desde 1987
-              </div>
-              <div style="font-size: 12px; line-height: 1.7; margin: 0 auto 10px auto; max-width: 92%; color: #14496f;">
-                Empresa de mudanzas en Valencia desde 1987 con un servicio de mudanzas. Nuestro equipo humano es sinonimo de profesionalidad y disponen de la mas moderna maquinaria y medios de elevacion.
-              </div>
-              <div style="font-size: 12px; line-height: 1.7; margin: 0 auto; max-width: 92%; color: #14496f;">
-                Las mudanzas en Valencia son cosa de Mudanzas Willy. Proporcionamos un eficaz y rapido servicio de mudanzas baratas en Valencia. Tambien realizamos traslados de instalaciones laborales, portes de objetos y otros servicios de transportes de enseres.
-              </div>
+
+              <table style="width: 100%; table-layout: fixed; border-collapse: collapse; margin-bottom: 35px;">
+                <tr>
+                  <td style="width: 70%; vertical-align: top; padding: 0 18px 0 0;">
+                    <div style="font-size: 28px; font-weight: 800; line-height: 1.2; color: #15507E; margin-bottom: 12px;">
+                      Guardamuebles
+                    </div>
+                    <div style="font-size: 15px; line-height: 1.8; margin-block: 12px;">
+                      Tambien ofrecemos servicio de guardamuebles para guardar tus pertenencias durante el tiempo que necesites. Es util cuando la nueva vivienda aun no esta lista, hay reformas o necesitas espacio temporal. Tus muebles permanecen protegidos y almacenados con seguridad hasta que los necesites.
+                    </div>
+                  </td>
+                  <td style="width: 25%; vertical-align: top; padding: 5px;">
+                    <img
+                      t-att-src="'%s/mudanzas_crm/static/src/img/img3.JPG' % web_base_url"
+                      alt="Guardamuebles y mudanzas"
+                      style="display: block; width: 100%; height: auto; border-radius: 16px; border: 1px solid #9ecdec;"
+                    />
+                  </td>
+                </tr>
+              </table>
+
+              <table style="width: 100%; table-layout: fixed; border-collapse: collapse; margin-top: 35px; margin-bottom: 20;">
+                <tr>
+                  <td style="width: 100%; vertical-align: top; padding: 0; text-align: center;">
+                    <div style="font-size: 28px; font-weight: 800; line-height: 1.2; color: #15507E; margin-bottom: 12px;">
+                      Gracias por confiar en nosotros
+                    </div>
+                    <div style="font-size: 15px; line-height: 1.8; margin-bottom: 18px;">
+                      Gracias por confiar en Mudanzas Willy para tu mudanza. Nuestro objetivo es que el traslado sea sencillo, organizado y sin preocupaciones para ti. Pondremos toda nuestra experiencia para que todo salga bien.
+                    </div>
+                  </td>
+                </tr>
+              </table>
             </div>
 
             <div style="border-radius: 14px; background: #ffffff; padding-inline: 18px; font-size: 11px; line-height: 1.55; color: #163d5c;">
